@@ -5,28 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DIT | Desarrollo Infantil Temprano</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glow-cyan: #bbf2f6;
-            --glow-pink: #ffb7d5;
-            --pastel-blue: #70a1ff;
-            --pastel-purple: #9b5de5;
-            --pastel-yellow: #fee440;
-            --bg-dark: #0f172a;
-            --glass: rgba(30, 41, 59, 0.95);
-            --minsa-blue: #4a7bc7;
+            --glow-cyan: #38bdf8;
+            --glow-pink: #f472b6;
+            --pastel-blue: #60a5fa;
+            --pastel-purple: #c084fc;
+            --pastel-yellow: #facc15;
+            --bg-dark: #090d16;
+            --card-bg: rgba(22, 30, 49, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --minsa-blue: #3b82f6;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: radial-gradient(circle at top, #1e1b4b, #0f172a);
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #090d16 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -46,7 +48,7 @@
 
         .auth-visual {
             flex: 1;
-            background: linear-gradient(rgba(74, 123, 199, 0.85), rgba(15, 23, 42, 0.9)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
+            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(9, 13, 22, 0.95)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -147,14 +149,14 @@
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(74, 123, 199, 0.3);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
             transition: all 0.2s ease;
             letter-spacing: 0.5px;
         }
 
         .btn-main:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 123, 199, 0.4);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .btn-main:active {
@@ -177,33 +179,33 @@
 
         /* --- BOTÓN PARA MOSTRAR/OCULTAR AUDITORÍA --- */
         .btn-toggle-auditoria {
-            background: rgba(255, 255, 255, 0.12);
-            border: 2px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: #fff;
-            padding: 12px 20px;
-            border-radius: 18px;
-            font-weight: 800;
+            padding: 12px 22px;
+            border-radius: 50px;
+            font-weight: 700;
             cursor: pointer;
             margin: 15px auto;
             display: flex;
             align-items: center;
             gap: 10px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             transition: all 0.3s ease;
             font-size: 0.85rem;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .btn-toggle-auditoria:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.2);
             transform: scale(1.03);
         }
 
-        /* --- FILTRO POR RANGO DE FECHAS (INFANTIL ELEGANTE) --- */
+        /* --- FILTRO POR RANGO DE FECHAS --- */
         .filter-panel {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
             border-radius: 20px;
-            padding: 12px;
+            padding: 14px;
             margin-bottom: 15px;
             display: flex;
             flex-direction: column;
@@ -236,7 +238,7 @@
             padding: 10px 35px 10px 12px;
             font-size: 0.8rem;
             background: rgba(15, 23, 42, 0.6);
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: #fff;
             border-radius: 12px;
         }
@@ -248,7 +250,7 @@
             flex: 1;
             padding: 12px;
             font-size: 0.8rem;
-            font-weight: bold;
+            font-weight: 700;
             border: none;
             border-radius: 12px;
             cursor: pointer;
@@ -268,31 +270,30 @@
             box-shadow: 0 4px 10px rgba(244, 114, 182, 0.2);
         }
 
-        /* --- PODIO MODULAR INFANTIL-ELEGANTE (OCULTO POR DEFECTO) --- */
+        /* --- PODIO AUDITORÍA --- */
         .podium-section {
             width: 100%;
             max-width: 650px;
             margin: 10px auto;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             padding: 24px;
-            border-radius: 30px;
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(20px);
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: none; /* Oculto por defecto */
+            display: none;
             flex-direction: column;
             animation: fadeIn 0.4s ease-out;
         }
 
         .podium-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 18px;
             color: #fff;
-            font-weight: bold;
-            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            font-weight: 800;
         }
 
         .podium-container {
@@ -320,7 +321,7 @@
 
         .podium-name {
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
@@ -379,7 +380,7 @@
         .podium-column span.podium-label {
             font-size: 0.55rem;
             text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 800;
             letter-spacing: 0.5px;
             opacity: 0.9;
         }
@@ -410,11 +411,6 @@
             border-bottom: none;
             padding-bottom: 0;
         }
-        .metric-line span i {
-            margin-right: 4px;
-            width: 11px;
-            text-align: center;
-        }
 
         .podium-extended-list {
             width: 100%;
@@ -422,11 +418,9 @@
             overflow-y: auto;
             margin-top: 15px;
             padding-right: 5px;
-            border-top: 2px dashed rgba(255, 255, 255, 0.1);
+            border-top: 1px dashed rgba(255, 255, 255, 0.1);
             scrollbar-width: thin;
         }
-        .podium-extended-list::-webkit-scrollbar { width: 4px; }
-        .podium-extended-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
         
         .extended-row {
             display: flex;
@@ -437,7 +431,6 @@
             border-radius: 12px;
             margin-top: 8px;
             border: 1px solid rgba(255,255,255,0.05);
-            animation: fadeIn 0.3s ease-out;
         }
         .extended-top-info {
             display: flex;
@@ -474,8 +467,8 @@
         .extended-total-badge {
             font-size: 0.75rem;
             font-weight: 800;
-            background: rgba(34, 211, 238, 0.2);
-            color: #22d3ee;
+            background: rgba(34, 211, 238, 0.15);
+            color: #38bdf8;
             padding: 2px 8px;
             border-radius: 20px;
         }
@@ -492,30 +485,18 @@
         .metric-box { display: flex; flex-direction: column; gap: 2px; }
         .metric-box span { color: #94a3b8; font-weight: 600; font-size: 0.58rem; text-transform: uppercase;}
         
-        .badge-err { color: #f87171; font-weight: bold; }
-        .badge-mig { color: #4ade80; font-weight: bold; }
-        .badge-rua { color: #c084fc; font-weight: bold; }
-        .badge-falta { color: #f87171; font-weight: bold; }
-        .badge-proc { color: #fbbf24; font-weight: bold; }
+        .badge-err { color: #f87171; font-weight: 800; }
+        .badge-mig { color: #4ade80; font-weight: 800; }
+        .badge-rua { color: #c084fc; font-weight: 800; }
+        .badge-falta { color: #f87171; font-weight: 800; }
+        .badge-proc { color: #fbbf24; font-weight: 800; }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
-            #auth-screen { flex-direction: column; overflow-y: auto; }
-            .auth-visual { flex: none; padding: 20px 15px; text-align: center; gap: 15px; }
-            .auth-visual h1 { font-size: 1.8rem !important; }
-            .auth-form-panel { width: 100%; padding: 25px; box-shadow: none; border-radius: 0; }
-            .podium-section { padding: 15px !important; }
-            .podium-container { height: 110px !important; }
-            .podium-metrics-card { display: none !important; }
-            .podium-extended-list { max-height: 150px !important; }
-        }
-
-        /* --- INTERFAZ PRINCIPAL --- */
+        /* --- INTERFAZ PRINCIPAL ULTRA MODERNA --- */
         #main-app {
             display: none;
             flex-direction: column;
@@ -523,160 +504,241 @@
             width: 100%;
         }
 
-        .top-nav {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
-            padding-top: 12px;
-        }
-
-        .brand-header {
+        .header-clean {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px 12px;
+            padding: 20px 30px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 10;
         }
 
-        .logo-circle {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #a5f3fc, #0284c7);
-            border-radius: 12px;
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--glow-cyan), var(--pastel-purple));
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            color: #fff;
+            font-size: 0.95rem;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #fff;
+            font-size: 0.8rem;
+            padding: 10px 18px;
+            border-radius: 14px;
             cursor: pointer;
-        }
-
-        .scroll-container {
-            width: 100%;
-            overflow-x: auto;
-            padding: 5px 15px 15px;
-            scrollbar-width: none;
-        }
-        .scroll-container::-webkit-scrollbar { display: none; }
-
-        #sortable-nodes { display: flex; gap: 10px; width: max-content; }
-
-        .node-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            padding: 10px 20px;
-            border-radius: 18px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .action-btn-danger {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .action-btn-danger:hover {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .main-viewport {
+            flex: 1;
+            position: relative;
+            background: transparent;
+            overflow-y: auto;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
+
+        /* --- BOTÓN FLOTANTE REGRESAR AL INICIO --- */
+        #btn-back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid var(--glow-cyan);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .node-btn i { font-size: 1.1rem; color: var(--pastel-blue); }
-        .node-btn span { font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
-        .node-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.2); }
-        .node-btn.active {
-            border-color: #fff;
-            background: linear-gradient(135deg, #38bdf8, #0369a1);
-            box-shadow: 0 5px 15px rgba(3, 105, 161, 0.4);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .main-viewport { flex: 1; position: relative; background: #0f172a; overflow-y: auto; }
-        iframe { width: 100%; height: 100%; border: none; display: none; }
+        #btn-back-home:hover {
+            background: var(--glow-cyan);
+            color: #0f172a;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+        }
 
-        /* --- DASHBOARD ELEGANTE EN INICIO CON TODOS LOS MÓDULOS --- */
+        /* --- DASHBOARD DE TARJETAS INFANTILES ELEGANTES --- */
         #modules-dashboard {
-            padding: 30px 20px;
-            max-width: 1200px;
+            padding: 40px 30px 60px;
+            max-width: 1300px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            animation: fadeIn 0.5s ease;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .module-card {
-            background: rgba(30, 41, 59, 0.7);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            padding: 24px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(16px);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .module-card::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
             pointer-events: none;
         }
 
         .module-card:hover {
-            transform: translateY(-5px);
-            border-color: rgba(56, 189, 248, 0.5);
-            background: rgba(30, 41, 59, 0.95);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(56, 189, 248, 0.4);
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(56, 189, 248, 0.15);
         }
 
         .module-card .icon-box {
-            width: 55px;
-            height: 55px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(15, 23, 42, 0.4));
-            border: 1px solid rgba(56, 189, 248, 0.3);
+            width: 70px;
+            height: 70px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(192, 132, 252, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-            color: #38bdf8;
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            color: var(--glow-cyan);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .module-card:hover .icon-box {
-            transform: scale(1.1);
-            background: linear-gradient(135deg, #38bdf8, #0369a1);
+            transform: scale(1.15) rotate(-3deg);
+            background: linear-gradient(135deg, var(--glow-cyan), var(--minsa-blue));
             color: #fff;
-            box-shadow: 0 5px 15px rgba(3, 105, 161, 0.5);
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
         }
 
         .module-card h3 {
             font-size: 0.95rem;
             font-weight: 800;
             color: #f8fafc;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
         }
+
+        /* COLORES PERSONALIZADOS PARA ICONOS */
+        .module-card:nth-child(2n) .icon-box { color: var(--pastel-purple); }
+        .module-card:nth-child(3n) .icon-box { color: var(--glow-pink); }
+        .module-card:nth-child(4n) .icon-box { color: var(--pastel-yellow); }
+
+        .module-card:nth-child(2n):hover .icon-box { background: linear-gradient(135deg, var(--pastel-purple), #9333ea); }
+        .module-card:nth-child(3n):hover .icon-box { background: linear-gradient(135deg, var(--glow-pink), #db2777); }
+        .module-card:nth-child(4n):hover .icon-box { background: linear-gradient(135deg, var(--pastel-yellow), #d97706); }
 
         #modal-pw {
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(9, 13, 22, 0.85);
             z-index: 3000;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
             display: none;
         }
         .modal-card {
             background: #fff;
-            padding: 30px;
-            border-radius: 24px;
+            padding: 35px;
+            border-radius: 28px;
             width: 90%;
-            max-width: 380px;
+            max-width: 400px;
             color: #334155;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            #auth-screen { flex-direction: column; overflow-y: auto; }
+            .auth-visual { flex: none; padding: 25px 20px; text-align: center; gap: 15px; }
+            .auth-visual h1 { font-size: 1.8rem !important; }
+            .auth-form-panel { width: 100%; padding: 30px 20px; box-shadow: none; border-radius: 0; }
+            .header-clean { padding: 15px 20px; }
+            #modules-dashboard { padding: 25px 15px 40px; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .module-card { padding: 22px 12px; border-radius: 20px; }
+            .module-card .icon-box { width: 55px; height: 55px; font-size: 1.4rem; margin-bottom: 12px; }
+            .module-card h3 { font-size: 0.8rem; }
+            #btn-back-home { top: 15px; left: 15px; padding: 10px 18px; font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
 
+    <!-- PANTALLA DE AUTENTICACIÓN -->
     <div id="auth-screen">
         <div class="auth-visual">
             <div>
@@ -684,14 +746,12 @@
                 <p style="opacity: 0.9; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px;">✨ Plataforma de Monitoreo Integral Infantil</p>
             </div>
             
-            <!-- BOTÓN PARA DESPLEGAR/OCULTAR AUDITORÍA -->
             <button class="btn-toggle-auditoria" onclick="toggleAuditoria()">
                 <i class="fas fa-star" style="color:var(--pastel-yellow)"></i> 
                 <span>VER AUDITORÍA CRUZADA: SICHE VS RUA</span>
                 <i class="fas fa-chevron-down" id="auditoria-arrow"></i>
             </button>
 
-            <!-- PODIO (OCULTO POR DEFECTO POR BOTÓN) -->
             <div class="podium-section" id="podium-section">
                 <div class="podium-title"><i class="fas fa-star" style="color:var(--pastel-yellow)"></i> Auditoría Cruzada: SICHE vs RUA</div>
                 
@@ -798,99 +858,102 @@
         </div>
     </div>
 
+    <!-- APLICACIÓN PRINCIPAL -->
     <div id="main-app">
-        <header class="top-nav">
-            <div class="brand-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div class="logo-circle" onclick="showDashboard()" title="Ir al Inicio / Dashboard"><i class="fas fa-child-reaching" style="color: #fff; font-size: 1.1rem;"></i></div>
-                    <div>
-                        <h4 style="color: #fff; font-size: 0.9rem; font-weight: 900; letter-spacing: 0.5px; cursor: pointer;" onclick="showDashboard()">SISTEMA INTEGRADO DIT</h4>
-                        <p id="user-display" style="font-size: 0.68rem; color: var(--pastel-blue); font-weight: 800; text-transform: uppercase;"></p>
-                    </div>
+        <!-- BOTÓN FLOTANTE REGRESAR -->
+        <button id="btn-back-home" onclick="showDashboard()">
+            <i class="fas fa-arrow-left"></i> REGRESAR AL INICIO
+        </button>
+
+        <!-- ENCABEZADO ULTRA MODERNO -->
+        <header class="header-clean" id="app-header">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #38bdf8, #818cf8); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);">
+                    <i class="fas fa-child-reaching" style="color: #fff; font-size: 1.3rem;"></i>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button onclick="document.getElementById('modal-pw').style.display='flex'" style="background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.72rem; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;"><i class="fas fa-key" style="color:var(--pastel-yellow)"></i> LLAVE</button>
-                    <button onclick="logout()" style="background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; color: #ef4444; font-size: 0.72rem; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;"><i class="fas fa-door-open"></i> SALIR</button>
+                <div>
+                    <h3 style="color: #fff; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">SISTEMA INTEGRADO DIT</h3>
+                    <p style="font-size: 0.72rem; color: var(--glow-cyan); font-weight: 600;">Panel Principal de Monitoreo</p>
                 </div>
             </div>
 
-            <div class="scroll-container">
-                <div id="sortable-nodes">
-                    <div class="node-btn active" onclick="showDashboard()"><i class="fas fa-house"></i><span>INICIO</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/"><i class="fas fa-baby"></i><span>CENSO DIT</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/"><i class="fas fa-calendar-check"></i><span>CITAS CRED</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/"><i class="fas fa-calendar-check"></i><span>CITAS SATD</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/"><i class="fas fa-calendar-check"></i><span>REPORTE SATD</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/Mapa/"><i class="fas fa-map-marked-alt"></i><span>MAPA DIT</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/"><i class="fas fa-bell"></i><span>RECORDAR CITADOS</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/RegistroDiario/"><i class="fas fa-notes-medical"></i><span>REGISTRO ATENCIÓN</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/"><i class="fas fa-book-open"></i><span>LIBRETA CRED</span></div>
-                    <div class="node-btn" data-url="https://confianzaseguridad772-max.github.io/Dosificador_Hierro/"><i class="fas fa-projections-atom"></i><span>DOSIFICADOR</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/mapasector/"><i class="fas fa-home-user"></i><span>MAPA SECTOR</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/sectorizar/"><i class="fas fa-home-user"></i><span>FICHA FAMILIAR</span></div>
-                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/casita/"><i class="fas fa-home-user"></i><span>LA CASITA</span></div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="user-pill">
+                    <div class="user-avatar"><i class="fas fa-user-nurse"></i></div>
+                    <span id="user-display" style="font-size: 0.8rem; color: #f8fafc; font-weight: 700;"></span>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="action-btn" onclick="document.getElementById('modal-pw').style.display='flex'">
+                        <i class="fas fa-key" style="color:var(--pastel-yellow)"></i> LLAVE
+                    </button>
+                    <button class="action-btn action-btn-danger" onclick="logout()">
+                        <i class="fas fa-power-off"></i> SALIR
+                    </button>
                 </div>
             </div>
         </header>
 
+        <!-- CONTENEDOR PRINCIPAL -->
         <main class="main-viewport">
-            <!-- DASHBOARD PRINCIPAL CON TODOS LOS MÓDULOS DISTRIBUIDOS -->
+            <!-- DASHBOARD DE TARJETAS MODULARES -->
             <div id="modules-dashboard">
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/')">
                     <div class="icon-box"><i class="fas fa-baby"></i></div>
-                    <h3>CENSO DIT</h3>
+                    <h3>Censo DIT</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/')">
                     <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-                    <h3>CITAS CRED</h3>
+                    <h3>Citas CRED</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/')">
                     <div class="icon-box"><i class="fas fa-calendar-plus"></i></div>
-                    <h3>CITAS SATD</h3>
+                    <h3>Citas SATD</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/')">
                     <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                    <h3>REPORTE SATD</h3>
+                    <h3>Reporte SATD</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Mapa/')">
                     <div class="icon-box"><i class="fas fa-map-marked-alt"></i></div>
-                    <h3>MAPA DIT</h3>
+                    <h3>Mapa DIT</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/')">
                     <div class="icon-box"><i class="fas fa-bell"></i></div>
-                    <h3>RECORDAR CITADOS</h3>
+                    <h3>Recordar Citados</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RegistroDiario/')">
                     <div class="icon-box"><i class="fas fa-notes-medical"></i></div>
-                    <h3>REGISTRO ATENCIÓN</h3>
+                    <h3>Registro Atención</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/')">
                     <div class="icon-box"><i class="fas fa-book-open"></i></div>
-                    <h3>LIBRETA CRED</h3>
+                    <h3>Libreta CRED</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://confianzaseguridad772-max.github.io/Dosificador_Hierro/')">
                     <div class="icon-box"><i class="fas fa-pills"></i></div>
-                    <h3>DOSIFICADOR</h3>
+                    <h3>Dosificador</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/mapasector/')">
                     <div class="icon-box"><i class="fas fa-map-pin"></i></div>
-                    <h3>MAPA SECTOR</h3>
+                    <h3>Mapa Sector</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/sectorizar/')">
                     <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
-                    <h3>FICHA FAMILIAR</h3>
+                    <h3>Ficha Familiar</h3>
                 </div>
                 <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/casita/')">
                     <div class="icon-box"><i class="fas fa-house-user"></i></div>
-                    <h3>LA CASITA</h3>
+                    <h3>La Casita</h3>
                 </div>
             </div>
 
-            <!-- IFRAME DE CONTENIDO -->
+            <!-- VISOR IFRAME DE MÓDULOS -->
             <iframe id="content-frame"></iframe>
         </main>
     </div>
 
+    <!-- MODAL LLAVE (CAMBIO DE CONTRASEÑA) -->
     <div id="modal-pw">
         <div class="modal-card">
             <h3 style="margin-bottom: 15px; font-weight: 900; color: #0f172a; font-size: 1.2rem;">Cambiar Contraseña</h3>
@@ -923,7 +986,6 @@
             m.style.display = t ? 'block' : 'none';
         }
 
-        /* METODO PARA DESPLEGAR/OCULTAR AUDITORIA CRUZADA */
         function toggleAuditoria() {
             const section = document.getElementById('podium-section');
             const arrow = document.getElementById('auditoria-arrow');
@@ -936,26 +998,21 @@
             }
         }
 
-        /* RUTINAS DE DASHBOARD Y NAVEGACIÓN MODULAR */
+        /* NAVEGACIÓN ENTRE DASHBOARD E IFRAME */
         function showDashboard() {
             document.getElementById('modules-dashboard').style.display = 'grid';
+            document.getElementById('app-header').style.display = 'flex';
             document.getElementById('content-frame').style.display = 'none';
-            document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.node-btn').classList.add('active');
+            document.getElementById('btn-back-home').style.display = 'none';
         }
 
         function openModule(url) {
             document.getElementById('modules-dashboard').style.display = 'none';
+            document.getElementById('app-header').style.display = 'none';
             const frame = document.getElementById('content-frame');
             frame.src = url;
             frame.style.display = 'block';
-
-            document.querySelectorAll('.node-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.getAttribute('data-url') === url) {
-                    b.classList.add('active');
-                }
-            });
+            document.getElementById('btn-back-home').style.display = 'flex';
         }
 
         async function checkAuthorizedDNI() {
@@ -1100,7 +1157,7 @@
             document.getElementById('main-app').style.display = "flex";
             document.getElementById('user-display').innerText = n;
             
-            showDashboard(); // Muestra el Dashboard con todos los módulos repartidos
+            showDashboard();
 
             if(!window.hasGreeted) {
                 const msg = new SpeechSynthesisUtterance("Bienvenido al sistema DIT, " + n.split(" ")[0]);
@@ -1121,16 +1178,7 @@
 
         document.getElementById('l-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
 
-        document.querySelectorAll('.node-btn[data-url]').forEach(btn => {
-            btn.addEventListener('click', function() {
-                openModule(this.getAttribute('data-url'));
-            });
-        });
-
-        // ============================================================================================
-        //  --- AUDITORÍA CRUZADA ---
-        // ============================================================================================
-
+        /* AUDITORÍA CRUZADA */
         function ejecutarConsultaEstadistica() {
             const desde = document.getElementById('filtro-desde').value;
             const hasta = document.getElementById('filtro-hasta').value;
