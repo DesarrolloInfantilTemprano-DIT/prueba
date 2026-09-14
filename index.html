@@ -8,15 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glow-cyan: #38bdf8;
-            --glow-pink: #f472b6;
-            --pastel-blue: #60a5fa;
-            --pastel-purple: #c084fc;
-            --pastel-yellow: #facc15;
-            --bg-dark: #090d16;
-            --card-bg: rgba(22, 30, 49, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --minsa-blue: #3b82f6;
+            --bg-light: #f4f8ff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --primary-blue: #0284c7;
+            --mint-green: #10b981;
+            --pastel-pink: #f472b6;
+            --bright-yellow: #fbbf24;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow-soft: 0 10px 30px rgba(14, 165, 233, 0.12);
         }
 
         * {
@@ -28,12 +29,12 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 60%, #090d16 100%);
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fef3c7 100%);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            color: #f8fafc;
+            color: var(--text-main);
         }
 
         /* --- PANTALLA DE AUTENTICACIÓN --- */
@@ -42,13 +43,13 @@
             inset: 0;
             z-index: 2000;
             display: flex;
-            background: #f1f5f9;
+            background: #f8fafc;
             transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1);
         }
 
         .auth-visual {
             flex: 1;
-            background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(9, 13, 22, 0.95)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(168, 85, 247, 0.85)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -67,8 +68,8 @@
             flex-direction: column;
             justify-content: center;
             background: #ffffff;
-            color: #334155;
-            box-shadow: -10px 0 30px rgba(15, 23, 42, 0.15);
+            color: var(--text-main);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
             overflow-y: auto;
             border-top-left-radius: 30px;
             border-bottom-left-radius: 30px;
@@ -92,7 +93,7 @@
             display: block;
             font-size: 0.75rem;
             font-weight: 700;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 6px;
             margin-left: 5px;
             text-transform: uppercase;
@@ -102,20 +103,20 @@
         input {
             width: 100%;
             padding: 14px 16px;
-            background: #f8fafc;
+            background: #f1f5f9;
             border: 2px solid #e2e8f0;
             border-radius: 16px;
             outline: none;
             margin-bottom: 18px;
-            color: #1e293b;
+            color: var(--text-main);
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
 
         input:focus {
-            border-color: var(--pastel-blue);
+            border-color: var(--primary-blue);
             background: #fff;
-            box-shadow: 0 0 0 4px rgba(112, 161, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
         }
 
         input[type="date"] {
@@ -142,21 +143,21 @@
         .btn-main {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, var(--minsa-blue), var(--pastel-blue));
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
             color: white;
             border: none;
             border-radius: 16px;
             font-size: 0.95rem;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
             transition: all 0.2s ease;
             letter-spacing: 0.5px;
         }
 
         .btn-main:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
         }
 
         .btn-main:active {
@@ -167,24 +168,24 @@
             text-align: center;
             margin-top: 20px;
             font-size: 0.85rem;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .toggle-link span {
-            color: var(--minsa-blue);
+            color: var(--primary-blue);
             cursor: pointer;
             font-weight: 700;
             text-decoration: underline;
         }
 
-        /* --- BOTÓN PARA MOSTRAR/OCULTAR AUDITORÍA --- */
+        /* --- BOTÓN AUDITORÍA --- */
         .btn-toggle-auditoria {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             color: #fff;
             padding: 12px 22px;
             border-radius: 50px;
-            font-weight: 700;
+            font-weight: 800;
             cursor: pointer;
             margin: 15px auto;
             display: flex;
@@ -194,16 +195,18 @@
             transition: all 0.3s ease;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
+
         .btn-toggle-auditoria:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.4);
             transform: scale(1.03);
         }
 
         /* --- FILTRO POR RANGO DE FECHAS --- */
         .filter-panel {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px dashed rgba(14, 165, 233, 0.3);
             border-radius: 20px;
             padding: 14px;
             margin-bottom: 15px;
@@ -211,63 +214,71 @@
             flex-direction: column;
             gap: 10px;
         }
+
         .filter-row {
             display: flex;
             gap: 10px;
         }
+
         .filter-group {
             flex: 1;
             position: relative;
         }
+
         .filter-group label {
-            color: var(--glow-cyan);
+            color: var(--primary-blue);
             font-size: 0.7rem;
             margin-bottom: 4px;
         }
+
         .filter-group i.calendar-icon {
             position: absolute;
             right: 14px;
             bottom: 14px;
-            color: var(--glow-cyan);
+            color: var(--primary-blue);
             pointer-events: none;
             font-size: 0.95rem;
             z-index: 1;
         }
+
         .filter-group input[type="date"] {
             margin-bottom: 0;
             padding: 10px 35px 10px 12px;
             font-size: 0.8rem;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-main);
             border-radius: 12px;
         }
+
         .filter-buttons {
             display: flex;
             gap: 10px;
         }
+
         .btn-filter {
             flex: 1;
             padding: 12px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 800;
             border: none;
             border-radius: 12px;
             cursor: pointer;
-            color: #0f172a;
-            background: linear-gradient(135deg, #a5f3fc, #22d3ee);
+            color: #fff;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            box-shadow: 0 4px 10px rgba(34, 211, 238, 0.2);
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
             transition: all 0.2s;
         }
+
         .btn-filter:hover { transform: scale(1.02); }
+
         .btn-export {
-            background: linear-gradient(135deg, #fbcfe8, #f472b6);
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(244, 114, 182, 0.2);
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
         }
 
         /* --- PODIO AUDITORÍA --- */
@@ -275,15 +286,16 @@
             width: 100%;
             max-width: 650px;
             margin: 10px auto;
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(255, 255, 255, 0.9);
             padding: 24px;
             border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(20px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15);
             display: none;
             flex-direction: column;
             animation: fadeIn 0.4s ease-out;
+            color: var(--text-main);
         }
 
         .podium-title {
@@ -292,7 +304,7 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 18px;
-            color: #fff;
+            color: var(--primary-blue);
             font-weight: 800;
         }
 
@@ -321,13 +333,13 @@
 
         .podium-name {
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 8px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
-            color: #f1f5f9;
+            color: var(--text-main);
         }
 
         .podium-column {
@@ -344,37 +356,33 @@
 
         .podium-place.first .podium-column {
             height: 95px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+            color: #fff;
         }
 
         .podium-place.second .podium-column {
             height: 75px;
-            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
-            box-shadow: 0 10px 20px rgba(148, 163, 184, 0.3);
+            background: linear-gradient(135deg, #38bdf8, #7dd3fc);
+            box-shadow: 0 8px 15px rgba(56, 189, 248, 0.3);
+            color: #fff;
         }
 
         .podium-place.third .podium-column {
             height: 60px;
-            background: linear-gradient(135deg, #ed8936, #c05621);
-            box-shadow: 0 10px 15px rgba(192, 86, 33, 0.3);
+            background: linear-gradient(135deg, #34d399, #6ee7b7);
+            box-shadow: 0 8px 15px rgba(52, 211, 153, 0.3);
+            color: #fff;
         }
 
         .podium-cup {
             font-size: 1.4rem;
             margin-bottom: 2px;
-            animation: float 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes float {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-4px); }
         }
 
         .podium-count {
             font-size: 1.1rem;
             font-weight: 900;
-            color: #fff;
         }
 
         .podium-column span.podium-label {
@@ -386,16 +394,17 @@
         }
 
         .podium-metrics-card {
-            background: rgba(0, 0, 0, 0.3);
+            background: #fff;
             border-radius: 12px;
             padding: 6px 8px;
             width: 100%;
             margin-top: 8px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
             gap: 4px;
             text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
 
         .metric-line {
@@ -403,8 +412,8 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.65rem;
-            color: rgba(255,255,255,0.85);
-            border-bottom: 1px dashed rgba(255,255,255,0.08);
+            color: var(--text-muted);
+            border-bottom: 1px dashed #f1f5f9;
             padding-bottom: 2px;
         }
         .metric-line:last-child {
@@ -418,19 +427,18 @@
             overflow-y: auto;
             margin-top: 15px;
             padding-right: 5px;
-            border-top: 1px dashed rgba(255, 255, 255, 0.1);
-            scrollbar-width: thin;
+            border-top: 1px dashed #e2e8f0;
         }
-        
+
         .extended-row {
             display: flex;
             flex-direction: column;
             gap: 6px;
             padding: 10px 8px;
-            background: rgba(255, 255, 255, 0.03);
+            background: #fff;
             border-radius: 12px;
             margin-top: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid #e2e8f0;
         }
         .extended-top-info {
             display: flex;
@@ -447,19 +455,19 @@
         .extended-pos {
             font-weight: 900;
             font-size: 0.8rem;
-            background: rgba(255,255,255,0.1);
+            background: #f1f5f9;
             padding: 2px 7px;
             border-radius: 8px;
-            color: var(--glow-cyan);
+            color: var(--primary-blue);
         }
         .extended-pos.gold { background: #f59e0b; color: #fff; }
-        .extended-pos.silver { background: #94a3b8; color: #fff; }
-        .extended-pos.bronze { background: #c05621; color: #fff; }
+        .extended-pos.silver { background: #38bdf8; color: #fff; }
+        .extended-pos.bronze { background: #34d399; color: #fff; }
 
         .extended-name {
             font-weight: 700;
             font-size: 0.8rem;
-            color: #f1f5f9;
+            color: var(--text-main);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -467,8 +475,8 @@
         .extended-total-badge {
             font-size: 0.75rem;
             font-weight: 800;
-            background: rgba(34, 211, 238, 0.15);
-            color: #38bdf8;
+            background: #e0f2fe;
+            color: #0284c7;
             padding: 2px 8px;
             border-radius: 20px;
         }
@@ -476,27 +484,27 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
-            background: rgba(0,0,0,0.2);
+            background: #f8fafc;
             padding: 6px;
             border-radius: 8px;
             text-align: center;
             font-size: 0.65rem;
         }
         .metric-box { display: flex; flex-direction: column; gap: 2px; }
-        .metric-box span { color: #94a3b8; font-weight: 600; font-size: 0.58rem; text-transform: uppercase;}
-        
-        .badge-err { color: #f87171; font-weight: 800; }
-        .badge-mig { color: #4ade80; font-weight: 800; }
-        .badge-rua { color: #c084fc; font-weight: 800; }
-        .badge-falta { color: #f87171; font-weight: 800; }
-        .badge-proc { color: #fbbf24; font-weight: 800; }
+        .metric-box span { color: #64748b; font-weight: 600; font-size: 0.58rem; text-transform: uppercase;}
+
+        .badge-err { color: #ef4444; font-weight: 800; }
+        .badge-mig { color: #10b981; font-weight: 800; }
+        .badge-rua { color: #8b5cf6; font-weight: 800; }
+        .badge-falta { color: #f43f5e; font-weight: 800; }
+        .badge-proc { color: #f59e0b; font-weight: 800; }
 
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- INTERFAZ PRINCIPAL ULTRA MODERNA --- */
+        /* --- INTERFAZ PRINCIPAL ALEGRE Y MODERNA --- */
         #main-app {
             display: none;
             flex-direction: column;
@@ -508,34 +516,35 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 30px;
-            background: rgba(15, 23, 42, 0.6);
+            padding: 16px 30px;
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
             z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .user-pill {
             display: flex;
             align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 8px 16px;
+            gap: 10px;
+            background: #f0f9ff;
+            padding: 6px 14px;
             border-radius: 50px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid #bae6fd;
         }
 
         .user-avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--glow-cyan), var(--pastel-purple));
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
             display: flex;
             align-items: center;
             justify-content: center;
             color: #fff;
-            font-size: 0.95rem;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
         }
 
         .header-actions {
@@ -544,35 +553,37 @@
         }
 
         .action-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #fff;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: var(--text-main);
             font-size: 0.8rem;
-            padding: 10px 18px;
+            padding: 9px 16px;
             border-radius: 14px;
             cursor: pointer;
-            font-weight: 700;
+            font-weight: 800;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
         }
 
         .action-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: #f8fafc;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
 
         .action-btn-danger {
-            background: rgba(239, 68, 68, 0.12);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #f87171;
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #ef4444;
         }
 
         .action-btn-danger:hover {
             background: #ef4444;
             color: #fff;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
 
         .main-viewport {
@@ -595,45 +606,45 @@
             top: 20px;
             left: 20px;
             z-index: 100;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid var(--glow-cyan);
-            color: #fff;
-            padding: 12px 24px;
+            background: #ffffff;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 10px 22px;
             border-radius: 50px;
             font-weight: 800;
             font-size: 0.85rem;
             cursor: pointer;
             backdrop-filter: blur(15px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.2);
             display: none;
             align-items: center;
             gap: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         #btn-back-home:hover {
-            background: var(--glow-cyan);
-            color: #0f172a;
+            background: var(--primary-blue);
+            color: #ffffff;
             transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.5);
+            box-shadow: 0 12px 30px rgba(2, 132, 199, 0.35);
         }
 
-        /* --- DASHBOARD DE TARJETAS INFANTILES ELEGANTES --- */
+        /* --- DASHBOARD DE TARJETAS MODULARES ALEGRES --- */
         #modules-dashboard {
-            padding: 40px 30px 60px;
-            max-width: 1300px;
+            padding: 35px 25px 50px;
+            max-width: 1250px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
             animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .module-card {
             background: var(--card-bg);
-            border: 1px solid var(--glass-border);
+            border: 2px solid #ffffff;
             border-radius: 28px;
-            padding: 32px 20px;
+            padding: 28px 18px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -644,72 +655,78 @@
             backdrop-filter: blur(16px);
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .module-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
-            pointer-events: none;
+            box-shadow: var(--shadow-soft);
         }
 
         .module-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            border-color: rgba(56, 189, 248, 0.4);
-            background: rgba(30, 41, 59, 0.9);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(56, 189, 248, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            background: #ffffff;
+            box-shadow: 0 20px 35px rgba(14, 165, 233, 0.2);
         }
 
         .module-card .icon-box {
             width: 70px;
             height: 70px;
             border-radius: 24px;
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(192, 132, 252, 0.15));
-            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-size: 1.8rem;
-            color: var(--glow-cyan);
             transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
         }
 
         .module-card:hover .icon-box {
-            transform: scale(1.15) rotate(-3deg);
-            background: linear-gradient(135deg, var(--glow-cyan), var(--minsa-blue));
-            color: #fff;
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4);
+            transform: scale(1.15) rotate(-4deg);
+            color: #ffffff !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .module-card h3 {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 800;
-            color: #f8fafc;
-            letter-spacing: 0.6px;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
-        /* COLORES PERSONALIZADOS PARA ICONOS */
-        .module-card:nth-child(2n) .icon-box { color: var(--pastel-purple); }
-        .module-card:nth-child(3n) .icon-box { color: var(--glow-pink); }
-        .module-card:nth-child(4n) .icon-box { color: var(--pastel-yellow); }
+        /* TARJETAS CON PALETA ALEGRE PASTEL */
+        .module-card:nth-child(1) .icon-box { background: #e0f2fe; color: #0284c7; }
+        .module-card:nth-child(2) .icon-box { background: #dcfce7; color: #16a34a; }
+        .module-card:nth-child(3) .icon-box { background: #fef3c7; color: #d97706; }
+        .module-card:nth-child(4) .icon-box { background: #f3e8ff; color: #9333ea; }
+        .module-card:nth-child(5) .icon-box { background: #ffe4e6; color: #e11d48; }
+        .module-card:nth-child(6) .icon-box { background: #ccfbf1; color: #0d9488; }
+        .module-card:nth-child(7) .icon-box { background: #ffedd5; color: #ea580c; }
+        .module-card:nth-child(8) .icon-box { background: #fae8ff; color: #c084fc; }
+        .module-card:nth-child(9) .icon-box { background: #e0e7ff; color: #4f46e5; }
+        .module-card:nth-child(10) .icon-box { background: #ecfdf5; color: #059669; }
+        .module-card:nth-child(11) .icon-box { background: #fef2f2; color: #dc2626; }
+        .module-card:nth-child(12) .icon-box { background: #f0fdf4; color: #16a34a; }
 
-        .module-card:nth-child(2n):hover .icon-box { background: linear-gradient(135deg, var(--pastel-purple), #9333ea); }
-        .module-card:nth-child(3n):hover .icon-box { background: linear-gradient(135deg, var(--glow-pink), #db2777); }
-        .module-card:nth-child(4n):hover .icon-box { background: linear-gradient(135deg, var(--pastel-yellow), #d97706); }
+        .module-card:nth-child(1):hover .icon-box { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+        .module-card:nth-child(2):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
+        .module-card:nth-child(3):hover .icon-box { background: linear-gradient(135deg, #fbbf24, #d97706); }
+        .module-card:nth-child(4):hover .icon-box { background: linear-gradient(135deg, #c084fc, #9333ea); }
+        .module-card:nth-child(5):hover .icon-box { background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .module-card:nth-child(6):hover .icon-box { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
+        .module-card:nth-child(7):hover .icon-box { background: linear-gradient(135deg, #fb923c, #ea580c); }
+        .module-card:nth-child(8):hover .icon-box { background: linear-gradient(135deg, #e879f9, #c084fc); }
+        .module-card:nth-child(9):hover .icon-box { background: linear-gradient(135deg, #818cf8, #4f46e5); }
+        .module-card:nth-child(10):hover .icon-box { background: linear-gradient(135deg, #34d399, #059669); }
+        .module-card:nth-child(11):hover .icon-box { background: linear-gradient(135deg, #f87171, #dc2626); }
+        .module-card:nth-child(12):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
 
         #modal-pw {
             position: fixed;
             inset: 0;
-            background: rgba(9, 13, 22, 0.85);
+            background: rgba(30, 41, 59, 0.4);
             z-index: 3000;
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(8px);
             display: none;
         }
         .modal-card {
@@ -718,8 +735,8 @@
             border-radius: 28px;
             width: 90%;
             max-width: 400px;
-            color: #334155;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            color: var(--text-main);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
         }
 
         @media (max-width: 768px) {
@@ -727,12 +744,12 @@
             .auth-visual { flex: none; padding: 25px 20px; text-align: center; gap: 15px; }
             .auth-visual h1 { font-size: 1.8rem !important; }
             .auth-form-panel { width: 100%; padding: 30px 20px; box-shadow: none; border-radius: 0; }
-            .header-clean { padding: 15px 20px; }
-            #modules-dashboard { padding: 25px 15px 40px; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-            .module-card { padding: 22px 12px; border-radius: 20px; }
-            .module-card .icon-box { width: 55px; height: 55px; font-size: 1.4rem; margin-bottom: 12px; }
-            .module-card h3 { font-size: 0.8rem; }
-            #btn-back-home { top: 15px; left: 15px; padding: 10px 18px; font-size: 0.75rem; }
+            .header-clean { padding: 12px 16px; }
+            #modules-dashboard { padding: 20px 12px 40px; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .module-card { padding: 20px 10px; border-radius: 20px; }
+            .module-card .icon-box { width: 55px; height: 55px; font-size: 1.3rem; margin-bottom: 12px; }
+            .module-card h3 { font-size: 0.78rem; }
+            #btn-back-home { top: 12px; left: 12px; padding: 8px 16px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -742,18 +759,18 @@
     <div id="auth-screen">
         <div class="auth-visual">
             <div>
-                <h1 style="font-size: 2.6rem; font-weight:900; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">Desarrollo Infantil Temprano <b style="color:var(--glow-pink)">DIT</b></h1>
-                <p style="opacity: 0.9; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px;">✨ Plataforma de Monitoreo Integral Infantil</p>
+                <h1 style="font-size: 2.6rem; font-weight:900; text-shadow: 0 4px 10px rgba(0,0,0,0.15);">Desarrollo Infantil Temprano <b style="color:var(--bright-yellow)">DIT</b></h1>
+                <p style="opacity: 0.95; margin-top: 5px; font-weight: 700; letter-spacing: 0.5px;">☀️ Plataforma de Monitoreo Integral Infantil</p>
             </div>
             
             <button class="btn-toggle-auditoria" onclick="toggleAuditoria()">
-                <i class="fas fa-star" style="color:var(--pastel-yellow)"></i> 
+                <i class="fas fa-star" style="color:var(--bright-yellow)"></i> 
                 <span>VER AUDITORÍA CRUZADA: SICHE VS RUA</span>
                 <i class="fas fa-chevron-down" id="auditoria-arrow"></i>
             </button>
 
             <div class="podium-section" id="podium-section">
-                <div class="podium-title"><i class="fas fa-star" style="color:var(--pastel-yellow)"></i> Auditoría Cruzada: SICHE vs RUA</div>
+                <div class="podium-title"><i class="fas fa-star" style="color:var(--bright-yellow)"></i> Auditoría Cruzada: SICHE vs RUA</div>
                 
                 <div class="filter-panel">
                     <div class="filter-row">
@@ -775,20 +792,20 @@
                 </div>
 
                 <div class="podium-container" id="login-podium">
-                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin: auto; text-align: center;">
-                        <i class="fas fa-wand-magic-sparkles" style="color: var(--pastel-yellow); font-size: 1.5rem; margin-bottom: 8px; display: block;"></i> 
+                    <div style="font-size:0.8rem; color:var(--text-muted); margin: auto; text-align: center;">
+                        <i class="fas fa-wand-magic-sparkles" style="color: var(--primary-blue); font-size: 1.5rem; margin-bottom: 8px; display: block;"></i> 
                         Elige un rango de fechas para desplegar la auditoría interactiva.
                     </div>
                 </div>
                 <div class="podium-extended-list" id="podium-extended-list"></div>
             </div>
-            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;"><i class="fas fa-shield-cat"></i> Red Nacional de Salud - MINSA 2026</div>
+            <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 700;"><i class="fas fa-shield-cat"></i> Red Nacional de Salud - MINSA 2026</div>
         </div>
         
         <div class="auth-form-panel">
             <div id="login-box" class="form-box active">
-                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a; font-size: 1.6rem;">¡Hola, Profesional!</h2>
-                <p style="font-size:0.85rem; color:#64748b; margin-bottom: 25px;">Ingresa tus credenciales autorizadas para continuar.</p>
+                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a; font-size: 1.6rem;">¡Hola, Profesional! 👋</h2>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 25px;">Ingresa tus credenciales autorizadas para continuar.</p>
                 
                 <label>DNI del Usuario</label>
                 <input type="text" id="l-dni" placeholder="Ingresa tu número de DNI" autocomplete="username">
@@ -802,7 +819,7 @@
 
             <div id="reg-check" class="form-box">
                 <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a;">Validación de Personal</h2>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 25px;">Validaremos si tu DNI figura pre-aprobado por la jefatura del establecimiento.</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px;">Validaremos si tu DNI figura pre-aprobado por la jefatura del establecimiento.</p>
                 
                 <label>Ingresa tu DNI</label>
                 <input type="text" id="r-dni-search" placeholder="Escribe aquí el DNI a evaluar">
@@ -813,8 +830,8 @@
 
             <div id="reg-final" class="form-box">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 id="reg-greeting" style="color: var(--minsa-blue); font-size: 1.1rem; font-weight: 800;"></h3>
-                    <button onclick="showBox('reg-check')" style="background: none; border: none; color: var(--minsa-blue); font-size: 0.8rem; cursor: pointer; font-weight: 700;"><i class="fas fa-arrow-left"></i> VOLVER</button>
+                    <h3 id="reg-greeting" style="color: var(--primary-blue); font-size: 1.1rem; font-weight: 800;"></h3>
+                    <button onclick="showBox('reg-check')" style="background: none; border: none; color: var(--primary-blue); font-size: 0.8rem; cursor: pointer; font-weight: 700;"><i class="fas fa-arrow-left"></i> VOLVER</button>
                 </div>
                 
                 <label>Nombres y Apellidos Completos</label>
@@ -865,27 +882,27 @@
             <i class="fas fa-arrow-left"></i> REGRESAR AL INICIO
         </button>
 
-        <!-- ENCABEZADO ULTRA MODERNO -->
+        <!-- ENCABEZADO MODERNO Y CLARO -->
         <header class="header-clean" id="app-header">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #38bdf8, #818cf8); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);">
-                    <i class="fas fa-child-reaching" style="color: #fff; font-size: 1.3rem;"></i>
+                <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #0284c7, #38bdf8); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);">
+                    <i class="fas fa-child-reaching" style="color: #fff; font-size: 1.2rem;"></i>
                 </div>
                 <div>
-                    <h3 style="color: #fff; font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">SISTEMA INTEGRADO DIT</h3>
-                    <p style="font-size: 0.72rem; color: var(--glow-cyan); font-weight: 600;">Panel Principal de Monitoreo</p>
+                    <h3 style="color: var(--text-main); font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">SISTEMA INTEGRADO DIT</h3>
+                    <p style="font-size: 0.72rem; color: var(--primary-blue); font-weight: 700;">Panel Principal de Monitoreo</p>
                 </div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 15px;">
                 <div class="user-pill">
                     <div class="user-avatar"><i class="fas fa-user-nurse"></i></div>
-                    <span id="user-display" style="font-size: 0.8rem; color: #f8fafc; font-weight: 700;"></span>
+                    <span id="user-display" style="font-size: 0.8rem; color: var(--text-main); font-weight: 800;"></span>
                 </div>
                 
                 <div class="header-actions">
                     <button class="action-btn" onclick="document.getElementById('modal-pw').style.display='flex'">
-                        <i class="fas fa-key" style="color:var(--pastel-yellow)"></i> LLAVE
+                        <i class="fas fa-key" style="color:var(--bright-yellow)"></i> LLAVE
                     </button>
                     <button class="action-btn action-btn-danger" onclick="logout()">
                         <i class="fas fa-power-off"></i> SALIR
@@ -1188,7 +1205,7 @@
                 return;
             }
 
-            document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:var(--glow-cyan); margin: auto;"><i class="fas fa-spinner fa-spin"></i> Generando Auditoría DIT...</div>';
+            document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:var(--primary-blue); margin: auto;"><i class="fas fa-spinner fa-spin"></i> Generando Auditoría DIT...</div>';
             document.getElementById('podium-extended-list').innerHTML = "";
 
             const viejoScript = document.getElementById('jsonp-stats');
@@ -1199,7 +1216,7 @@
             script.src = URL_ATENCION_SICHE + "?action=getHistorial&desde=" + desde + "&hasta=" + hasta + "&callback=procesarDatosExcel";
             
             script.onerror = function() {
-                document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:#f87171; margin: auto;"><i class="fas fa-times-circle"></i> Error al conectar con SICHE.</div>';
+                document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:#ef4444; margin: auto;"><i class="fas fa-times-circle"></i> Error al conectar con SICHE.</div>';
             };
             document.body.appendChild(script);
         }
@@ -1210,7 +1227,7 @@
             if(!podiumWrapper) return;
 
             if (!ranking || !Array.isArray(ranking) || ranking.length === 0) {
-                podiumWrapper.innerHTML = '<div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin:auto;">No hay registros de atenciones para estas fechas.</div>';
+                podiumWrapper.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); margin:auto;">No hay registros de atenciones para estas fechas.</div>';
                 if(extendedWrapper) extendedWrapper.innerHTML = "";
                 return;
             }
@@ -1231,45 +1248,45 @@
                 <div class="podium-place second">
                     <div class="podium-name" title="${top2.nombre}">${formatearNombreCorto(top2.nombre)}</div>
                     <div class="podium-column">
-                        <i class="fas fa-medal podium-cup" style="color: #cbd5e1"></i>
+                        <i class="fas fa-medal podium-cup" style="color: #fff"></i>
                         <span class="podium-count">${top2.migrados}</span>
                         <span class="podium-label">MIGRADOS</span>
                     </div>
                     <div class="podium-metrics-card">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top2.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top2.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top2.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top2.erroresMigracion}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top2.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top2.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top2.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top2.erroresMigracion}</span></div>
                     </div>
                 </div>
                 
                 <div class="podium-place first">
                     <div class="podium-name" title="${top1.nombre}">${formatearNombreCorto(top1.nombre)}</div>
                     <div class="podium-column">
-                        <i class="fas fa-crown podium-cup" style="color: #fbbf24"></i>
+                        <i class="fas fa-crown podium-cup" style="color: #fff"></i>
                         <span class="podium-count">${top1.migrados}</span>
                         <span class="podium-label">LÍDER</span>
                     </div>
-                    <div class="podium-metrics-card" style="background: rgba(34,211,238,0.08); border-color: rgba(34,211,238,0.2);">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top1.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top1.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top1.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top1.erroresMigracion}</span></div>
+                    <div class="podium-metrics-card" style="background: #fffbebf; border-color: #fde68a;">
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top1.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top1.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top1.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top1.erroresMigracion}</span></div>
                     </div>
                 </div>
                 
                 <div class="podium-place third">
                     <div class="podium-name" title="${top3.nombre}">${formatearNombreCorto(top3.nombre)}</div>
                     <div class="podium-column">
-                        <i class="fas fa-medal podium-cup" style="color: #ed8936"></i>
+                        <i class="fas fa-medal podium-cup" style="color: #fff"></i>
                         <span class="podium-count">${top3.migrados}</span>
                         <span class="podium-label">MIGRADOS</span>
                     </div>
                     <div class="podium-metrics-card">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top3.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top3.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top3.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top3.erroresMigracion}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top3.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top3.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top3.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top3.erroresMigracion}</span></div>
                     </div>
                 </div>
             `;
