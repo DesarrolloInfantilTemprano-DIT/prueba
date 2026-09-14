@@ -1,400 +1,1303 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sistema SIGIS_FED - Registro de Salud</title>
-  <!-- Tailwind CSS CDN para estilos modernos y responsivos -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Iconos Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .loader {
-      border-top-color: #2563eb;
-      animation: spinner 0.6s linear infinite;
-    }
-    @keyframes spinner {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body class="bg-slate-100 min-h-screen pb-12 font-sans text-slate-800">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIT | Desarrollo Infantil Temprano</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --glow-cyan: #bbf2f6;
+            --glow-pink: #ffb7d5;
+            --pastel-blue: #70a1ff;
+            --pastel-purple: #9b5de5;
+            --pastel-yellow: #fee440;
+            --bg-dark: #0f172a;
+            --glass: rgba(30, 41, 59, 0.95);
+            --minsa-blue: #4a7bc7;
+        }
 
-  <!-- Encabezado -->
-  <header class="bg-blue-700 text-white shadow-lg mb-6">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center space-x-3">
-        <i data-lucide="activity" class="w-8 h-8"></i>
-        <div>
-          <h1 class="text-xl font-bold leading-tight">SIGIS_FED - Censo de Salud</h1>
-          <p class="text-xs text-blue-200">Centro de Salud - Captura e Integración</p>
-        </div>
-      </div>
-      <span class="bg-blue-800 text-xs px-2.5 py-1 rounded-full text-blue-100 font-medium">GitHub Edition</span>
-    </div>
-  </header>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  <main class="max-w-4xl mx-auto px-4">
-    <!-- Mensajes de Notificación -->
-    <div id="statusAlert" class="hidden mb-4 p-4 rounded-lg text-sm font-medium transition-all shadow-sm"></div>
+        body {
+            background: radial-gradient(circle at top, #1e1b4b, #0f172a);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: #f8fafc;
+        }
 
-    <form id="formCenso" class="bg-white rounded-xl shadow-md p-6 border border-slate-200 space-y-6">
-      
-      <!-- Campo oculto para almacenar el número de fila si se actualiza un registro -->
-      <input type="hidden" id="row" name="row" value="" />
+        /* --- PANTALLA DE AUTENTICACIÓN --- */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            background: #f1f5f9;
+            transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1);
+        }
 
-      <!-- SECCIÓN 1: BÚSQUEDA Y DATOS PERSONALES -->
-      <div>
-        <h2 class="text-lg font-semibold text-blue-900 border-b pb-2 mb-4 flex items-center gap-2">
-          <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
-          Datos de Identificación del Paciente
-        </h2>
+        .auth-visual {
+            flex: 1;
+            background: linear-gradient(rgba(74, 123, 199, 0.85), rgba(15, 23, 42, 0.9)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+            position: relative;
+            overflow-y: auto;
+        }
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          <!-- DNI (Columna A) con búsqueda rápida -->
-          <div class="md:col-span-1">
-            <label for="dni" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              DNI (Columna A) <span class="text-red-500">*</span>
-            </label>
-            <div class="relative flex">
-              <input type="text" id="dni" name="dni" required pattern="[0-9]{8}" maxlength="8"
-                placeholder="8 dígitos"
-                class="w-full pl-3 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-base">
-              <button type="button" onclick="buscarDNI()" title="Buscar DNI en sistema"
-                class="absolute right-1 top-1 bottom-1 px-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center transition">
-                <i data-lucide="search" class="w-4 h-4"></i>
-              </button>
-            </div>
-            <span class="text-[11px] text-slate-500">Presiona buscar o Tab para consultar</span>
-          </div>
+        .auth-form-panel {
+            width: 450px;
+            padding: 40px 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            color: #334155;
+            box-shadow: -10px 0 30px rgba(15, 23, 42, 0.15);
+            overflow-y: auto;
+            border-top-left-radius: 30px;
+            border-bottom-left-radius: 30px;
+        }
 
-          <!-- Apellidos y Nombres (Columna B) -->
-          <div class="md:col-span-2">
-            <label for="nombreB" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Apellidos y Nombres (Columna B) <span class="text-red-500">*</span>
-            </label>
-            <input type="text" id="nombreB" name="nombreB" required placeholder="NOMBRES Y APELLIDOS COMPLETOS"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase">
-          </div>
+        .form-box {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-          <!-- Fecha de Nacimiento (Columna C) -->
-          <div>
-            <label for="fn" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Fecha de Nacimiento (Columna C)
-            </label>
-            <input type="date" id="fn" name="fn"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-          </div>
+        .form-box.active {
+            display: block;
+        }
 
-          <!-- Sexo (Columna D) -->
-          <div>
-            <label for="sexo" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Sexo (Columna D)
-            </label>
-            <select id="sexo" name="sexo"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-              <option value="">-- Seleccionar --</option>
-              <option value="M">MASCULINO</option>
-              <option value="F">FEMENINO</option>
-            </select>
-          </div>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-          <!-- Historia Clínica (Columna E) -->
-          <div>
-            <label for="hclinica" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Historia Clínica (Columna E)
-            </label>
-            <input type="text" id="hclinica" name="hclinica" placeholder="Nº de HC"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-          </div>
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 6px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
 
-        </div>
-      </div>
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            outline: none;
+            margin-bottom: 18px;
+            color: #1e293b;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
 
-      <!-- SECCIÓN 2: DATOS FAMILIARES Y UBICACIÓN -->
-      <div>
-        <h2 class="text-lg font-semibold text-blue-900 border-b pb-2 mb-4 flex items-center gap-2">
-          <i data-lucide="home" class="w-5 h-5 text-blue-600"></i>
-          Ficha Familiar y Sectorización
-        </h2>
+        input:focus {
+            border-color: var(--pastel-blue);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(112, 161, 255, 0.2);
+        }
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        input[type="date"] {
+            position: relative;
+            appearance: none;
+            -webkit-appearance: none;
+            min-height: 45px;
+        }
 
-          <!-- Ficha Familiar (Columna F) - Validación de 7 DÍGITOS NUMÉRICOS -->
-          <div>
-            <label for="ffamiliar" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Ficha Familiar (Columna F) <span class="text-red-500">*</span>
-            </label>
-            <input type="text" id="ffamiliar" name="ffamiliar" required pattern="[0-9]{7}" maxlength="7"
-              placeholder="7 dígitos exactamente"
-              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono font-bold text-blue-800">
-            <span class="text-[11px] text-slate-500">Requerido: 7 números exactos</span>
-          </div>
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+            z-index: 2;
+        }
 
-          <!-- Teléfono (Columna G) -->
-          <div>
-            <label for="telefono" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Teléfono (Columna G)
-            </label>
-            <input type="tel" id="telefono" name="telefono" maxlength="9" placeholder="9XXXXXXXX"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-          </div>
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--minsa-blue), var(--pastel-blue));
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 123, 199, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
 
-          <!-- Estado Civil (Columna H) -->
-          <div>
-            <label for="estado_civil" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Estado Civil (Columna H)
-            </label>
-            <select id="estado_civil" name="estado_civil"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-              <option value="">-- Seleccionar --</option>
-              <option value="SOLTERO(A)">SOLTERO(A)</option>
-              <option value="CASADO(A)">CASADO(A)</option>
-              <option value="CONVIVIENTE">CONVIVIENTE</option>
-              <option value="DIVORCIADO(A)">DIVORCIADO(A)</option>
-              <option value="VIUDO(A)">VIUDO(A)</option>
-            </select>
-          </div>
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 123, 199, 0.4);
+        }
 
-          <!-- Sector (Columna I) -->
-          <div>
-            <label for="sector" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Sector (Columna I)
-            </label>
-            <input type="text" id="sector" name="sector" placeholder="Ej: SECTOR 7"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase">
-          </div>
+        .btn-main:active {
+            transform: translateY(1px);
+        }
 
-          <!-- Referencia Dirección (Columna J) -->
-          <div class="md:col-span-2">
-            <label for="ref_direccion" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Referencia de Dirección (Columna J)
-            </label>
-            <input type="text" id="ref_direccion" name="ref_direccion" placeholder="Ej: Frente al parque / Av. Principal"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase">
-          </div>
+        .toggle-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
 
-          <!-- Mz (Columna K) -->
-          <div>
-            <label for="mz" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Manzana / Lote (Columna K)
-            </label>
-            <input type="text" id="mz" name="mz" placeholder="Ej: Mz A Lt 5"
-              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase">
-          </div>
+        .toggle-link span {
+            color: var(--minsa-blue);
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: underline;
+        }
 
-          <!-- Georreferencia (Columna L) -->
-          <div class="md:col-span-2">
-            <label for="georeferencia" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Georreferencia GPS (Columna L)
-            </label>
-            <div class="flex gap-2">
-              <input type="text" id="georeferencia" name="georeferencia" readonly placeholder="-9.XXXXX, -75.XXXXX"
-                class="w-full px-3 py-2 border border-slate-300 bg-slate-50 rounded-lg outline-none text-slate-600 font-mono text-sm">
-              <button type="button" onclick="obtenerGeolocalizacion()"
-                class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center gap-1.5 text-xs font-medium transition whitespace-nowrap">
-                <i data-lucide="map-pin" class="w-4 h-4"></i> Capturar GPS
-              </button>
-            </div>
-          </div>
+        /* --- BOTÓN PARA MOSTRAR/OCULTAR AUDITORÍA --- */
+        .btn-toggle-auditoria {
+            background: rgba(255, 255, 255, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            margin: 15px auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+        .btn-toggle-auditoria:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
 
-        </div>
-      </div>
+        /* --- FILTRO POR RANGO DE FECHAS (INFANTIL ELEGANTE) --- */
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .filter-row {
+            display: flex;
+            gap: 10px;
+        }
+        .filter-group {
+            flex: 1;
+            position: relative;
+        }
+        .filter-group label {
+            color: var(--glow-cyan);
+            font-size: 0.7rem;
+            margin-bottom: 4px;
+        }
+        .filter-group i.calendar-icon {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            color: var(--glow-cyan);
+            pointer-events: none;
+            font-size: 0.95rem;
+            z-index: 1;
+        }
+        .filter-group input[type="date"] {
+            margin-bottom: 0;
+            padding: 10px 35px 10px 12px;
+            font-size: 0.8rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 12px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-filter {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #0f172a;
+            background: linear-gradient(135deg, #a5f3fc, #22d3ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(34, 211, 238, 0.2);
+            transition: all 0.2s;
+        }
+        .btn-filter:hover { transform: scale(1.02); }
+        .btn-export {
+            background: linear-gradient(135deg, #fbcfe8, #f472b6);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(244, 114, 182, 0.2);
+        }
 
-      <!-- BOTONES DE ACCIÓN -->
-      <div class="pt-4 border-t flex flex-col sm:flex-row gap-3 justify-end">
-        <button type="button" onclick="limpiarFormulario()"
-          class="px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium rounded-lg transition flex items-center justify-center gap-2">
-          <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Limpiar Formulario
-        </button>
+        /* --- PODIO MODULAR INFANTIL-ELEGANTE (OCULTO POR DEFECTO) --- */
+        .podium-section {
+            width: 100%;
+            max-width: 650px;
+            margin: 10px auto;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 24px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: none; /* Oculto por defecto */
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .podium-title {
+            font-size: 1rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 18px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+        }
+
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 12px;
+            height: 155px;
+            margin-bottom: 10px;
+        }
+
+        .podium-place {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 32%;
+            text-align: center;
+            opacity: 0;
+            animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .podium-place.second { animation-delay: 0.15s; }
+        .podium-place.first { animation-delay: 0s; }
+        .podium-place.third { animation-delay: 0.3s; }
+
+        .podium-name {
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            color: #f1f5f9;
+        }
+
+        .podium-column {
+            width: 100%;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 4px;
+            position: relative;
+        }
+
+        .podium-place.first .podium-column {
+            height: 95px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .podium-place.second .podium-column {
+            height: 75px;
+            background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+            box-shadow: 0 10px 20px rgba(148, 163, 184, 0.3);
+        }
+
+        .podium-place.third .podium-column {
+            height: 60px;
+            background: linear-gradient(135deg, #ed8936, #c05621);
+            box-shadow: 0 10px 15px rgba(192, 86, 33, 0.3);
+        }
+
+        .podium-cup {
+            font-size: 1.4rem;
+            margin-bottom: 2px;
+            animation: float 2s ease-in-out infinite alternate;
+        }
         
-        <button type="submit" id="btnGuardar"
-          class="px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-lg shadow-md transition flex items-center justify-center gap-2">
-          <i data-lucide="save" class="w-4 h-4"></i> Guardar Registro
-        </button>
-      </div>
+        @keyframes float {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-4px); }
+        }
 
-    </form>
-  </main>
+        .podium-count {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: #fff;
+        }
 
-  <!-- LÓGICA DE JAVASCRIPT -->
-  <script>
-    // Inicializar iconos de Lucide
-    lucide.createIcons();
+        .podium-column span.podium-label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
 
-    // Endpoint de tu Web App de Google Apps Script
-    const URL_CENSO = "https://script.google.com/macros/s/AKfycbwkYPuO13juZBjhs7wrxX0MEYy-hPeg0HyzjDJ9_Oy-Yq3Fih99wFAyI5xlbJ_u4rBX1g/exec";
+        .podium-metrics-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 6px 8px;
+            width: 100%;
+            margin-top: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+        }
 
-    // Manejador del evento Submit del formulario
-    document.getElementById('formCenso').addEventListener('submit', async function(e) {
-      e.preventDefault();
+        .metric-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.85);
+            border-bottom: 1px dashed rgba(255,255,255,0.08);
+            padding-bottom: 2px;
+        }
+        .metric-line:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .metric-line span i {
+            margin-right: 4px;
+            width: 11px;
+            text-align: center;
+        }
 
-      // Validar Ficha Familiar exactamente de 7 dígitos
-      const ffamiliar = document.getElementById('ffamiliar').value;
-      if (!/^\d{7}$/.test(ffamiliar)) {
-        mostrarAlerta("❌ La Ficha Familiar debe contener exactamente 7 dígitos numéricos.", "bg-red-100 text-red-800 border-red-300");
-        return;
-      }
+        .podium-extended-list {
+            width: 100%;
+            max-height: 180px;
+            overflow-y: auto;
+            margin-top: 15px;
+            padding-right: 5px;
+            border-top: 2px dashed rgba(255, 255, 255, 0.1);
+            scrollbar-width: thin;
+        }
+        .podium-extended-list::-webkit-scrollbar { width: 4px; }
+        .podium-extended-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        
+        .extended-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin-top: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .extended-top-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .extended-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            max-width: 70%;
+        }
+        .extended-pos {
+            font-weight: 900;
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 7px;
+            border-radius: 8px;
+            color: var(--glow-cyan);
+        }
+        .extended-pos.gold { background: #f59e0b; color: #fff; }
+        .extended-pos.silver { background: #94a3b8; color: #fff; }
+        .extended-pos.bronze { background: #c05621; color: #fff; }
 
-      // Preparar objeto de datos para enviar
-      const formData = {
-        row: document.getElementById('row').value || null,
-        dni: document.getElementById('dni').value.trim(),
-        nombreB: document.getElementById('nombreB').value.trim(),
-        fn: document.getElementById('fn').value,
-        sexo: document.getElementById('sexo').value,
-        hclinica: document.getElementById('hclinica').value.trim(),
-        ffamiliar: ffamiliar.trim(),
-        telefono: document.getElementById('telefono').value.trim(),
-        estado_civil: document.getElementById('estado_civil').value,
-        sector: document.getElementById('sector').value.trim(),
-        ref_direccion: document.getElementById('ref_direccion').value.trim(),
-        mz: document.getElementById('mz').value.trim(),
-        georeferencia: document.getElementById('georeferencia').value.trim() // Columna L
-      };
+        .extended-name {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .extended-total-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            background: rgba(34, 211, 238, 0.2);
+            color: #22d3ee;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+        .extended-grid-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            background: rgba(0,0,0,0.2);
+            padding: 6px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.65rem;
+        }
+        .metric-box { display: flex; flex-direction: column; gap: 2px; }
+        .metric-box span { color: #94a3b8; font-weight: 600; font-size: 0.58rem; text-transform: uppercase;}
+        
+        .badge-err { color: #f87171; font-weight: bold; }
+        .badge-mig { color: #4ade80; font-weight: bold; }
+        .badge-rua { color: #c084fc; font-weight: bold; }
+        .badge-falta { color: #f87171; font-weight: bold; }
+        .badge-proc { color: #fbbf24; font-weight: bold; }
 
-      const btnGuardar = document.getElementById('btnGuardar');
-      btnGuardar.disabled = true;
-      btnGuardar.innerHTML = `<div class="loader w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div> Guardando...`;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-      try {
-        const response = await fetch(URL_CENSO, {
-          method: 'POST',
-          mode: 'cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(formData)
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            #auth-screen { flex-direction: column; overflow-y: auto; }
+            .auth-visual { flex: none; padding: 20px 15px; text-align: center; gap: 15px; }
+            .auth-visual h1 { font-size: 1.8rem !important; }
+            .auth-form-panel { width: 100%; padding: 25px; box-shadow: none; border-radius: 0; }
+            .podium-section { padding: 15px !important; }
+            .podium-container { height: 110px !important; }
+            .podium-metrics-card { display: none !important; }
+            .podium-extended-list { max-height: 150px !important; }
+        }
+
+        /* --- INTERFAZ PRINCIPAL --- */
+        #main-app {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .top-nav {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+
+        .brand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px 12px;
+        }
+
+        .logo-circle {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #a5f3fc, #0284c7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+            cursor: pointer;
+        }
+
+        .scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            padding: 5px 15px 15px;
+            scrollbar-width: none;
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        #sortable-nodes { display: flex; gap: 10px; width: max-content; }
+
+        .node-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 20px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .node-btn i { font-size: 1.1rem; color: var(--pastel-blue); }
+        .node-btn span { font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+        .node-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.2); }
+        .node-btn.active {
+            border-color: #fff;
+            background: linear-gradient(135deg, #38bdf8, #0369a1);
+            box-shadow: 0 5px 15px rgba(3, 105, 161, 0.4);
+        }
+
+        .main-viewport { flex: 1; position: relative; background: #0f172a; overflow-y: auto; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
+
+        /* --- DASHBOARD ELEGANTE EN INICIO CON TODOS LOS MÓDULOS --- */
+        #modules-dashboard {
+            padding: 30px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .module-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top left, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(56, 189, 248, 0.5);
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .module-card .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(15, 23, 42, 0.4));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: #38bdf8;
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover .icon-box {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #38bdf8, #0369a1);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(3, 105, 161, 0.5);
+        }
+
+        .module-card h3 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 0.5px;
+        }
+
+        #modal-pw {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            display: none;
+        }
+        .modal-card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 380px;
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-visual">
+            <div>
+                <h1 style="font-size: 2.6rem; font-weight:900; text-shadow: 0 4px 10px rgba(0,0,0,0.2);">Desarrollo Infantil Temprano <b style="color:var(--glow-pink)">DIT</b></h1>
+                <p style="opacity: 0.9; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px;">✨ Plataforma de Monitoreo Integral Infantil</p>
+            </div>
+            
+            <!-- BOTÓN PARA DESPLEGAR/OCULTAR AUDITORÍA -->
+            <button class="btn-toggle-auditoria" onclick="toggleAuditoria()">
+                <i class="fas fa-star" style="color:var(--pastel-yellow)"></i> 
+                <span>VER AUDITORÍA CRUZADA: SICHE VS RUA</span>
+                <i class="fas fa-chevron-down" id="auditoria-arrow"></i>
+            </button>
+
+            <!-- PODIO (OCULTO POR DEFECTO POR BOTÓN) -->
+            <div class="podium-section" id="podium-section">
+                <div class="podium-title"><i class="fas fa-star" style="color:var(--pastel-yellow)"></i> Auditoría Cruzada: SICHE vs RUA</div>
+                
+                <div class="filter-panel">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Desde:</label>
+                            <input type="date" id="filtro-desde">
+                            <i class="fas fa-calendar-alt calendar-icon"></i>
+                        </div>
+                        <div class="filter-group">
+                            <label>Hasta:</label>
+                            <input type="date" id="filtro-hasta">
+                            <i class="fas fa-calendar-alt calendar-icon"></i>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-filter" onclick="ejecutarConsultaEstadistica()"><i class="fas fa-magic"></i> Consultar Fechas</button>
+                        <button class="btn-filter btn-export" onclick="exportarFaltantesAExcel()"><i class="fas fa-cloud-download-alt"></i> Exportar Faltantes</button>
+                    </div>
+                </div>
+
+                <div class="podium-container" id="login-podium">
+                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.5); margin: auto; text-align: center;">
+                        <i class="fas fa-wand-magic-sparkles" style="color: var(--pastel-yellow); font-size: 1.5rem; margin-bottom: 8px; display: block;"></i> 
+                        Elige un rango de fechas para desplegar la auditoría interactiva.
+                    </div>
+                </div>
+                <div class="podium-extended-list" id="podium-extended-list"></div>
+            </div>
+            <div style="font-size: 0.8rem; opacity: 0.7; font-weight: 600;"><i class="fas fa-shield-cat"></i> Red Nacional de Salud - MINSA 2026</div>
+        </div>
+        
+        <div class="auth-form-panel">
+            <div id="login-box" class="form-box active">
+                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a; font-size: 1.6rem;">¡Hola, Profesional!</h2>
+                <p style="font-size:0.85rem; color:#64748b; margin-bottom: 25px;">Ingresa tus credenciales autorizadas para continuar.</p>
+                
+                <label>DNI del Usuario</label>
+                <input type="text" id="l-dni" placeholder="Ingresa tu número de DNI" autocomplete="username">
+                
+                <label>Contraseña</label>
+                <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+                
+                <button class="btn-main" onclick="handleLogin()">INGRESAR AL SISTEMA</button>
+                <div class="toggle-link">¿No tienes una cuenta activa? <span onclick="showBox('reg-check')">Regístrate aquí</span></div>
+            </div>
+
+            <div id="reg-check" class="form-box">
+                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a;">Validación de Personal</h2>
+                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 25px;">Validaremos si tu DNI figura pre-aprobado por la jefatura del establecimiento.</p>
+                
+                <label>Ingresa tu DNI</label>
+                <input type="text" id="r-dni-search" placeholder="Escribe aquí el DNI a evaluar">
+                
+                <button class="btn-main" onclick="checkAuthorizedDNI()">BUSCAR AUTORIZACIÓN</button>
+                <div class="toggle-link"><span onclick="showBox('login')">Volver al inicio de sesión</span></div>
+            </div>
+
+            <div id="reg-final" class="form-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="reg-greeting" style="color: var(--minsa-blue); font-size: 1.1rem; font-weight: 800;"></h3>
+                    <button onclick="showBox('reg-check')" style="background: none; border: none; color: var(--minsa-blue); font-size: 0.8rem; cursor: pointer; font-weight: 700;"><i class="fas fa-arrow-left"></i> VOLVER</button>
+                </div>
+                
+                <label>Nombres y Apellidos Completos</label>
+                <input type="text" id="r-name" placeholder="Cargando...">
+                
+                <label>Profesión / Especialidad</label>
+                <input type="text" id="r-prof" placeholder="Ej. Lic. en Enfermería">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Número Celular</label>
+                        <input type="number" id="r-cel" placeholder="9 cifras" oninput="if(this.value.length > 9) this.value = this.value.slice(0,9);">
+                    </div>
+                    <div>
+                        <label>Región</label>
+                        <input type="text" id="r-reg" placeholder="Dpto">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Provincia</label>
+                        <input type="text" id="r-provaws" placeholder="Provincia">
+                    </div>
+                    <div>
+                        <label>Distrito</label>
+                        <input type="text" id="r-dist" placeholder="Distrito">
+                    </div>
+                </div>
+                
+                <label>Establecimiento de Salud (E.E.S.S.)</label>
+                <input type="text" id="r-eess" placeholder="Nombre de su IPRESS">
+                
+                <label>Defina su Nueva Contraseña</label>
+                <input type="password" id="r-new-pass" placeholder="Mínimo 4 caracteres">
+                
+                <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="activateAccount()">CONFIRMAR Y ACTIVAR CUENTA</button>
+            </div>
+            
+            <div id="auth-msg" style="margin-top: 20px; text-align: center; font-size: 0.85rem; display: none; padding: 14px; border-radius: 14px; font-weight: 700;"></div>
+        </div>
+    </div>
+
+    <div id="main-app">
+        <header class="top-nav">
+            <div class="brand-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="logo-circle" onclick="showDashboard()" title="Ir al Inicio / Dashboard"><i class="fas fa-child-reaching" style="color: #fff; font-size: 1.1rem;"></i></div>
+                    <div>
+                        <h4 style="color: #fff; font-size: 0.9rem; font-weight: 900; letter-spacing: 0.5px; cursor: pointer;" onclick="showDashboard()">SISTEMA INTEGRADO DIT</h4>
+                        <p id="user-display" style="font-size: 0.68rem; color: var(--pastel-blue); font-weight: 800; text-transform: uppercase;"></p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="document.getElementById('modal-pw').style.display='flex'" style="background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.72rem; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;"><i class="fas fa-key" style="color:var(--pastel-yellow)"></i> LLAVE</button>
+                    <button onclick="logout()" style="background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; color: #ef4444; font-size: 0.72rem; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;"><i class="fas fa-door-open"></i> SALIR</button>
+                </div>
+            </div>
+
+            <div class="scroll-container">
+                <div id="sortable-nodes">
+                    <div class="node-btn active" onclick="showDashboard()"><i class="fas fa-house"></i><span>INICIO</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/"><i class="fas fa-baby"></i><span>CENSO DIT</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/"><i class="fas fa-calendar-check"></i><span>CITAS CRED</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/"><i class="fas fa-calendar-check"></i><span>CITAS SATD</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/"><i class="fas fa-calendar-check"></i><span>REPORTE SATD</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/Mapa/"><i class="fas fa-map-marked-alt"></i><span>MAPA DIT</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/"><i class="fas fa-bell"></i><span>RECORDAR CITADOS</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/RegistroDiario/"><i class="fas fa-notes-medical"></i><span>REGISTRO ATENCIÓN</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/"><i class="fas fa-book-open"></i><span>LIBRETA CRED</span></div>
+                    <div class="node-btn" data-url="https://confianzaseguridad772-max.github.io/Dosificador_Hierro/"><i class="fas fa-projections-atom"></i><span>DOSIFICADOR</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/mapasector/"><i class="fas fa-home-user"></i><span>MAPA SECTOR</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/sectorizar/"><i class="fas fa-home-user"></i><span>FICHA FAMILIAR</span></div>
+                    <div class="node-btn" data-url="https://desarrolloinfantiltemprano-dit.github.io/casita/"><i class="fas fa-home-user"></i><span>LA CASITA</span></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-viewport">
+            <!-- DASHBOARD PRINCIPAL CON TODOS LOS MÓDULOS DISTRIBUIDOS -->
+            <div id="modules-dashboard">
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/')">
+                    <div class="icon-box"><i class="fas fa-baby"></i></div>
+                    <h3>CENSO DIT</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/')">
+                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                    <h3>CITAS CRED</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/')">
+                    <div class="icon-box"><i class="fas fa-calendar-plus"></i></div>
+                    <h3>CITAS SATD</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/')">
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+                    <h3>REPORTE SATD</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Mapa/')">
+                    <div class="icon-box"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>MAPA DIT</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/')">
+                    <div class="icon-box"><i class="fas fa-bell"></i></div>
+                    <h3>RECORDAR CITADOS</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RegistroDiario/')">
+                    <div class="icon-box"><i class="fas fa-notes-medical"></i></div>
+                    <h3>REGISTRO ATENCIÓN</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/')">
+                    <div class="icon-box"><i class="fas fa-book-open"></i></div>
+                    <h3>LIBRETA CRED</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://confianzaseguridad772-max.github.io/Dosificador_Hierro/')">
+                    <div class="icon-box"><i class="fas fa-pills"></i></div>
+                    <h3>DOSIFICADOR</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/mapasector/')">
+                    <div class="icon-box"><i class="fas fa-map-pin"></i></div>
+                    <h3>MAPA SECTOR</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/sectorizar/')">
+                    <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
+                    <h3>FICHA FAMILIAR</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/casita/')">
+                    <div class="icon-box"><i class="fas fa-house-user"></i></div>
+                    <h3>LA CASITA</h3>
+                </div>
+            </div>
+
+            <!-- IFRAME DE CONTENIDO -->
+            <iframe id="content-frame"></iframe>
+        </main>
+    </div>
+
+    <div id="modal-pw">
+        <div class="modal-card">
+            <h3 style="margin-bottom: 15px; font-weight: 900; color: #0f172a; font-size: 1.2rem;">Cambiar Contraseña</h3>
+            <label>Contraseña Actual</label>
+            <input type="password" id="old-pw" placeholder="Escriba clave vigente">
+            <label>Nueva Contraseña</label>
+            <input type="password" id="new-pw" placeholder="Mínimo 4 caracteres">
+            <button class="btn-main" onclick="changePassword()">ACTUALIZAR CREDENCIAL</button>
+            <button class="btn-main" style="background: #e2e8f0; color: #475569; margin-top: 10px; font-weight: 700; box-shadow: none;" onclick="document.getElementById('modal-pw').style.display='none'">CANCELAR</button>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2QKNMUiL-H8Z9CAtC1GvHj7OcbS4mG5yjcUwr6S1cL3B8DZ0-ZddSp2trQlAC6uyQ/exec";
+        const URL_ATENCION_SICHE = "https://script.google.com/macros/s/AKfycbyxsU7zLwpZVgcbb_b6HoGglYU2_QQsKfoP6netAos_r89minIBxWRGpKpNe28IlDDG/exec";
+
+        let currentDNI = '';
+        let userDataCache = {};
+
+        function showBox(box) {
+            document.querySelectorAll('.form-box').forEach(b => b.classList.remove('active'));
+            document.getElementById(box === 'login' ? 'login-box' : box).classList.add('active');
+        }
+
+        function showMsg(t, c) {
+            const m = document.getElementById('auth-msg');
+            m.innerText = t;
+            m.style.background = c === 'red' ? '#fef2f2' : (c === 'green' ? '#f0fdf4' : '#f0f9ff');
+            m.style.color = c === 'red' ? '#991b1b' : (c === 'green' ? '#166534' : '#075985');
+            m.style.display = t ? 'block' : 'none';
+        }
+
+        /* METODO PARA DESPLEGAR/OCULTAR AUDITORIA CRUZADA */
+        function toggleAuditoria() {
+            const section = document.getElementById('podium-section');
+            const arrow = document.getElementById('auditoria-arrow');
+            if (section.style.display === 'flex') {
+                section.style.display = 'none';
+                arrow.className = 'fas fa-chevron-down';
+            } else {
+                section.style.display = 'flex';
+                arrow.className = 'fas fa-chevron-up';
+            }
+        }
+
+        /* RUTINAS DE DASHBOARD Y NAVEGACIÓN MODULAR */
+        function showDashboard() {
+            document.getElementById('modules-dashboard').style.display = 'grid';
+            document.getElementById('content-frame').style.display = 'none';
+            document.querySelectorAll('.node-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.node-btn').classList.add('active');
+        }
+
+        function openModule(url) {
+            document.getElementById('modules-dashboard').style.display = 'none';
+            const frame = document.getElementById('content-frame');
+            frame.src = url;
+            frame.style.display = 'block';
+
+            document.querySelectorAll('.node-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('data-url') === url) {
+                    b.classList.add('active');
+                }
+            });
+        }
+
+        async function checkAuthorizedDNI() {
+            const dni = document.getElementById('r-dni-search').value;
+            if(!dni) return showMsg("Por favor, ingrese un número de DNI", "red");
+            showMsg("Verificando en servidores del MINSA...", "blue");
+            
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=fetchUserData&dni=${dni}`);
+                const res = await r.json();
+                
+                if(res.status === "found") {
+                    if(res.hasPass) {
+                        showMsg("Este perfil ya se encuentra activo. Redireccionando...", "blue");
+                        setTimeout(() => showBox('login'), 2000);
+                    } else {
+                        currentDNI = dni;
+                        userDataCache = res.userData;
+                        document.getElementById('reg-greeting').innerText = "¡Hola, " + res.userData.nombre.split(" ")[0] + "!";
+                        document.getElementById('r-name').value = res.userData.nombre || "";
+                        document.getElementById('r-prof').value = res.userData.profesion || "";
+                        document.getElementById('r-cel').value = res.userData.celular || "";
+                        document.getElementById('r-reg').value = res.userData.region || "";
+                        document.getElementById('r-provaws').value = res.userData.provincia || "";
+                        document.getElementById('r-dist').value = res.userData.distrito || "";
+                        document.getElementById('r-eess').value = res.userData.eess || "";
+                        showBox('reg-final');
+                        showMsg("", "");
+                    }
+                } else {
+                    showMsg("DNI no registrado como autorizado. Contacte con soporte DIT.", "red");
+                }
+            } catch(e) {
+                showMsg("Ocurrió un error al conectar con la base de datos.", "red");
+            }
+        }
+
+        async function activateAccount() {
+            const cel = document.getElementById('r-cel').value;
+            const pass = document.getElementById('r-new-pass').value;
+
+            if(cel.length !== 9) return showMsg("El celular debe tener 9 dígitos", "red");
+            if(pass.length < 4) return showMsg("Contraseña muy corta (mínimo 4 caracteres)", "red");
+
+            const data = {
+                action: "updateUserProfile",
+                dni: currentDNI,
+                nombre: document.getElementById('r-name').value,
+                profesion: document.getElementById('r-prof').value,
+                celular: cel,
+                region: document.getElementById('r-reg').value,
+                provincia: document.getElementById('r-provaws').value,
+                distrito: document.getElementById('r-dist').value,
+                eess: document.getElementById('r-eess').value,
+                newPass: pass
+            };
+
+            showMsg("Guardando y encriptando tu cuenta...", "blue");
+            const formData = new URLSearchParams();
+            formData.append('jsonData', JSON.stringify(data));
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const resText = await response.text();
+                
+                if(resText.includes("Success")) {
+                    showMsg("¡Cuenta activada con éxito! Reiniciando...", "green");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMsg("Error del servidor: " + resText, "red");
+                }
+            } catch(e) {
+                showMsg("Fallo crítico en la red.", "red");
+            }
+        }
+
+        async function handleLogin() {
+            const u = document.getElementById('l-dni').value;
+            const p = document.getElementById('l-pass').value;
+            if(!u || !p) return showMsg("Por favor completa los dos campos", "red");
+            
+            showMsg("Validando credenciales...", "blue");
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=login&dni=${u}&pass=${p}`);
+                const res = await r.json();
+                if(res.status === "success") {
+                    sessionStorage.setItem('user_dni', u);
+                    sessionStorage.setItem('is_auth', 'true');
+                    sessionStorage.setItem('user_name', res.nombre);
+                    unlockApp(res.nombre);
+                } else {
+                    showMsg("DNI o Contraseña no coinciden", "red");
+                }
+            } catch(e) {
+                showMsg("Error de conexión remota.", "red");
+            }
+        }
+
+        async function changePassword() {
+            const oldP = document.getElementById('old-pw').value;
+            const newP = document.getElementById('new-pw').value;
+            if(!oldP || !newP) return alert("Rellene los campos obligatorios.");
+
+            const data = {
+                action: "updateUserProfile",
+                dni: sessionStorage.getItem('user_dni'),
+                oldPass: oldP,
+                newPass: newP,
+                isChange: true,
+                nombre: "", profesion: "", celular: "", region: "", provincia: "", distrito: "", eess: ""
+            };
+
+            const formData = new URLSearchParams();
+            formData.append('jsonData', JSON.stringify(data));
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const resText = await response.text();
+                if(resText.includes("Error")) {
+                    alert(resText);
+                } else {
+                    document.getElementById('modal-pw').style.display='none';
+                    alert("¡Contraseña actualizada!");
+                    document.getElementById('old-pw').value = "";
+                    document.getElementById('new-pw').value = "";
+                }
+            } catch(e) {
+                alert("Error al procesar el cambio.");
+            }
+        }
+
+        function unlockApp(n) {
+            document.getElementById('auth-screen').style.transform = "translateY(-100%)";
+            document.getElementById('main-app').style.display = "flex";
+            document.getElementById('user-display').innerText = n;
+            
+            showDashboard(); // Muestra el Dashboard con todos los módulos repartidos
+
+            if(!window.hasGreeted) {
+                const msg = new SpeechSynthesisUtterance("Bienvenido al sistema DIT, " + n.split(" ")[0]);
+                msg.lang = 'es-PE';
+                window.speechSynthesis.speak(msg);
+                window.hasGreeted = true;
+            }
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
+
+        if(sessionStorage.getItem('is_auth') === 'true') {
+            unlockApp(sessionStorage.getItem('user_name'));
+        }
+
+        document.getElementById('l-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+
+        document.querySelectorAll('.node-btn[data-url]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                openModule(this.getAttribute('data-url'));
+            });
         });
 
-        const textResult = await response.text();
-        mostrarAlerta(textResult, "bg-green-100 text-green-800 border-green-300");
-        
-        // Limpiar después de guardar con éxito
-        setTimeout(() => {
-          limpiarFormulario();
-        }, 1500);
+        // ============================================================================================
+        //  --- AUDITORÍA CRUZADA ---
+        // ============================================================================================
 
-      } catch (error) {
-        console.error("Error al guardar:", error);
-        mostrarAlerta("⚠️ No se pudo guardar. Verifica la conexión o la configuración de Google Apps Script.", "bg-red-100 text-red-800 border-red-300");
-      } finally {
-        btnGuardar.disabled = false;
-        btnGuardar.innerHTML = `<i data-lucide="save" class="w-4 h-4"></i> Guardar Registro`;
-        lucide.createIcons();
-      }
-    });
+        function ejecutarConsultaEstadistica() {
+            const desde = document.getElementById('filtro-desde').value;
+            const hasta = document.getElementById('filtro-hasta').value;
 
-    // Función para buscar datos por DNI en el Apps Script
-    async function buscarDNI() {
-      const dni = document.getElementById('dni').value.trim();
-      if (!dni || dni.length < 8) {
-        mostrarAlerta("⚠️ Ingrese un DNI válido de 8 dígitos para realizar la búsqueda.", "bg-amber-100 text-amber-800 border-amber-300");
-        return;
-      }
-
-      mostrarAlerta("🔍 Consultando base de datos...", "bg-blue-100 text-blue-800 border-blue-300");
-
-      try {
-        const response = await fetch(`${URL_CENSO}?action=buscar&dni=${encodeURIComponent(dni)}`);
-        const data = await response.json();
-
-        if (data && data.status === "ok") {
-          // Rellenar campos existentes con lo recuperado de la base de datos
-          document.getElementById('row').value = data.row || "";
-          document.getElementById('nombreB').value = data.nombreB || "";
-          
-          // Formatear Fecha (Convertir dd/MM/yyyy a YYYY-MM-DD para el input date)
-          if (data.fn) {
-            const partes = data.fn.split('/');
-            if (partes.length === 3) {
-              document.getElementById('fn').value = `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
-            } else {
-              document.getElementById('fn').value = data.fn;
+            if(!desde || !hasta) {
+                alert("Por favor elija un rango válido de fechas.");
+                return;
             }
-          }
 
-          document.getElementById('sexo').value = data.sexo || "";
-          document.getElementById('hclinica').value = data.hclinica || "";
-          document.getElementById('ffamiliar').value = data.ffamiliar || "";
-          document.getElementById('telefono').value = data.telefono || "";
-          document.getElementById('estado_civil').value = data.estado_civil || "";
-          document.getElementById('sector').value = data.sector || "";
-          document.getElementById('ref_direccion').value = data.ref_direccion || "";
-          document.getElementById('mz').value = data.mz || "";
-          
-          if(data.georeferencia) {
-            document.getElementById('georeferencia').value = data.georeferencia;
-          }
+            document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:var(--glow-cyan); margin: auto;"><i class="fas fa-spinner fa-spin"></i> Generando Auditoría DIT...</div>';
+            document.getElementById('podium-extended-list').innerHTML = "";
 
-          mostrarAlerta(`✅ DNI encontrado en la fila ${data.row}. Puedes actualizar los datos que faltan.`, "bg-green-100 text-green-800 border-green-300");
-        } else {
-          // El DNI no existe aún en la base de datos
-          document.getElementById('row').value = "";
-          const dniActual = document.getElementById('dni').value;
-          
-          // Limpiar el resto de campos manteniendo el DNI
-          limpiarFormulario(false);
-          document.getElementById('dni').value = dniActual;
-          
-          mostrarAlerta("ℹ️ DNI no encontrado. Puedes registrar a esta persona como NUEVO registro.", "bg-blue-100 text-blue-800 border-blue-300");
+            const viejoScript = document.getElementById('jsonp-stats');
+            if (viejoScript) viejoScript.remove();
+
+            const script = document.createElement('script');
+            script.id = 'jsonp-stats';
+            script.src = URL_ATENCION_SICHE + "?action=getHistorial&desde=" + desde + "&hasta=" + hasta + "&callback=procesarDatosExcel";
+            
+            script.onerror = function() {
+                document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:#f87171; margin: auto;"><i class="fas fa-times-circle"></i> Error al conectar con SICHE.</div>';
+            };
+            document.body.appendChild(script);
         }
-      } catch (error) {
-        console.error("Error al buscar DNI:", error);
-        mostrarAlerta("❌ Error al conectar con Google Sheets. Asegúrate de tener permisos o conexión.", "bg-red-100 text-red-800 border-red-300");
-      }
-    }
 
-    // Escuchar pérdida de foco o ENTER en el DNI para autobúsqueda rápida
-    document.getElementById('dni').addEventListener('blur', function() {
-      if (this.value.trim().length === 8 && !document.getElementById('row').value) {
-        buscarDNI();
-      }
-    });
+        function procesarDatosExcel(ranking) {
+            const podiumWrapper = document.getElementById('login-podium');
+            const extendedWrapper = document.getElementById('podium-extended-list');
+            if(!podiumWrapper) return;
 
-    // Captura de coordenadas GPS
-    function obtenerGeolocalizacion() {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          function(position) {
-            const lat = position.coords.latitude.toFixed(6);
-            const lng = position.coords.longitude.toFixed(6);
-            document.getElementById('georeferencia').value = `${lat}, ${lng}`;
-            mostrarAlerta("📍 Ubicación GPS obtenida correctamente.", "bg-emerald-100 text-emerald-800 border-emerald-300");
-          },
-          function(error) {
-            mostrarAlerta("⚠️ No se pudo obtener la ubicación GPS. Verifica los permisos de tu navegador.", "bg-amber-100 text-amber-800 border-amber-300");
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      } else {
-        mostrarAlerta("❌ Tu navegador no soporta geolocalización.", "bg-red-100 text-red-800 border-red-300");
-      }
-    }
+            if (!ranking || !Array.isArray(ranking) || ranking.length === 0) {
+                podiumWrapper.innerHTML = '<div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin:auto;">No hay registros de atenciones para estas fechas.</div>';
+                if(extendedWrapper) extendedWrapper.innerHTML = "";
+                return;
+            }
 
-    // Limpiar todos los campos del formulario
-    function limpiarFormulario(limpiarTodo = true) {
-      document.getElementById('formCenso').reset();
-      document.getElementById('row').value = "";
-      document.getElementById('georeferencia').value = "";
-      if (limpiarTodo) {
-        ocultarAlerta();
-      }
-    }
+            const formatearNombreCorto = (nombreCompleto) => {
+                if(!nombreCompleto || nombreCompleto === "-" || nombreCompleto.includes("NO ESPECIFICADO")) return "P. SALUD";
+                var partes = nombreCompleto.split(" ");
+                if(partes.length >= 3) return partes[0] + " " + partes[2];
+                return nombreCompleto;
+            };
 
-    // Auxiliares para mensajes
-    function mostrarAlerta(mensaje, clasesCss) {
-      const alertDiv = document.getElementById('statusAlert');
-      alertDiv.className = `mb-4 p-4 rounded-lg text-sm font-medium transition-all shadow-sm border ${clasesCss}`;
-      alertDiv.innerHTML = mensaje;
-      alertDiv.classList.remove('hidden');
-    }
+            const fallback = { nombre: "-", totalAtenciones: 0, erroresMigracion: 0, migrados: 0, porProcesar: 0, anemia: 0, cred: 0, rua: 0, faltaSiche: 0 };
+            const top1 = ranking[0] || fallback;
+            const top2 = ranking[1] || fallback;
+            const top3 = ranking[2] || fallback;
 
-    function ocultarAlerta() {
-      const alertDiv = document.getElementById('statusAlert');
-      alertDiv.classList.add('hidden');
-    }
-  </script>
+            podiumWrapper.innerHTML = `
+                <div class="podium-place second">
+                    <div class="podium-name" title="${top2.nombre}">${formatearNombreCorto(top2.nombre)}</div>
+                    <div class="podium-column">
+                        <i class="fas fa-medal podium-cup" style="color: #cbd5e1"></i>
+                        <span class="podium-count">${top2.migrados}</span>
+                        <span class="podium-label">MIGRADOS</span>
+                    </div>
+                    <div class="podium-metrics-card">
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top2.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top2.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top2.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top2.erroresMigracion}</span></div>
+                    </div>
+                </div>
+                
+                <div class="podium-place first">
+                    <div class="podium-name" title="${top1.nombre}">${formatearNombreCorto(top1.nombre)}</div>
+                    <div class="podium-column">
+                        <i class="fas fa-crown podium-cup" style="color: #fbbf24"></i>
+                        <span class="podium-count">${top1.migrados}</span>
+                        <span class="podium-label">LÍDER</span>
+                    </div>
+                    <div class="podium-metrics-card" style="background: rgba(34,211,238,0.08); border-color: rgba(34,211,238,0.2);">
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top1.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top1.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top1.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top1.erroresMigracion}</span></div>
+                    </div>
+                </div>
+                
+                <div class="podium-place third">
+                    <div class="podium-name" title="${top3.nombre}">${formatearNombreCorto(top3.nombre)}</div>
+                    <div class="podium-column">
+                        <i class="fas fa-medal podium-cup" style="color: #ed8936"></i>
+                        <span class="podium-count">${top3.migrados}</span>
+                        <span class="podium-label">MIGRADOS</span>
+                    </div>
+                    <div class="podium-metrics-card">
+                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#c084fc"></i>RUA:</span><span class="badge-rua">${top3.rua}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#f87171"></i>Falta:</span><span class="badge-falta">${top3.faltaSiche}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#fbbf24"></i>Pend:</span><span class="badge-proc">${top3.porProcesar}</span></div>
+                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#f87171"></i>Err:</span><span class="badge-err">${top3.erroresMigracion}</span></div>
+                    </div>
+                </div>
+            `;
+
+            if(extendedWrapper) {
+                extendedWrapper.innerHTML = "";
+                
+                ranking.forEach((p, index) => {
+                    let posClass = "";
+                    let posLabel = `${index + 1}°`;
+                    
+                    if(index === 0) { posClass = "gold"; }
+                    else if(index === 1) { posClass = "silver"; }
+                    else if(index === 2) { posClass = "bronze"; }
+
+                    extendedWrapper.innerHTML += `
+                        <div class="extended-row">
+                            <div class="extended-top-info">
+                                <div class="extended-left">
+                                    <span class="extended-pos ${posClass}">${posLabel}</span>
+                                    <span class="extended-name" title="${p.nombre}">${formatearNombreCorto(p.nombre)}</span>
+                                </div>
+                                <span class="extended-total-badge">Total RUA: ${p.rua}</span>
+                            </div>
+                            <div class="extended-grid-metrics">
+                                <div class="metric-box"><span>Migrado</span><b class="badge-mig">${p.migrados}</b></div>
+                                <div class="metric-box"><span>Falta</span><b class="badge-falta">${p.faltaSiche}</b></div>
+                                <div class="metric-box"><span>Pendiente</span><b class="badge-proc">${p.porProcesar}</b></div>
+                                <div class="metric-box"><span>Error</span><b class="badge-err">${p.erroresMigracion}</b></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        async function exportarFaltantesAExcel() {
+            const desde = document.getElementById('filtro-desde').value;
+            const hasta = document.getElementById('filtro-hasta').value;
+            
+            if(!desde || !hasta) {
+                alert("Seleccione las fechas para exportar.");
+                return;
+            }
+            
+            alert("Compilando reporte CSV de atenciones faltantes...");
+            
+            try {
+                const url = URL_ATENCION_SICHE + "?action=exportarFaltantes&desde=" + desde + "&hasta=" + hasta;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data || data.length === 0) {
+                    alert("¡Felicidades! 100% de coberturas cuadradas con éxito.");
+                    return;
+                }
+
+                let csvContent = "\uFEFF"; 
+                csvContent += "Fecha de Atención,DNI Paciente Rezagado,Personal de Salud\n";
+                
+                data.forEach(item => {
+                    csvContent += '"' + item.fecha + '","' + item.dni + '","' + item.personal + '"\n';
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const urlBlob = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", urlBlob);
+                link.setAttribute("download", "Faltantes_SICHE_" + desde + "_" + hasta + ".csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (e) {
+                alert("Error de respuesta de red.");
+            }
+        }
+    </script>
 </body>
 </html>
