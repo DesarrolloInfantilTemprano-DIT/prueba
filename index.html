@@ -166,6 +166,50 @@
         </div>
       </div>
 
+      <!-- MÓDULO DE MONITOREO ESPECIAL -->
+      <div class="bg-amber-50/80 p-3 rounded-lg border border-amber-200 space-y-2">
+        <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs uppercase border-b border-amber-200 pb-1">
+          <i data-lucide="activity" class="w-4 h-4 text-amber-600"></i>
+          <span>Módulo de Monitoreo</span>
+        </div>
+        
+        <div>
+          <label for="f_tipo_monitoreo" class="block text-[10px] font-bold text-amber-800 uppercase mb-0.5">Tipo de Consulta:</label>
+          <select id="f_tipo_monitoreo" onchange="cambiarTipoMonitoreo()" class="w-full px-2 py-1.5 border border-amber-300 rounded text-xs font-bold text-slate-700 bg-white outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="">-- Sin Monitoreo Activo --</option>
+            <option value="InaCRED">Inasistente CRED (InaCRED)</option>
+            <option value="InaAnemia">Inasistente Anemia (InaAnemia)</option>
+            <option value="InaVAC">Vacunas Pendientes (InaVAC)</option>
+            <option value="Gestante">Gestantes (FPP)</option>
+            <option value="AnemiaInfantil">Niños Anémicos (+7 meses Alta)</option>
+            <option value="PAT">Pacientes TBC (PAT)</option>
+            <option value="HTA">Hipertensos (HTA)</option>
+            <option value="DM">Diabéticos (DM)</option>
+          </select>
+        </div>
+
+        <!-- BUSCADOR / SUBFILTRO ESPECÍFICO PARA VACUNAS PENDIENTES (InaVAC) -->
+        <div id="contenedorFiltroVacuna" class="hidden">
+          <label for="f_nombre_vacuna" class="block text-[10px] font-bold text-amber-800 uppercase mb-0.5">Vacuna Pendiente Deseada:</label>
+          <input type="text" id="f_nombre_vacuna" placeholder="Ej: Pentavalente, Neumococo..." oninput="aplicarFiltros()" class="w-full px-2 py-1 border border-amber-300 rounded text-xs outline-none bg-white font-semibold">
+        </div>
+
+        <!-- RANGO DE FECHAS PARA EL MONITOREO -->
+        <div id="contenedorFechasMonitoreo" class="hidden space-y-1 pt-1">
+          <span class="block text-[10px] font-bold text-amber-800 uppercase">Rango de Fechas Monitoreo:</span>
+          <div class="grid grid-cols-2 gap-1.5">
+            <div>
+              <span class="text-[9px] text-slate-500 block">Desde:</span>
+              <input type="date" id="f_mon_desde" onchange="aplicarFiltros()" class="w-full px-1.5 py-1 border border-amber-300 rounded text-[11px] bg-white outline-none">
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-500 block">Hasta:</span>
+              <input type="date" id="f_mon_hasta" onchange="aplicarFiltros()" class="w-full px-1.5 py-1 border border-amber-300 rounded text-[11px] bg-white outline-none">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- FILTRO FICHA FAMILIAR -->
       <div>
         <label for="f_ffamiliar" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ficha Familiar</label>
@@ -305,7 +349,10 @@
     lucide.createIcons();
 
     const URL_CENSO = "https://script.google.com/macros/s/AKfycbz-PaNW15W43wBS8AmlEHfFe4QrUnITK-8yEnvwoGUnpw7PdbpNvJhPCc4q5qDs8c3WWg/exec";
+    const URL_MONITOREO = "https://script.google.com/macros/s/AKfycbyXroqRmutduY3ytB_4ZuhPo2RgAzD4x0AS53KfnGX8EVYVUyjJrZbNNiZif7-hkkCxGA/exec";
+    
     let baseDatos = [];
+    let baseMonitoreo = {}; // Almacena datos por hoja e.g. { InaCRED: { '70000000': { fecha: '...' } } }
     let map = null;
     let markersLayer = L.layerGroup();
     let drawnItems = new L.FeatureGroup();
@@ -330,7 +377,6 @@
       setTimeout(() => { if (map) map.invalidateSize(); }, 300);
     }
 
-    // Inicializar Modal de Sectores con Checkboxes
     function initModalSectores() {
       const datalist = document.getElementById('listaSectores');
       const opciones = Array.from(datalist.options).map(opt => opt.value);
@@ -412,7 +458,59 @@
       aplicarFiltros();
     }
 
-    // Filtro por Grupo Etario al presionar tarjetas de estadística
+    function cambiarTipoMonitoreo() {
+      const tipo = document.getElementById('f_tipo_monitoreo').value;
+      const contVacuna = document.getElementById('contenedorFiltroVacuna');
+      const contFechas = document.getElementById('contenedorFechasMonitoreo');
+
+      if (tipo === "InaVAC") {
+        contVacuna.classList.remove('hidden');
+      } else {
+        contVacuna.classList.add('hidden');
+      }
+
+      if (tipo !== "") {
+        contFechas.classList.remove('hidden');
+        cargarMonitoreoHoja(tipo);
+      } else {
+        contFechas.classList.add('hidden');
+        aplicarFiltros();
+      }
+    }
+
+    async function cargarMonitoreoHoja(hojaNombre) {
+      if (baseMonitoreo[hojaNombre]) {
+        aplicarFiltros();
+        return;
+      }
+      document.getElementById('badgeConteo').textContent = `Cargando ${hojaNombre}...`;
+      try {
+        const response = await fetch(`${URL_MONITOREO}?action=obtenerMonitoreo&hoja=${encodeURIComponent(hojaNombre)}`);
+        const result = await response.json();
+
+        if (result && result.status === "ok") {
+          baseMonitoreo[hojaNombre] = {};
+          (result.data || []).forEach(row => {
+            const dniStr = row.dni ? row.dni.toString().trim() : "";
+            if (dniStr) {
+              baseMonitoreo[hojaNombre][dniStr] = {
+                valB: row.valB || "", // Fecha u otra información de col B
+                valC: row.valC || ""
+              };
+            }
+          });
+          aplicarFiltros();
+        } else {
+          baseMonitoreo[hojaNombre] = {};
+          aplicarFiltros();
+        }
+      } catch (e) {
+        console.error(`Error al cargar monitoreo ${hojaNombre}:`, e);
+        baseMonitoreo[hojaNombre] = {};
+        aplicarFiltros();
+      }
+    }
+
     function toggleFiltroEtario(grupo) {
       const botones = ['ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'];
       
@@ -434,7 +532,6 @@
       aplicarFiltros();
     }
 
-    // Inicializar Mapa
     function initMap() {
       map = L.map('map').setView([-9.288639, -76.008830], 14);
 
@@ -489,7 +586,6 @@
         aplicarFiltros();
       });
 
-      // En dispositivos móviles inicia con el panel cerrado para dar visibilidad al mapa
       if (window.innerWidth < 768) {
         document.getElementById('panelFiltros').classList.add('hidden');
         document.getElementById('btnAbrirPanelFlotante').classList.remove('hidden');
@@ -560,6 +656,16 @@
       return `${edad} años`;
     }
 
+    function sumarMesesAFecha(strFecha, mesesASumar = 7) {
+      const d = parseFechaPeruana(strFecha);
+      if (!d) return strFecha || '-';
+      d.setMonth(d.getMonth() + mesesASumar);
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const anio = d.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    }
+
     function actualizarInfoEdad() {
       const fnDesdeStr = document.getElementById('f_fn_desde').value;
       const fnHastaStr = document.getElementById('f_fn_hasta').value;
@@ -615,9 +721,44 @@
       const dateDesde = fnDesdeStr ? new Date(fnDesdeStr) : null;
       const dateHasta = fnHastaStr ? new Date(fnHastaStr) : null;
 
+      // Filtros de Monitoreo
+      const tipoMon = document.getElementById('f_tipo_monitoreo').value;
+      const nombreVacuna = document.getElementById('f_nombre_vacuna').value.trim().toLowerCase();
+      const monDesdeStr = document.getElementById('f_mon_desde').value;
+      const monHastaStr = document.getElementById('f_mon_hasta').value;
+
+      const dateMonDesde = monDesdeStr ? new Date(monDesdeStr) : null;
+      const dateMonHasta = monHastaStr ? new Date(monHastaStr) : null;
+
       markersLayer.clearLayers();
 
       const filtrados = baseDatos.filter(item => {
+        const itemDni = item.dni ? item.dni.toString().trim() : "";
+
+        // Filtro estricto por Módulo de Monitoreo
+        if (tipoMon) {
+          const datosHoja = baseMonitoreo[tipoMon];
+          if (!datosHoja || !datosHoja[itemDni]) return false;
+
+          const regMon = datosHoja[itemDni];
+
+          // Subfiltro de Vacuna Pendiente
+          if (tipoMon === "InaVAC" && nombreVacuna) {
+            if (!regMon.valB || !regMon.valB.toLowerCase().includes(nombreVacuna)) return false;
+          }
+
+          // Subfiltro por Rango de Fechas del Monitoreo
+          if (dateMonDesde || dateMonHasta) {
+            let fechaMonStr = regMon.valB;
+            // Para AnemiaInfantil se evalúa sobre la fecha de Alta calculada (+7 meses) o la fecha inicio
+            const fechaMonObj = parseFechaPeruana(fechaMonStr);
+            if (!fechaMonObj) return false;
+
+            if (dateMonDesde && fechaMonObj < dateMonDesde) return false;
+            if (dateMonHasta && fechaMonObj > dateMonHasta) return false;
+          }
+        }
+
         if (ffamiliar && (!item.ffamiliar || !item.ffamiliar.toString().toLowerCase().includes(ffamiliar))) return false;
         
         if (arraySectoresInput.length > 0) {
@@ -742,12 +883,30 @@
         grupo.integrantes.forEach(ing => {
           const edadTxt = obtenerTextoEdadDetallada(ing.fn);
           const tel = ing.telefono ? ing.telefono.toString().trim() : '';
+          const ingDni = ing.dni ? ing.dni.toString().trim() : '';
+
+          // Detalle extra de monitoreo
+          let htmlMonitoreoInfo = "";
+          if (tipoMon && baseMonitoreo[tipoMon] && baseMonitoreo[tipoMon][ingDni]) {
+            const regM = baseMonitoreo[tipoMon][ingDni];
+            if (tipoMon === "AnemiaInfantil") {
+              const fechaAlta = sumarMesesAFecha(regM.valB, 7);
+              htmlMonitoreoInfo = `<p class="text-[10px] bg-red-100 text-red-800 p-1 rounded font-bold mt-1">🔴 Anemia Inicio: ${regM.valB || '-'} | Alta (+7m): ${fechaAlta}</p>`;
+            } else if (tipoMon === "InaVAC") {
+              htmlMonitoreoInfo = `<p class="text-[10px] bg-amber-100 text-amber-900 p-1 rounded font-bold mt-1">💉 Vacuna Pendiente: ${regM.valB || '-'}</p>`;
+            } else if (tipoMon === "Gestante") {
+              htmlMonitoreoInfo = `<p class="text-[10px] bg-purple-100 text-purple-900 p-1 rounded font-bold mt-1">🤰 Gestante FPP: ${regM.valB || '-'}</p>`;
+            } else {
+              htmlMonitoreoInfo = `<p class="text-[10px] bg-amber-100 text-amber-900 p-1 rounded font-bold mt-1">⚠️ ${tipoMon}: ${regM.valB || 'Registrado'}</p>`;
+            }
+          }
 
           popupContent += `
             <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-[11px] space-y-1">
               <p class="font-bold text-blue-900 uppercase">${ing.nombreB || 'SIN NOMBRE'}</p>
               <p class="text-slate-600"><strong>DNI:</strong> ${ing.dni || '-'} | <strong>Edad:</strong> ${edadTxt}</p>
               <p class="text-slate-600"><strong>HC:</strong> ${ing.hclinica || '-'} | <strong>Tel:</strong> ${tel || '-'}</p>
+              ${htmlMonitoreoInfo}
           `;
 
           if (tel) {
@@ -825,6 +984,13 @@
     }
 
     function limpiarFiltros() {
+      document.getElementById('f_tipo_monitoreo').value = "";
+      document.getElementById('f_nombre_vacuna').value = "";
+      document.getElementById('f_mon_desde').value = "";
+      document.getElementById('f_mon_hasta').value = "";
+      document.getElementById('contenedorFiltroVacuna').classList.add('hidden');
+      document.getElementById('contenedorFechasMonitoreo').classList.add('hidden');
+
       document.getElementById('f_ffamiliar').value = "";
       document.getElementById('f_sector').value = "";
       sectoresSeleccionados.clear();
