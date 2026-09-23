@@ -1,1368 +1,828 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DIT | Desarrollo Infantil Temprano</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-light: #f4f8ff;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --primary-blue: #0284c7;
-            --mint-green: #10b981;
-            --pastel-pink: #f472b6;
-            --bright-yellow: #fbbf24;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --shadow-soft: 0 10px 30px rgba(14, 165, 233, 0.12);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fef3c7 100%);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            color: var(--text-main);
-        }
-
-        /* --- PANTALLA DE AUTENTICACIÓN --- */
-        #auth-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            display: flex;
-            background: #f8fafc;
-            transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1);
-        }
-
-        .auth-visual {
-            flex: 1;
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(168, 85, 247, 0.85)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 40px;
-            color: white;
-            position: relative;
-            overflow-y: auto;
-        }
-
-        .auth-form-panel {
-            width: 450px;
-            padding: 40px 35px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: #ffffff;
-            color: var(--text-main);
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
-            overflow-y: auto;
-            border-top-left-radius: 30px;
-            border-bottom-left-radius: 30px;
-        }
-
-        .form-box {
-            display: none;
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .form-box.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            margin-left: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 16px;
-            background: #f1f5f9;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            outline: none;
-            margin-bottom: 18px;
-            color: var(--text-main);
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        input:focus {
-            border-color: var(--primary-blue);
-            background: #fff;
-            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
-        }
-
-        input[type="date"] {
-            position: relative;
-            appearance: none;
-            -webkit-appearance: none;
-            min-height: 45px;
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            background: transparent;
-            bottom: 0;
-            color: transparent;
-            cursor: pointer;
-            height: auto;
-            left: 0;
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: auto;
-            z-index: 2;
-        }
-
-        .btn-main {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            color: white;
-            border: none;
-            border-radius: 16px;
-            font-size: 0.95rem;
-            font-weight: 800;
-            cursor: pointer;
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
-            transition: all 0.2s ease;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-main:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
-        }
-
-        .btn-main:active {
-            transform: translateY(1px);
-        }
-
-        .toggle-link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .toggle-link span {
-            color: var(--primary-blue);
-            cursor: pointer;
-            font-weight: 700;
-            text-decoration: underline;
-        }
-
-        /* --- BOTÓN AUDITORÍA --- */
-        .btn-toggle-auditoria {
-            background: rgba(255, 255, 255, 0.25);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: #fff;
-            padding: 12px 22px;
-            border-radius: 50px;
-            font-weight: 800;
-            cursor: pointer;
-            margin: 15px auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .btn-toggle-auditoria:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.03);
-        }
-
-        /* --- FILTRO POR RANGO DE FECHAS --- */
-        .filter-panel {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px dashed rgba(14, 165, 233, 0.3);
-            border-radius: 20px;
-            padding: 14px;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .filter-row {
-            display: flex;
-            gap: 10px;
-        }
-
-        .filter-group {
-            flex: 1;
-            position: relative;
-        }
-
-        .filter-group label {
-            color: var(--primary-blue);
-            font-size: 0.7rem;
-            margin-bottom: 4px;
-        }
-
-        .filter-group i.calendar-icon {
-            position: absolute;
-            right: 14px;
-            bottom: 14px;
-            color: var(--primary-blue);
-            pointer-events: none;
-            font-size: 0.95rem;
-            z-index: 1;
-        }
-
-        .filter-group input[type="date"] {
-            margin-bottom: 0;
-            padding: 10px 35px 10px 12px;
-            font-size: 0.8rem;
-            background: #fff;
-            border: 1px solid #cbd5e1;
-            color: var(--text-main);
-            border-radius: 12px;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-filter {
-            flex: 1;
-            padding: 12px;
-            font-size: 0.8rem;
-            font-weight: 800;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            color: #fff;
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
-            transition: all 0.2s;
-        }
-
-        .btn-filter:hover { transform: scale(1.02); }
-
-        .btn-export {
-            background: linear-gradient(135deg, #ec4899, #f472b6);
-            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.2);
-        }
-
-        /* --- PODIO AUDITORÍA --- */
-        .podium-section {
-            width: 100%;
-            max-width: 650px;
-            margin: 10px auto;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 24px;
-            border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15);
-            display: none;
-            flex-direction: column;
-            animation: fadeIn 0.4s ease-out;
-            color: var(--text-main);
-        }
-
-        .podium-title {
-            font-size: 0.95rem;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 18px;
-            color: var(--primary-blue);
-            font-weight: 800;
-        }
-
-        .podium-container {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 12px;
-            height: 155px;
-            margin-bottom: 10px;
-        }
-
-        .podium-place {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 32%;
-            text-align: center;
-            opacity: 0;
-            animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .podium-place.second { animation-delay: 0.15s; }
-        .podium-place.first { animation-delay: 0s; }
-        .podium-place.third { animation-delay: 0.3s; }
-
-        .podium-name {
-            font-size: 0.75rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            width: 100%;
-            color: var(--text-main);
-        }
-
-        .podium-column {
-            width: 100%;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 4px;
-            position: relative;
-        }
-
-        .podium-place.first .podium-column {
-            height: 95px;
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
-            color: #fff;
-        }
-
-        .podium-place.second .podium-column {
-            height: 75px;
-            background: linear-gradient(135deg, #38bdf8, #7dd3fc);
-            box-shadow: 0 8px 15px rgba(56, 189, 248, 0.3);
-            color: #fff;
-        }
-
-        .podium-place.third .podium-column {
-            height: 60px;
-            background: linear-gradient(135deg, #34d399, #6ee7b7);
-            box-shadow: 0 8px 15px rgba(52, 211, 153, 0.3);
-            color: #fff;
-        }
-
-        .podium-cup {
-            font-size: 1.4rem;
-            margin-bottom: 2px;
-        }
-
-        .podium-count {
-            font-size: 1.1rem;
-            font-weight: 900;
-        }
-
-        .podium-column span.podium-label {
-            font-size: 0.55rem;
-            text-transform: uppercase;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-        }
-
-        .podium-metrics-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 6px 8px;
-            width: 100%;
-            margin-top: 8px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            text-align: left;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        }
-
-        .metric-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            border-bottom: 1px dashed #f1f5f9;
-            padding-bottom: 2px;
-        }
-        .metric-line:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .podium-extended-list {
-            width: 100%;
-            max-height: 180px;
-            overflow-y: auto;
-            margin-top: 15px;
-            padding-right: 5px;
-            border-top: 1px dashed #e2e8f0;
-        }
-
-        .extended-row {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            padding: 10px 8px;
-            background: #fff;
-            border-radius: 12px;
-            margin-top: 8px;
-            border: 1px solid #e2e8f0;
-        }
-        .extended-top-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .extended-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            overflow: hidden;
-            max-width: 70%;
-        }
-        .extended-pos {
-            font-weight: 900;
-            font-size: 0.8rem;
-            background: #f1f5f9;
-            padding: 2px 7px;
-            border-radius: 8px;
-            color: var(--primary-blue);
-        }
-        .extended-pos.gold { background: #f59e0b; color: #fff; }
-        .extended-pos.silver { background: #38bdf8; color: #fff; }
-        .extended-pos.bronze { background: #34d399; color: #fff; }
-
-        .extended-name {
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: var(--text-main);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .extended-total-badge {
-            font-size: 0.75rem;
-            font-weight: 800;
-            background: #e0f2fe;
-            color: #0284c7;
-            padding: 2px 8px;
-            border-radius: 20px;
-        }
-        .extended-grid-metrics {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            background: #f8fafc;
-            padding: 6px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.65rem;
-        }
-        .metric-box { display: flex; flex-direction: column; gap: 2px; }
-        .metric-box span { color: #64748b; font-weight: 600; font-size: 0.58rem; text-transform: uppercase;}
-
-        .badge-err { color: #ef4444; font-weight: 800; }
-        .badge-mig { color: #10b981; font-weight: 800; }
-        .badge-rua { color: #8b5cf6; font-weight: 800; }
-        .badge-falta { color: #f43f5e; font-weight: 800; }
-        .badge-proc { color: #f59e0b; font-weight: 800; }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- INTERFAZ PRINCIPAL ALEGRE Y MODERNA --- */
-        #main-app {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            width: 100%;
-        }
-
-        .header-clean {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 30px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            z-index: 10;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-        }
-
-        .user-pill {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f0f9ff;
-            padding: 6px 14px;
-            border-radius: 50px;
-            border: 1px solid #bae6fd;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0284c7, #38bdf8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-btn {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            color: var(--text-main);
-            font-size: 0.8rem;
-            padding: 9px 16px;
-            border-radius: 14px;
-            cursor: pointer;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.25s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-
-        .action-btn:hover {
-            background: #f8fafc;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-
-        .action-btn-danger {
-            background: #fef2f2;
-            border-color: #fecaca;
-            color: #ef4444;
-        }
-
-        .action-btn-danger:hover {
-            background: #ef4444;
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-
-        .main-viewport {
-            flex: 1;
-            position: relative;
-            background: transparent;
-            overflow-y: auto;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: none;
-        }
-
-        /* --- BOTÓN FLOTANTE REGRESAR AL INICIO --- */
-        #btn-back-home {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 100;
-            background: #ffffff;
-            border: 2px solid var(--primary-blue);
-            color: var(--primary-blue);
-            padding: 10px 22px;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 0.85rem;
-            cursor: pointer;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.2);
-            display: none;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        #btn-back-home:hover {
-            background: var(--primary-blue);
-            color: #ffffff;
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 12px 30px rgba(2, 132, 199, 0.35);
-        }
-
-        /* --- DASHBOARD DE TARJETAS MODULARES ALEGRES --- */
-        #modules-dashboard {
-            padding: 35px 25px 50px;
-            max-width: 1250px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 22px;
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .module-card {
-            background: var(--card-bg);
-            border: 2px solid #ffffff;
-            border-radius: 28px;
-            padding: 28px 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(16px);
-            position: relative;
-            overflow: hidden;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .module-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            background: #ffffff;
-            box-shadow: 0 20px 35px rgba(14, 165, 233, 0.2);
-        }
-
-        .module-card .icon-box {
-            width: 70px;
-            height: 70px;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 18px;
-            font-size: 1.8rem;
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
-        }
-
-        .module-card:hover .icon-box {
-            transform: scale(1.15) rotate(-4deg);
-            color: #ffffff !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .module-card h3 {
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: var(--text-main);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        /* TARJETAS CON PALETA ALEGRE PASTEL */
-        .module-card:nth-child(1) .icon-box { background: #e0f2fe; color: #0284c7; }
-        .module-card:nth-child(2) .icon-box { background: #dcfce7; color: #16a34a; }
-        .module-card:nth-child(3) .icon-box { background: #fef3c7; color: #d97706; }
-        .module-card:nth-child(4) .icon-box { background: #f3e8ff; color: #9333ea; }
-        .module-card:nth-child(5) .icon-box { background: #ffe4e6; color: #e11d48; }
-        .module-card:nth-child(6) .icon-box { background: #ccfbf1; color: #0d9488; }
-        .module-card:nth-child(7) .icon-box { background: #ffedd5; color: #ea580c; }
-        .module-card:nth-child(8) .icon-box { background: #fae8ff; color: #c084fc; }
-        .module-card:nth-child(9) .icon-box { background: #e0e7ff; color: #4f46e5; }
-        .module-card:nth-child(10) .icon-box { background: #ecfdf5; color: #059669; }
-        .module-card:nth-child(11) .icon-box { background: #fef2f2; color: #dc2626; }
-        .module-card:nth-child(12) .icon-box { background: #f0fdf4; color: #16a34a; }
-
-        .module-card:nth-child(1):hover .icon-box { background: linear-gradient(135deg, #38bdf8, #0284c7); }
-        .module-card:nth-child(2):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
-        .module-card:nth-child(3):hover .icon-box { background: linear-gradient(135deg, #fbbf24, #d97706); }
-        .module-card:nth-child(4):hover .icon-box { background: linear-gradient(135deg, #c084fc, #9333ea); }
-        .module-card:nth-child(5):hover .icon-box { background: linear-gradient(135deg, #fb7185, #e11d48); }
-        .module-card:nth-child(6):hover .icon-box { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
-        .module-card:nth-child(7):hover .icon-box { background: linear-gradient(135deg, #fb923c, #ea580c); }
-        .module-card:nth-child(8):hover .icon-box { background: linear-gradient(135deg, #e879f9, #c084fc); }
-        .module-card:nth-child(9):hover .icon-box { background: linear-gradient(135deg, #818cf8, #4f46e5); }
-        .module-card:nth-child(10):hover .icon-box { background: linear-gradient(135deg, #34d399, #059669); }
-        .module-card:nth-child(11):hover .icon-box { background: linear-gradient(135deg, #f87171, #dc2626); }
-        .module-card:nth-child(12):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
-
-        #modal-pw {
-            position: fixed;
-            inset: 0;
-            background: rgba(30, 41, 59, 0.4);
-            z-index: 3000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(8px);
-            display: none;
-        }
-        .modal-card {
-            background: #fff;
-            padding: 35px;
-            border-radius: 28px;
-            width: 90%;
-            max-width: 400px;
-            color: var(--text-main);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-        }
-
-        @media (max-width: 768px) {
-            #auth-screen { flex-direction: column; overflow-y: auto; }
-            .auth-visual { flex: none; padding: 25px 20px; text-align: center; gap: 15px; }
-            .auth-visual h1 { font-size: 1.8rem !important; }
-            .auth-form-panel { width: 100%; padding: 30px 20px; box-shadow: none; border-radius: 0; }
-            .header-clean { padding: 12px 16px; }
-            #modules-dashboard { padding: 20px 12px 40px; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-            .module-card { padding: 20px 10px; border-radius: 20px; }
-            .module-card .icon-box { width: 55px; height: 55px; font-size: 1.3rem; margin-bottom: 12px; }
-            .module-card h3 { font-size: 0.78rem; }
-            #btn-back-home { top: 12px; left: 12px; padding: 8px 16px; font-size: 0.75rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIGIS_FED - Mapa Georreferenciado</title>
+  
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet Draw (Trazar líneas / Polígonos de búsqueda) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+  <style>
+    #map { height: calc(100vh - 60px); width: 100%; z-index: 1; }
+    .loader {
+      border-top-color: #2563eb;
+      animation: spinner 0.6s linear infinite;
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .custom-popup .leaflet-popup-content-wrapper {
+      padding: 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .custom-popup .leaflet-popup-content {
+      margin: 0;
+      width: 280px !important;
+    }
+    .draw-tooltip {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #3b82f6;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 11px;
+      border-radius: 6px;
+      padding: 4px 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    .draw-tooltip::before {
+      border-top-color: rgba(15, 23, 42, 0.9);
+    }
+  </style>
 </head>
-<body>
+<body class="bg-slate-100 font-sans text-slate-800 h-screen overflow-hidden flex flex-col">
 
-    <!-- PANTALLA DE AUTENTICACIÓN -->
-    <div id="auth-screen">
-        <div class="auth-visual">
-            <div>
-                <h1 style="font-size: 2.6rem; font-weight:900; text-shadow: 0 4px 10px rgba(0,0,0,0.15);">Desarrollo Infantil Temprano <b style="color:var(--bright-yellow)">DIT</b></h1>
-                <p style="opacity: 0.95; margin-top: 5px; font-weight: 700; letter-spacing: 0.5px;">☀️ Plataforma de Monitoreo Integral Infantil</p>
-            </div>
-            
-            <button class="btn-toggle-auditoria" onclick="toggleAuditoria()">
-                <i class="fas fa-star" style="color:var(--bright-yellow)"></i> 
-                <span>VER AUDITORÍA CRUZADA: SICHE VS RUA</span>
-                <i class="fas fa-chevron-down" id="auditoria-arrow"></i>
-            </button>
+  <!-- DATALIST GLOBAL DE SECTORES RESTRINGIDOS -->
+  <datalist id="listaSectores">
+    <option value="933-AA.VV. 25 DE ENERO"></option>
+    <option value="933-AA.VV. CARMEN GARAY"></option>
+    <option value="933-AA.VV. FUNDO NUEVA ESPERANZA"></option>
+    <option value="933-AA.VV. LOS LAURELES"></option>
+    <option value="933-AA.VV. PUEBLO LIBRE"></option>
+    <option value="933-AA.VV.01 DE MAYO"></option>
+    <option value="933-AA.VV.01 DE SETIEMBRE"></option>
+    <option value="933-AA.VV.07 DE MAYO"></option>
+    <option value="933-AA.VV.09 DE AGOSTO"></option>
+    <option value="933-AA.VV.15 DE AGOSTO"></option>
+    <option value="933-AA.VV.CESAR VALLEJO"></option>
+    <option value="933-AA.VV.CIUDAD COLINA"></option>
+    <option value="933-AA.VV.COLONIA TINGALESA"></option>
+    <option value="933-AA.VV.EDUARDO VILLASANTE"></option>
+    <option value="933-AA.VV.JOSE CARLOS MARIATEGUI"></option>
+    <option value="933-AA.VV.JOSE OLAYA BALANDRA"></option>
+    <option value="933-AA.VV.JUAN PICON QUEDO"></option>
+    <option value="933-AA.VV.JULIO MARTINEZ"></option>
+    <option value="933-AA.VV.LAS ALMENDRAS"></option>
+    <option value="933-AA.VV.LAS AMAZONAS"></option>
+    <option value="933-AA.VV.LAS PALMERAS"></option>
+    <option value="933-AA.VV.LOS ANGELES"></option>
+    <option value="933-AA.VV.LOS JARDINES"></option>
+    <option value="933-AA.VV.LOS PINOS"></option>
+    <option value="933-AA.VV.MARIA PARADO DE BELLIDO"></option>
+    <option value="933-AA.VV.MONTERRICO"></option>
+    <option value="933-AA.VV.NUEVA ESPERANZA"></option>
+    <option value="933-AA.VV.NUEVA JERUSALEN"></option>
+    <option value="933-AA.VV.NUEV AMANECER"></option>
+    <option value="933-AA.VV.PADRES DE FAMILIA"></option>
+    <option value="933-AA.VV.PANTOJA"></option>
+    <option value="933-AA.VV.PEDREGAL"></option>
+    <option value="933-AA.VV.POBLADORES DE CASTILLO GRANDE"></option>
+    <option value="933-AA.VV.SAN CARLOS"></option>
+    <option value="933-AA.VV.SAN ISIDRO"></option>
+    <option value="933-AA.VV.SAN MIGUEL"></option>
+    <option value="933-AA.VV.SANTA ROSA"></option>
+    <option value="933-SOL NACIENTE"></option>
+    <option value="933-COMUNIDAD ASERRADERO"></option>
+    <option value="933-COMUNIDAD CAPITAN SOTO"></option>
+    <option value="933-COMUNIDAD HUANGANAPAMPA"></option>
+    <option value="933-COMUNIDAD HUAYNACAPAC"></option>
+    <option value="933-COMUNIDAD JACINTILLO"></option>
+    <option value="933-COMUNIDAD LA CURVA"></option>
+    <option value="933-COMUNIDAD LA FLORIDA"></option>
+    <option value="933-COMUNIDAD MANCO CAPAC"></option>
+    <option value="933-COMUNIDAD MANTARO"></option>
+    <option value="933-COMUNIDAD MERCED DE LOCRO"></option>
+    <option value="933-COMUNIDAD MOYANO"></option>
+    <option value="933-COMUNIDAD NUEVA ALTURA"></option>
+    <option value="933-COMUNIDAD PACHACUTEC"></option>
+    <option value="933-COMUNIDAD PAPAYAL"></option>
+    <option value="933-COMUNIDAD PICUROYACU"></option>
+    <option value="933-COMUNIDAD SANTA ROSA DE CASTILLA"></option>
+    <option value="933-COMUNIDAD SHAMIRO"></option>
+    <option value="933-COMUNIDAD SINCHI ROCCA"></option>
+    <option value="933-COMUNIDAD VENADO PAMPA"></option>
+    <option value="933-COMUNIDAD YURIMAGUAS"></option>
+    <option value="933-SIN SECTOR"></option>
+  </datalist>
 
-            <div class="podium-section" id="podium-section">
-                <div class="podium-title"><i class="fas fa-star" style="color:var(--bright-yellow)"></i> Auditoría Cruzada: SICHE vs RUA</div>
-                
-                <div class="filter-panel">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label>Desde:</label>
-                            <input type="date" id="filtro-desde">
-                            <i class="fas fa-calendar-alt calendar-icon"></i>
-                        </div>
-                        <div class="filter-group">
-                            <label>Hasta:</label>
-                            <input type="date" id="filtro-hasta">
-                            <i class="fas fa-calendar-alt calendar-icon"></i>
-                        </div>
-                    </div>
-                    <div class="filter-buttons">
-                        <button class="btn-filter" onclick="ejecutarConsultaEstadistica()"><i class="fas fa-magic"></i> Consultar Fechas</button>
-                        <button class="btn-filter btn-export" onclick="exportarFaltantesAExcel()"><i class="fas fa-cloud-download-alt"></i> Exportar Faltantes</button>
-                    </div>
-                </div>
-
-                <div class="podium-container" id="login-podium">
-                    <div style="font-size:0.8rem; color:var(--text-muted); margin: auto; text-align: center;">
-                        <i class="fas fa-wand-magic-sparkles" style="color: var(--primary-blue); font-size: 1.5rem; margin-bottom: 8px; display: block;"></i> 
-                        Elige un rango de fechas para desplegar la auditoría interactiva.
-                    </div>
-                </div>
-                <div class="podium-extended-list" id="podium-extended-list"></div>
-            </div>
-            <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 700;"><i class="fas fa-shield-cat"></i> Red Nacional de Salud - MINSA 2026</div>
-        </div>
-        
-        <div class="auth-form-panel">
-            <div id="login-box" class="form-box active">
-                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a; font-size: 1.6rem;">¡Hola, Profesional! 👋</h2>
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 25px;">Ingresa tus credenciales autorizadas para continuar.</p>
-                
-                <label>DNI del Usuario</label>
-                <input type="text" id="l-dni" placeholder="Ingresa tu número de DNI" autocomplete="username">
-                
-                <label>Contraseña</label>
-                <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
-                
-                <button class="btn-main" onclick="handleLogin()">INGRESAR AL SISTEMA</button>
-                <div class="toggle-link">¿No tienes una cuenta activa? <span onclick="showBox('reg-check')">Regístrate aquí</span></div>
-            </div>
-
-            <div id="reg-check" class="form-box">
-                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a;">Validación de Personal</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px;">Validaremos si tu DNI figura pre-aprobado por la jefatura del establecimiento.</p>
-                
-                <label>Ingresa tu DNI</label>
-                <input type="text" id="r-dni-search" placeholder="Escribe aquí el DNI a evaluar">
-                
-                <button class="btn-main" onclick="checkAuthorizedDNI()">BUSCAR AUTORIZACIÓN</button>
-                <div class="toggle-link"><span onclick="showBox('login')">Volver al inicio de sesión</span></div>
-            </div>
-
-            <div id="reg-final" class="form-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 id="reg-greeting" style="color: var(--primary-blue); font-size: 1.1rem; font-weight: 800;"></h3>
-                    <button onclick="showBox('reg-check')" style="background: none; border: none; color: var(--primary-blue); font-size: 0.8rem; cursor: pointer; font-weight: 700;"><i class="fas fa-arrow-left"></i> VOLVER</button>
-                </div>
-                
-                <label>Nombres y Apellidos Completos</label>
-                <input type="text" id="r-name" placeholder="Cargando...">
-                
-                <label>Profesión / Especialidad</label>
-                <input type="text" id="r-prof" placeholder="Ej. Lic. en Enfermería">
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label>Número Celular</label>
-                        <input type="number" id="r-cel" placeholder="9 cifras" oninput="if(this.value.length > 9) this.value = this.value.slice(0,9);">
-                    </div>
-                    <div>
-                        <label>Región</label>
-                        <input type="text" id="r-reg" placeholder="Dpto">
-                    </div>
-                </div>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <label>Provincia</label>
-                        <input type="text" id="r-provaws" placeholder="Provincia">
-                    </div>
-                    <div>
-                        <label>Distrito</label>
-                        <input type="text" id="r-dist" placeholder="Distrito">
-                    </div>
-                </div>
-                
-                <label>Establecimiento de Salud (E.E.S.S.)</label>
-                <input type="text" id="r-eess" placeholder="Nombre de su IPRESS">
-                
-                <label>Defina su Nueva Contraseña</label>
-                <input type="password" id="r-new-pass" placeholder="Mínimo 4 caracteres">
-                
-                <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="activateAccount()">CONFIRMAR Y ACTIVAR CUENTA</button>
-            </div>
-            
-            <div id="auth-msg" style="margin-top: 20px; text-align: center; font-size: 0.85rem; display: none; padding: 14px; border-radius: 14px; font-weight: 700;"></div>
-        </div>
+  <!-- CABECERA -->
+  <header class="bg-blue-800 text-white shadow-md z-10 px-4 py-3 flex justify-between items-center h-[60px]">
+    <div class="flex items-center space-x-3">
+      <button onclick="togglePanelFiltros()" title="Mostrar/Ocultar Filtros" class="p-1.5 bg-blue-700 hover:bg-blue-600 rounded-lg transition text-white flex items-center justify-center">
+        <i data-lucide="panel-left-close" id="iconTogglePanel" class="w-5 h-5"></i>
+      </button>
+      <i data-lucide="map-pin" class="w-6 h-6 text-emerald-400"></i>
+      <div>
+        <h1 class="text-base font-bold leading-tight">SIGIS_FED - Mapa de Georreferenciación</h1>
+        <p class="text-[10px] text-blue-200">Monitoreo de Familias y Personas Georreferenciadas</p>
+      </div>
     </div>
+    <div class="flex items-center gap-3">
+      <span id="badgeConteo" class="bg-blue-900 text-emerald-300 text-xs px-3 py-1 rounded-full font-bold border border-emerald-500/30">
+        Cargando datos...
+      </span>
+      <button onclick="cargarBaseDatos()" title="Recargar Datos" class="p-1.5 bg-blue-700 hover:bg-blue-600 rounded-lg transition text-white">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
 
-    <!-- APLICACIÓN PRINCIPAL -->
-    <div id="main-app">
-        <!-- BOTÓN FLOTANTE REGRESAR -->
-        <button id="btn-back-home" onclick="showDashboard()">
-            <i class="fas fa-arrow-left"></i> REGRESAR AL INICIO
+  <!-- PANEL PRINCIPAL CONTENEDOR (FILTROS + MAPA) -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+    <!-- BOTÓN FLOTANTE PARA REABRIR PANEL CUANDO ESTÁ OCULTO -->
+    <button id="btnAbrirPanelFlotante" onclick="togglePanelFiltros()" class="hidden absolute top-3 left-3 z-30 bg-blue-800 text-white p-2 rounded-lg shadow-xl hover:bg-blue-700 transition flex items-center gap-1.5 text-xs font-bold border border-blue-600">
+      <i data-lucide="filter" class="w-4 h-4 text-emerald-400"></i>
+      <span>Filtros</span>
+    </button>
+
+    <!-- PANEL LATERAL DE FILTROS Y ESTADÍSTICAS -->
+    <aside id="panelFiltros" class="w-full md:w-80 bg-white border-r border-slate-200 shadow-lg p-4 overflow-y-auto space-y-4 z-20 max-h-[45vh] md:max-h-none transition-all duration-300 ease-in-out">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h2 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5">
+          <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i> Filtros de Búsqueda
+        </h2>
+        <div class="flex items-center gap-2">
+          <button onclick="limpiarFiltros()" class="text-[11px] text-blue-600 hover:underline font-semibold">
+            Limpiar Filtros
+          </button>
+          <button onclick="togglePanelFiltros()" title="Ocultar Panel" class="text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- FILTRO FICHA FAMILIAR -->
+      <div>
+        <label for="f_ffamiliar" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ficha Familiar</label>
+        <input type="text" id="f_ffamiliar" placeholder="Ej: 0001234" oninput="aplicarFiltros()"
+          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <!-- FILTRO SECTOR (MÚLTIPLE) -->
+      <div>
+        <label for="f_sector" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Sector(es) Múltiple</label>
+        <div class="relative">
+          <input type="text" id="f_sector" placeholder="TODOS LOS SECTORES..." readonly onclick="abrirModalSector()"
+            class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold uppercase focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer pr-8 truncate">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
+        </div>
+      </div>
+
+      <!-- FILTRO MANZANA (MZ) - COINCIDENCIA EXACTA Y MÚLTIPLE SEPARADA POR COMAS -->
+      <div>
+        <label for="f_mz" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Manzana (Mz) [Separar por comas]</label>
+        <input type="text" id="f_mz" placeholder="Ej: 5, 12, A" oninput="aplicarFiltros()"
+          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <!-- FILTRO DNI -->
+      <div>
+        <label for="f_dni" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">DNI</label>
+        <input type="text" id="f_dni" placeholder="Ej: 70000000" maxlength="8" oninput="aplicarFiltros()"
+          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <!-- FILTRO APELLIDOS Y NOMBRES -->
+      <div>
+        <label for="f_nombre" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Apellidos y Nombres</label>
+        <input type="text" id="f_nombre" placeholder="BUSCAR POR NOMBRE..." oninput="aplicarFiltros()"
+          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs uppercase focus:ring-2 focus:ring-blue-500 outline-none">
+      </div>
+
+      <!-- FILTRO RANGO DE FECHA DE NACIMIENTO CON MUESTRA DE EDADES CALCULADAS -->
+      <div class="bg-blue-50/70 p-3 rounded-lg border border-blue-100 space-y-2">
+        <div class="flex justify-between items-center">
+          <label class="block text-[11px] font-bold text-blue-900 uppercase">Rango Fecha Nacimiento</label>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-500 font-semibold block mb-0.5">Desde:</span>
+          <input type="date" id="f_fn_desde" onchange="actualizarInfoEdad(); aplicarFiltros();"
+            class="w-full px-2 py-1 border border-slate-300 rounded text-xs outline-none bg-white">
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-500 font-semibold block mb-0.5">Hasta:</span>
+          <input type="date" id="f_fn_hasta" onchange="actualizarInfoEdad(); aplicarFiltros();"
+            class="w-full px-2 py-1 border border-slate-300 rounded text-xs outline-none bg-white">
+        </div>
+
+        <div id="badgeEdadEquivalente" class="hidden mt-1.5 p-1.5 bg-blue-600 text-white text-[10px] rounded font-bold text-center flex items-center justify-center gap-1 shadow-sm">
+          <i data-lucide="user-check" class="w-3 h-3"></i>
+          <span id="textoEdadEquivalente">Rango: -</span>
+        </div>
+      </div>
+
+      <!-- PANEL DE ESTADÍSTICAS INTERACTIVO POR GRUPO ETARIO -->
+      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
+        <h3 class="text-xs font-bold text-slate-800 uppercase border-b pb-1 flex items-center justify-between">
+          <span>Estadística Demográfica</span>
+          <span id="stat_total" class="text-blue-700 font-extrabold text-[11px]">0 pers.</span>
+        </h3>
+        <p class="text-[10px] text-slate-500 font-medium">Haz clic en un grupo para ubicarlo en el mapa:</p>
+        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+          <button id="btn_etario_ninos" onclick="toggleFiltroEtario('ninos')" class="bg-emerald-50 border border-emerald-300 p-1.5 rounded flex justify-between items-center hover:bg-emerald-100 transition text-left cursor-pointer">
+            <span class="text-emerald-800 font-bold">Niños (&lt;12)</span>
+            <span id="stat_ninos" class="font-extrabold text-emerald-900">0</span>
+          </button>
+          <button id="btn_etario_adolescentes" onclick="toggleFiltroEtario('adolescentes')" class="bg-teal-50 border border-teal-300 p-1.5 rounded flex justify-between items-center hover:bg-teal-100 transition text-left cursor-pointer">
+            <span class="text-teal-800 font-bold">Adolesc. (12-17)</span>
+            <span id="stat_adolescentes" class="font-extrabold text-teal-900">0</span>
+          </button>
+          <button id="btn_etario_jovenes" onclick="toggleFiltroEtario('jovenes')" class="bg-blue-50 border border-blue-300 p-1.5 rounded flex justify-between items-center hover:bg-blue-100 transition text-left cursor-pointer">
+            <span class="text-blue-800 font-bold">Jóvenes (18-29)</span>
+            <span id="stat_jovenes" class="font-extrabold text-blue-900">0</span>
+          </button>
+          <button id="btn_etario_adultos" onclick="toggleFiltroEtario('adultos')" class="bg-indigo-50 border border-indigo-300 p-1.5 rounded flex justify-between items-center hover:bg-indigo-100 transition text-left cursor-pointer">
+            <span class="text-indigo-800 font-bold">Adultos (30-59)</span>
+            <span id="stat_adultos" class="font-extrabold text-indigo-900">0</span>
+          </button>
+          <button id="btn_etario_ancianos" onclick="toggleFiltroEtario('ancianos')" class="bg-purple-50 border border-purple-300 p-1.5 rounded flex justify-between items-center hover:bg-purple-100 transition text-left cursor-pointer col-span-2">
+            <span class="text-purple-800 font-bold">Ancianos (60+)</span>
+            <span id="stat_ancianos" class="font-extrabold text-purple-900">0</span>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAPA LEAFLET -->
+    <main class="flex-1 relative">
+      <div id="map"></div>
+    </main>
+  </div>
+
+  <!-- MODAL DE SELECCIÓN DE SECTORES MÚLTIPLES -->
+  <div id="modalSector" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="bg-blue-700 text-white p-3.5 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-5 h-5"></i>
+          <h3 class="font-bold text-sm">Seleccionar Sectores Registrados</h3>
+        </div>
+        <button onclick="cerrarModalSector()" class="hover:bg-blue-800 p-1 rounded transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
-
-        <!-- ENCABEZADO MODERNO Y CLARO -->
-        <header class="header-clean" id="app-header">
-            <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #0284c7, #38bdf8); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);">
-                    <i class="fas fa-child-reaching" style="color: #fff; font-size: 1.2rem;"></i>
-                </div>
-                <div>
-                    <h3 style="color: var(--text-main); font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">SISTEMA INTEGRADO DIT</h3>
-                    <p style="font-size: 0.72rem; color: var(--primary-blue); font-weight: 700;">Panel Principal de Monitoreo</p>
-                </div>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <div class="user-pill">
-                    <div class="user-avatar"><i class="fas fa-user-nurse"></i></div>
-                    <span id="user-display" style="font-size: 0.8rem; color: var(--text-main); font-weight: 800;"></span>
-                </div>
-                
-                <div class="header-actions">
-                    <button class="action-btn" onclick="document.getElementById('modal-pw').style.display='flex'">
-                        <i class="fas fa-key" style="color:var(--bright-yellow)"></i> LLAVE
-                    </button>
-                    <button class="action-btn action-btn-danger" onclick="logout()">
-                        <i class="fas fa-power-off"></i> SALIR
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- CONTENEDOR PRINCIPAL -->
-        <main class="main-viewport">
-            <!-- DASHBOARD DE TARJETAS MODULARES -->
-            <div id="modules-dashboard">
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/')">
-                    <div class="icon-box"><i class="fas fa-baby"></i></div>
-                    <h3>Censo DIT</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/')">
-                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-                    <h3>Citas CRED</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/')">
-                    <div class="icon-box"><i class="fas fa-calendar-plus"></i></div>
-                    <h3>Citas SATD</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/')">
-                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                    <h3>Reporte SATD</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Mapa/')">
-                    <div class="icon-box"><i class="fas fa-map-marked-alt"></i></div>
-                    <h3>Mapa DIT</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/')">
-                    <div class="icon-box"><i class="fas fa-bell"></i></div>
-                    <h3>Recordar Citados</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RegistroDiario/')">
-                    <div class="icon-box"><i class="fas fa-notes-medical"></i></div>
-                    <h3>Registro Atención</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/')">
-                    <div class="icon-box"><i class="fas fa-book-open"></i></div>
-                    <h3>Libreta CRED</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://confianzaseguridad772-max.github.io/Dosificador_Hierro/')">
-                    <div class="icon-box"><i class="fas fa-pills"></i></div>
-                    <h3>Dosificador</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/mapasector/')">
-                    <div class="icon-box"><i class="fas fa-map-pin"></i></div>
-                    <h3>Mapa Sector</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/sectorizar/')">
-                    <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
-                    <h3>Ficha Familiar</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/casita/')">
-                    <div class="icon-box"><i class="fas fa-house-user"></i></div>
-                    <h3>La Casita</h3>
-                </div>
-            </div>
-
-            <!-- VISOR IFRAME DE MÓDULOS -->
-            <iframe id="content-frame"></iframe>
-        </main>
+      </div>
+      <div class="p-3 border-b bg-slate-50 flex gap-2">
+        <input type="text" id="searchSectorInput" placeholder="ESCRIBA PARA BUSCAR SECTOR..." oninput="filtrarListaSectores()"
+          class="flex-1 px-3 py-2 border border-blue-400 rounded-lg text-xs uppercase font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
+        <button onclick="marcarTodosSectores(true)" class="px-2.5 py-1.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded hover:bg-blue-200">
+          MARCAR
+        </button>
+        <button onclick="marcarTodosSectores(false)" class="px-2.5 py-1.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded hover:bg-slate-300">
+          DESMARCAR
+        </button>
+      </div>
+      <div id="contenedorListaSectores" class="p-2 overflow-y-auto flex-1 divide-y divide-slate-100 space-y-1">
+        <!-- Checkboxes generados por JS -->
+      </div>
+      <div class="p-3 bg-slate-100 border-t flex justify-end gap-2">
+        <button onclick="seleccionarSectorTodos()" class="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-300">
+          TODOS
+        </button>
+        <button onclick="confirmarSectoresSeleccionados()" class="px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow">
+          ACEPTAR
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- MODAL LLAVE (CAMBIO DE CONTRASEÑA) -->
-    <div id="modal-pw">
-        <div class="modal-card">
-            <h3 style="margin-bottom: 15px; font-weight: 900; color: #0f172a; font-size: 1.2rem;">Cambiar Contraseña</h3>
-            <label>Contraseña Actual</label>
-            <input type="password" id="old-pw" placeholder="Escriba clave vigente">
-            <label>Nueva Contraseña</label>
-            <input type="password" id="new-pw" placeholder="Mínimo 4 caracteres">
-            <button class="btn-main" onclick="changePassword()">ACTUALIZAR CREDENCIAL</button>
-            <button class="btn-main" style="background: #e2e8f0; color: #475569; margin-top: 10px; font-weight: 700; box-shadow: none;" onclick="document.getElementById('modal-pw').style.display='none'">CANCELAR</button>
-        </div>
-    </div>
+  <script>
+    lucide.createIcons();
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2QKNMUiL-H8Z9CAtC1GvHj7OcbS4mG5yjcUwr6S1cL3B8DZ0-ZddSp2trQlAC6uyQ/exec";
-        const URL_ATENCION_SICHE = "https://script.google.com/macros/s/AKfycbyxsU7zLwpZVgcbb_b6HoGglYU2_QQsKfoP6netAos_r89minIBxWRGpKpNe28IlDDG/exec";
+    const URL_CENSO = "https://script.google.com/macros/s/AKfycbz-PaNW15W43wBS8AmlEHfFe4QrUnITK-8yEnvwoGUnpw7PdbpNvJhPCc4q5qDs8c3WWg/exec";
+    let baseDatos = [];
+    let map = null;
+    let markersLayer = L.layerGroup();
+    let drawnItems = new L.FeatureGroup();
+    let sectoresSeleccionados = new Set();
+    let filtroEtarioActivo = null; // 'ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'
 
-        let currentDNI = '';
-        let userDataCache = {};
+    function togglePanelFiltros() {
+      const panel = document.getElementById('panelFiltros');
+      const btnFlotante = document.getElementById('btnAbrirPanelFlotante');
+      const iconToggle = document.getElementById('iconTogglePanel');
 
-        function showBox(box) {
-            document.querySelectorAll('.form-box').forEach(b => b.classList.remove('active'));
-            document.getElementById(box === 'login' ? 'login-box' : box).classList.add('active');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        btnFlotante.classList.add('hidden');
+        if (iconToggle) iconToggle.setAttribute('data-lucide', 'panel-left-close');
+      } else {
+        panel.classList.add('hidden');
+        btnFlotante.classList.remove('hidden');
+        if (iconToggle) iconToggle.setAttribute('data-lucide', 'panel-left');
+      }
+      lucide.createIcons();
+      setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+    }
+
+    // Inicializar Modal de Sectores con Checkboxes
+    function initModalSectores() {
+      const datalist = document.getElementById('listaSectores');
+      const opciones = Array.from(datalist.options).map(opt => opt.value);
+      renderSectoresModal(opciones);
+    }
+
+    function renderSectoresModal(lista) {
+      const cont = document.getElementById('contenedorListaSectores');
+      cont.innerHTML = "";
+      if (lista.length === 0) {
+        cont.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 font-semibold">No se encontraron sectores</div>`;
+        return;
+      }
+      lista.forEach(sec => {
+        const isChecked = sectoresSeleccionados.has(sec);
+        const label = document.createElement('label');
+        label.className = "flex items-center gap-3 p-2 hover:bg-blue-50 cursor-pointer rounded transition text-xs font-bold text-slate-700 uppercase";
+        label.innerHTML = `
+          <input type="checkbox" value="${sec}" ${isChecked ? 'checked' : ''} onchange="toggleSectorCheckbox('${sec}', this.checked)" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+          <span class="flex-1">${sec}</span>
+        `;
+        cont.appendChild(label);
+      });
+    }
+
+    function toggleSectorCheckbox(sec, checked) {
+      if (checked) {
+        sectoresSeleccionados.add(sec);
+      } else {
+        sectoresSeleccionados.delete(sec);
+      }
+    }
+
+    function marcarTodosSectores(estado) {
+      const datalist = document.getElementById('listaSectores');
+      const opciones = Array.from(datalist.options).map(opt => opt.value);
+      if (estado) {
+        opciones.forEach(sec => sectoresSeleccionados.add(sec));
+      } else {
+        sectoresSeleccionados.clear();
+      }
+      filtrarListaSectores();
+    }
+
+    function filtrarListaSectores() {
+      const q = document.getElementById('searchSectorInput').value.trim().toLowerCase();
+      const datalist = document.getElementById('listaSectores');
+      const opciones = Array.from(datalist.options).map(opt => opt.value);
+      const filtradas = opciones.filter(opt => opt.toLowerCase().includes(q));
+      renderSectoresModal(filtradas);
+    }
+
+    function abrirModalSector() {
+      document.getElementById('modalSector').classList.remove('hidden');
+      document.getElementById('searchSectorInput').value = "";
+      filtrarListaSectores();
+      document.getElementById('searchSectorInput').focus();
+    }
+
+    function cerrarModalSector() {
+      document.getElementById('modalSector').classList.add('hidden');
+    }
+
+    function seleccionarSectorTodos() {
+      sectoresSeleccionados.clear();
+      document.getElementById('f_sector').value = "";
+      cerrarModalSector();
+      aplicarFiltros();
+    }
+
+    function confirmarSectoresSeleccionados() {
+      const arraySectores = Array.from(sectoresSeleccionados);
+      if (arraySectores.length === 0) {
+        document.getElementById('f_sector').value = "";
+      } else {
+        document.getElementById('f_sector').value = arraySectores.join(', ');
+      }
+      cerrarModalSector();
+      aplicarFiltros();
+    }
+
+    // Filtro por Grupo Etario al presionar tarjetas de estadística
+    function toggleFiltroEtario(grupo) {
+      const botones = ['ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'];
+      
+      if (filtroEtarioActivo === grupo) {
+        filtroEtarioActivo = null;
+      } else {
+        filtroEtarioActivo = grupo;
+      }
+
+      botones.forEach(b => {
+        const btn = document.getElementById(`btn_etario_${b}`);
+        if (b === filtroEtarioActivo) {
+          btn.classList.add('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
+        } else {
+          btn.classList.remove('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
+        }
+      });
+
+      aplicarFiltros();
+    }
+
+    // Inicializar Mapa
+    function initMap() {
+      map = L.map('map').setView([-9.288639, -76.008830], 14);
+
+      const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: '&copy; Google Maps'
+      });
+
+      const callejero = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      });
+
+      googleHybrid.addTo(map);
+
+      const baseMaps = {
+        "Satelital HD (Google Earth)": googleHybrid,
+        "Callejero": callejero
+      };
+
+      L.control.layers(baseMaps).addTo(map);
+      markersLayer.addTo(map);
+      map.addLayer(drawnItems);
+
+      const drawControl = new L.Control.Draw({
+        draw: {
+          polygon: true,
+          rectangle: true,
+          circle: true,
+          polyline: false,
+          marker: false,
+          circlemarker: false
+        },
+        edit: {
+          featureGroup: drawnItems,
+          remove: true
+        }
+      });
+      map.addControl(drawControl);
+
+      map.on(L.Draw.Event.CREATED, function (e) {
+        drawnItems.clearLayers();
+        drawnItems.addLayer(e.layer);
+        aplicarFiltros();
+      });
+
+      map.on(L.Draw.Event.EDITED, function () {
+        aplicarFiltros();
+      });
+
+      map.on(L.Draw.Event.DELETED, function () {
+        aplicarFiltros();
+      });
+
+      initModalSectores();
+      cargarBaseDatos();
+    }
+
+    async function cargarBaseDatos() {
+      document.getElementById('badgeConteo').textContent = "Cargando...";
+      try {
+        const response = await fetch(`${URL_CENSO}?action=obtenerTodosMapas`);
+        const result = await response.json();
+
+        if (result && result.status === "ok") {
+          baseDatos = result.data || [];
+          aplicarFiltros();
+        } else {
+          document.getElementById('badgeConteo').textContent = "0 Registros";
+        }
+      } catch (error) {
+        console.error("Error al cargar mapa:", error);
+        document.getElementById('badgeConteo').textContent = "Error de conexión";
+      }
+    }
+
+    function parseFechaPeruana(strFecha) {
+      if (!strFecha) return null;
+      if (strFecha.includes('-')) {
+        const partes = strFecha.split('-');
+        if (partes[0].length === 4) return new Date(strFecha);
+      }
+      const partes = strFecha.split('/');
+      if (partes.length === 3) {
+        return new Date(partes[2], partes[1] - 1, partes[0]);
+      }
+      return null;
+    }
+
+    function calcularEdad(strFecha) {
+      const fn = parseFechaPeruana(strFecha);
+      if (!fn || isNaN(fn.getTime())) return null;
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - fn.getFullYear();
+      const m = hoy.getMonth() - fn.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) {
+        edad--;
+      }
+      return edad;
+    }
+
+    function actualizarInfoEdad() {
+      const fnDesdeStr = document.getElementById('f_fn_desde').value;
+      const fnHastaStr = document.getElementById('f_fn_hasta').value;
+      const badge = document.getElementById('badgeEdadEquivalente');
+      const texto = document.getElementById('textoEdadEquivalente');
+
+      if (!fnDesdeStr && !fnHastaStr) {
+        badge.classList.add('hidden');
+        return;
+      }
+
+      let edadMin = null;
+      let edadMax = null;
+
+      if (fnHastaStr) edadMin = calcularEdad(fnHastaStr);
+      if (fnDesdeStr) edadMax = calcularEdad(fnDesdeStr);
+
+      badge.classList.remove('hidden');
+
+      if (edadMin !== null && edadMax !== null) {
+        if (edadMin > edadMax) {
+          const temp = edadMin; edadMin = edadMax; edadMax = temp;
+        }
+        texto.textContent = `Edades filtradas: ${edadMin} a ${edadMax} años`;
+      } else if (edadMin !== null) {
+        texto.textContent = `Edades filtradas: Desde ${edadMin} años`;
+      } else if (edadMax !== null) {
+        texto.textContent = `Edades filtradas: Hasta ${edadMax} años`;
+      }
+      lucide.createIcons();
+    }
+
+    function normalizarMz(mzStr) {
+      if (!mzStr) return "";
+      return mzStr.toString().toLowerCase().replace(/mz|\.|\s/g, '').trim();
+    }
+
+    // Filtrar y Renderizar los marcadores
+    function aplicarFiltros() {
+      const ffamiliar = document.getElementById('f_ffamiliar').value.trim().toLowerCase();
+      
+      // Filtro Múltiple de Sectores
+      const arraySectoresInput = Array.from(sectoresSeleccionados).map(s => s.toLowerCase());
+
+      // Filtro Múltiple de Manzanas separadas por comas (,)
+      const mzInputRaw = document.getElementById('f_mz').value.trim();
+      const arrayMzInput = mzInputRaw ? mzInputRaw.split(',').map(m => normalizarMz(m)).filter(m => m !== "") : [];
+
+      const dni = document.getElementById('f_dni').value.trim().toLowerCase();
+      const nombre = document.getElementById('f_nombre').value.trim().toLowerCase();
+
+      const fnDesdeStr = document.getElementById('f_fn_desde').value;
+      const fnHastaStr = document.getElementById('f_fn_hasta').value;
+
+      const dateDesde = fnDesdeStr ? new Date(fnDesdeStr) : null;
+      const dateHasta = fnHastaStr ? new Date(fnHastaStr) : null;
+
+      markersLayer.clearLayers();
+
+      const filtrados = baseDatos.filter(item => {
+        if (ffamiliar && (!item.ffamiliar || !item.ffamiliar.toString().toLowerCase().includes(ffamiliar))) return false;
+        
+        // Comprobar si coincide con alguno de los sectores seleccionados
+        if (arraySectoresInput.length > 0) {
+          if (!item.sector) return false;
+          const itemSector = item.sector.toString().toLowerCase();
+          const coincideSector = arraySectoresInput.some(sec => itemSector.includes(sec));
+          if (!coincideSector) return false;
         }
 
-        function showMsg(t, c) {
-            const m = document.getElementById('auth-msg');
-            m.innerText = t;
-            m.style.background = c === 'red' ? '#fef2f2' : (c === 'green' ? '#f0fdf4' : '#f0f9ff');
-            m.style.color = c === 'red' ? '#991b1b' : (c === 'green' ? '#166534' : '#075985');
-            m.style.display = t ? 'block' : 'none';
+        // Comprobar si coincide con alguna de las Manzanas separadas por comas
+        if (arrayMzInput.length > 0) {
+          const itemMz = normalizarMz(item.mz);
+          const coincideMz = arrayMzInput.some(m => itemMz === m);
+          if (!coincideMz) return false;
         }
 
-        function toggleAuditoria() {
-            const section = document.getElementById('podium-section');
-            const arrow = document.getElementById('auditoria-arrow');
-            if (section.style.display === 'flex') {
-                section.style.display = 'none';
-                arrow.className = 'fas fa-chevron-down';
-            } else {
-                section.style.display = 'flex';
-                arrow.className = 'fas fa-chevron-up';
+        if (dni && (!item.dni || !item.dni.toString().toLowerCase().includes(dni))) return false;
+        if (nombre && (!item.nombreB || !item.nombreB.toString().toLowerCase().includes(nombre))) return false;
+
+        if (dateDesde || dateHasta) {
+          const fnFecha = parseFechaPeruana(item.fn);
+          if (!fnFecha) return false;
+          if (dateDesde && fnFecha < dateDesde) return false;
+          if (dateHasta && fnFecha > dateHasta) return false;
+        }
+
+        // Filtro interactivo por Grupo Etario
+        if (filtroEtarioActivo) {
+          const edad = calcularEdad(item.fn);
+          if (edad === null) return false;
+          if (filtroEtarioActivo === 'ninos' && edad >= 12) return false;
+          if (filtroEtarioActivo === 'adolescentes' && (edad < 12 || edad > 17)) return false;
+          if (filtroEtarioActivo === 'jovenes' && (edad < 18 || edad > 29)) return false;
+          if (filtroEtarioActivo === 'adultos' && (edad < 30 || edad > 59)) return false;
+          if (filtroEtarioActivo === 'ancianos' && edad < 60) return false;
+        }
+
+        return true;
+      });
+
+      actualizarEstadisticas(filtrados);
+
+      // Agrupar integrantes por Coordenadas
+      const gruposCoordenadas = {};
+
+      filtrados.forEach((item) => {
+        if (!item.georeferencia) return;
+        const strGeoref = item.georeferencia.toString().replace(/;/g, ',').replace(/\s+/g, '');
+        const coords = strGeoref.split(',');
+        if (coords.length >= 2) {
+          const lat = parseFloat(coords[0].replace(',', '.'));
+          const lng = parseFloat(coords[1].replace(',', '.'));
+
+          if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
+            if (!gruposCoordenadas[key]) {
+              gruposCoordenadas[key] = { lat, lng, ffamiliar: item.ffamiliar, integrantes: [] };
             }
+            gruposCoordenadas[key].integrantes.push(item);
+          }
         }
+      });
 
-        /* NAVEGACIÓN ENTRE DASHBOARD E IFRAME */
-        function showDashboard() {
-            document.getElementById('modules-dashboard').style.display = 'grid';
-            document.getElementById('app-header').style.display = 'flex';
-            document.getElementById('content-frame').style.display = 'none';
-            document.getElementById('btn-back-home').style.display = 'none';
-        }
+      const bounds = [];
+      let totalPersonasEnFigura = 0;
+      let totalPuntosEnFigura = 0;
 
-        function openModule(url) {
-            document.getElementById('modules-dashboard').style.display = 'none';
-            document.getElementById('app-header').style.display = 'none';
-            const frame = document.getElementById('content-frame');
-            frame.src = url;
-            frame.style.display = 'block';
-            document.getElementById('btn-back-home').style.display = 'flex';
-        }
-
-        async function checkAuthorizedDNI() {
-            const dni = document.getElementById('r-dni-search').value;
-            if(!dni) return showMsg("Por favor, ingrese un número de DNI", "red");
-            showMsg("Verificando en servidores del MINSA...", "blue");
-            
-            try {
-                const r = await fetch(`${SCRIPT_URL}?action=fetchUserData&dni=${dni}`);
-                const res = await r.json();
-                
-                if(res.status === "found") {
-                    if(res.hasPass) {
-                        showMsg("Este perfil ya se encuentra activo. Redireccionando...", "blue");
-                        setTimeout(() => showBox('login'), 2000);
-                    } else {
-                        currentDNI = dni;
-                        userDataCache = res.userData;
-                        document.getElementById('reg-greeting').innerText = "¡Hola, " + res.userData.nombre.split(" ")[0] + "!";
-                        document.getElementById('r-name').value = res.userData.nombre || "";
-                        document.getElementById('r-prof').value = res.userData.profesion || "";
-                        document.getElementById('r-cel').value = res.userData.celular || "";
-                        document.getElementById('r-reg').value = res.userData.region || "";
-                        document.getElementById('r-provaws').value = res.userData.provincia || "";
-                        document.getElementById('r-dist').value = res.userData.distrito || "";
-                        document.getElementById('r-eess').value = res.userData.eess || "";
-                        showBox('reg-final');
-                        showMsg("", "");
-                    }
-                } else {
-                    showMsg("DNI no registrado como autorizado. Contacte con soporte DIT.", "red");
-                }
-            } catch(e) {
-                showMsg("Ocurrió un error al conectar con la base de datos.", "red");
+      Object.values(gruposCoordenadas).forEach(grupo => {
+        if (drawnItems.getLayers().length > 0) {
+          let dentro = false;
+          const pt = L.latLng(grupo.lat, grupo.lng);
+          drawnItems.eachLayer(layer => {
+            if (layer instanceof L.Circle) {
+              if (layer.getLatLng().distanceTo(pt) <= layer.getRadius()) dentro = true;
+            } else if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+              if (layer.getBounds().contains(pt)) dentro = true;
             }
+          });
+          if (!dentro) return;
         }
 
-        async function activateAccount() {
-            const cel = document.getElementById('r-cel').value;
-            const pass = document.getElementById('r-new-pass').value;
+        totalPuntosEnFigura++;
+        totalPersonasEnFigura += grupo.integrantes.length;
+        bounds.push([grupo.lat, grupo.lng]);
 
-            if(cel.length !== 9) return showMsg("El celular debe tener 9 dígitos", "red");
-            if(pass.length < 4) return showMsg("Contraseña muy corta (mínimo 4 caracteres)", "red");
+        let countNinos = 0, countAdolescentes = 0, countJovenes = 0, countAdultos = 0, countAncianos = 0;
 
-            const data = {
-                action: "updateUserProfile",
-                dni: currentDNI,
-                nombre: document.getElementById('r-name').value,
-                profesion: document.getElementById('r-prof').value,
-                celular: cel,
-                region: document.getElementById('r-reg').value,
-                provincia: document.getElementById('r-provaws').value,
-                distrito: document.getElementById('r-dist').value,
-                eess: document.getElementById('r-eess').value,
-                newPass: pass
-            };
+        grupo.integrantes.forEach(ing => {
+          const edad = calcularEdad(ing.fn);
+          if (edad !== null) {
+            if (edad < 12) countNinos++;
+            else if (edad <= 17) countAdolescentes++;
+            else if (edad <= 29) countJovenes++;
+            else if (edad <= 59) countAdultos++;
+            else countAncianos++;
+          }
+        });
 
-            showMsg("Guardando y encriptando tu cuenta...", "blue");
-            const formData = new URLSearchParams();
-            formData.append('jsonData', JSON.stringify(data));
+        let popupContent = `
+          <div class="custom-popup font-sans text-xs">
+            <div class="bg-blue-800 text-white p-2.5 flex justify-between items-center">
+              <div>
+                <span class="text-[10px] uppercase text-blue-200 block font-bold">Ficha Familiar</span>
+                <span class="font-bold text-sm">${grupo.ffamiliar || 'S/N'}</span>
+              </div>
+              <span class="text-[10px] bg-emerald-500 text-slate-900 font-extrabold px-2 py-0.5 rounded-full">${grupo.integrantes.length} Integrante(s)</span>
+            </div>
 
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                const resText = await response.text();
-                
-                if(resText.includes("Success")) {
-                    showMsg("¡Cuenta activada con éxito! Reiniciando...", "green");
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showMsg("Error del servidor: " + resText, "red");
-                }
-            } catch(e) {
-                showMsg("Fallo crítico en la red.", "red");
-            }
-        }
+            <div class="p-2 bg-slate-100 border-b border-slate-200 text-[10px] text-slate-700">
+              <p><strong>Sector:</strong> ${grupo.integrantes[0].sector || '-'}</p>
+              <p><strong>Ref / Mz:</strong> ${grupo.integrantes[0].ref_direccion || '-'} (Mz ${grupo.integrantes[0].mz || '-'})</p>
+            </div>
 
-        async function handleLogin() {
-            const u = document.getElementById('l-dni').value;
-            const p = document.getElementById('l-pass').value;
-            if(!u || !p) return showMsg("Por favor completa los dos campos", "red");
-            
-            showMsg("Validando credenciales...", "blue");
-            try {
-                const r = await fetch(`${SCRIPT_URL}?action=login&dni=${u}&pass=${p}`);
-                const res = await r.json();
-                if(res.status === "success") {
-                    sessionStorage.setItem('user_dni', u);
-                    sessionStorage.setItem('is_auth', 'true');
-                    sessionStorage.setItem('user_name', res.nombre);
-                    unlockApp(res.nombre);
-                } else {
-                    showMsg("DNI o Contraseña no coinciden", "red");
-                }
-            } catch(e) {
-                showMsg("Error de conexión remota.", "red");
-            }
-        }
+            <div class="p-2 bg-blue-50 border-b border-blue-100 text-[10px] grid grid-cols-3 gap-1 text-center font-bold">
+              <span class="text-emerald-700">Niños: ${countNinos}</span>
+              <span class="text-teal-700">Adol: ${countAdolescentes}</span>
+              <span class="text-blue-700">Jóv: ${countJovenes}</span>
+              <span class="text-indigo-700">Adult: ${countAdultos}</span>
+              <span class="text-purple-700 col-span-2">Ancianos (60+): ${countAncianos}</span>
+            </div>
 
-        async function changePassword() {
-            const oldP = document.getElementById('old-pw').value;
-            const newP = document.getElementById('new-pw').value;
-            if(!oldP || !newP) return alert("Rellene los campos obligatorios.");
+            <div class="p-2 space-y-2 max-h-48 overflow-y-auto">
+        `;
 
-            const data = {
-                action: "updateUserProfile",
-                dni: sessionStorage.getItem('user_dni'),
-                oldPass: oldP,
-                newPass: newP,
-                isChange: true,
-                nombre: "", profesion: "", celular: "", region: "", provincia: "", distrito: "", eess: ""
-            };
+        grupo.integrantes.forEach(ing => {
+          const edad = calcularEdad(ing.fn);
+          const edadTxt = edad !== null ? `${edad} años` : 'S/I';
+          const tel = ing.telefono ? ing.telefono.toString().trim() : '';
 
-            const formData = new URLSearchParams();
-            formData.append('jsonData', JSON.stringify(data));
+          popupContent += `
+            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-[11px] space-y-1">
+              <p class="font-bold text-blue-900 uppercase">${ing.nombreB || 'SIN NOMBRE'}</p>
+              <p class="text-slate-600"><strong>DNI:</strong> ${ing.dni || '-'} | <strong>Edad:</strong> ${edadTxt}</p>
+              <p class="text-slate-600"><strong>HC:</strong> ${ing.hclinica || '-'} | <strong>Tel:</strong> ${tel || '-'}</p>
+          `;
 
-            try {
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                });
-                const resText = await response.text();
-                if(resText.includes("Error")) {
-                    alert(resText);
-                } else {
-                    document.getElementById('modal-pw').style.display='none';
-                    alert("¡Contraseña actualizada!");
-                    document.getElementById('old-pw').value = "";
-                    document.getElementById('new-pw').value = "";
-                }
-            } catch(e) {
-                alert("Error al procesar el cambio.");
-            }
-        }
-
-        function unlockApp(n) {
-            document.getElementById('auth-screen').style.transform = "translateY(-100%)";
-            document.getElementById('main-app').style.display = "flex";
-            document.getElementById('user-display').innerText = n;
-            
-            showDashboard();
-
-            if(!window.hasGreeted) {
-                const msg = new SpeechSynthesisUtterance("Bienvenido al sistema DIT, " + n.split(" ")[0]);
-                msg.lang = 'es-PE';
-                window.speechSynthesis.speak(msg);
-                window.hasGreeted = true;
-            }
-        }
-
-        function logout() {
-            sessionStorage.clear();
-            location.reload();
-        }
-
-        if(sessionStorage.getItem('is_auth') === 'true') {
-            unlockApp(sessionStorage.getItem('user_name'));
-        }
-
-        document.getElementById('l-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
-
-        /* AUDITORÍA CRUZADA */
-        function ejecutarConsultaEstadistica() {
-            const desde = document.getElementById('filtro-desde').value;
-            const hasta = document.getElementById('filtro-hasta').value;
-
-            if(!desde || !hasta) {
-                alert("Por favor elija un rango válido de fechas.");
-                return;
-            }
-
-            document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:var(--primary-blue); margin: auto;"><i class="fas fa-spinner fa-spin"></i> Generando Auditoría DIT...</div>';
-            document.getElementById('podium-extended-list').innerHTML = "";
-
-            const viejoScript = document.getElementById('jsonp-stats');
-            if (viejoScript) viejoScript.remove();
-
-            const script = document.createElement('script');
-            script.id = 'jsonp-stats';
-            script.src = URL_ATENCION_SICHE + "?action=getHistorial&desde=" + desde + "&hasta=" + hasta + "&callback=procesarDatosExcel";
-            
-            script.onerror = function() {
-                document.getElementById('login-podium').innerHTML = '<div style="font-size:0.8rem; color:#ef4444; margin: auto;"><i class="fas fa-times-circle"></i> Error al conectar con SICHE.</div>';
-            };
-            document.body.appendChild(script);
-        }
-
-        function procesarDatosExcel(ranking) {
-            const podiumWrapper = document.getElementById('login-podium');
-            const extendedWrapper = document.getElementById('podium-extended-list');
-            if(!podiumWrapper) return;
-
-            if (!ranking || !Array.isArray(ranking) || ranking.length === 0) {
-                podiumWrapper.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted); margin:auto;">No hay registros de atenciones para estas fechas.</div>';
-                if(extendedWrapper) extendedWrapper.innerHTML = "";
-                return;
-            }
-
-            const formatearNombreCorto = (nombreCompleto) => {
-                if(!nombreCompleto || nombreCompleto === "-" || nombreCompleto.includes("NO ESPECIFICADO")) return "P. SALUD";
-                var partes = nombreCompleto.split(" ");
-                if(partes.length >= 3) return partes[0] + " " + partes[2];
-                return nombreCompleto;
-            };
-
-            const fallback = { nombre: "-", totalAtenciones: 0, erroresMigracion: 0, migrados: 0, porProcesar: 0, anemia: 0, cred: 0, rua: 0, faltaSiche: 0 };
-            const top1 = ranking[0] || fallback;
-            const top2 = ranking[1] || fallback;
-            const top3 = ranking[2] || fallback;
-
-            podiumWrapper.innerHTML = `
-                <div class="podium-place second">
-                    <div class="podium-name" title="${top2.nombre}">${formatearNombreCorto(top2.nombre)}</div>
-                    <div class="podium-column">
-                        <i class="fas fa-medal podium-cup" style="color: #fff"></i>
-                        <span class="podium-count">${top2.migrados}</span>
-                        <span class="podium-label">MIGRADOS</span>
-                    </div>
-                    <div class="podium-metrics-card">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top2.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top2.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top2.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top2.erroresMigracion}</span></div>
-                    </div>
-                </div>
-                
-                <div class="podium-place first">
-                    <div class="podium-name" title="${top1.nombre}">${formatearNombreCorto(top1.nombre)}</div>
-                    <div class="podium-column">
-                        <i class="fas fa-crown podium-cup" style="color: #fff"></i>
-                        <span class="podium-count">${top1.migrados}</span>
-                        <span class="podium-label">LÍDER</span>
-                    </div>
-                    <div class="podium-metrics-card" style="background: #fffbebf; border-color: #fde68a;">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top1.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top1.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top1.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top1.erroresMigracion}</span></div>
-                    </div>
-                </div>
-                
-                <div class="podium-place third">
-                    <div class="podium-name" title="${top3.nombre}">${formatearNombreCorto(top3.nombre)}</div>
-                    <div class="podium-column">
-                        <i class="fas fa-medal podium-cup" style="color: #fff"></i>
-                        <span class="podium-count">${top3.migrados}</span>
-                        <span class="podium-label">MIGRADOS</span>
-                    </div>
-                    <div class="podium-metrics-card">
-                        <div class="metric-line"><span><i class="fas fa-file-invoice" style="color:#8b5cf6"></i>RUA:</span><span class="badge-rua">${top3.rua}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Falta:</span><span class="badge-falta">${top3.faltaSiche}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-clock" style="color:#f59e0b"></i>Pend:</span><span class="badge-proc">${top3.porProcesar}</span></div>
-                        <div class="metric-line"><span><i class="fas fa-bug" style="color:#ef4444"></i>Err:</span><span class="badge-err">${top3.erroresMigracion}</span></div>
-                    </div>
-                </div>
+          if (tel) {
+            popupContent += `
+              <div class="flex gap-1.5 pt-1">
+                <a href="tel:${tel}" class="flex-1 bg-blue-600 text-white text-[10px] font-bold py-1 rounded text-center flex items-center justify-center gap-1 hover:bg-blue-700">
+                  <i data-lucide="phone" class="w-3 h-3"></i> Llamar
+                </a>
+                <a href="https://wa.me/51${tel}" target="_blank" class="flex-1 bg-emerald-600 text-white text-[10px] font-bold py-1 rounded text-center flex items-center justify-center gap-1 hover:bg-emerald-700">
+                  <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
+                </a>
+              </div>
             `;
+          }
 
-            if(extendedWrapper) {
-                extendedWrapper.innerHTML = "";
-                
-                ranking.forEach((p, index) => {
-                    let posClass = "";
-                    let posLabel = `${index + 1}°`;
-                    
-                    if(index === 0) { posClass = "gold"; }
-                    else if(index === 1) { posClass = "silver"; }
-                    else if(index === 2) { posClass = "bronze"; }
+          popupContent += `</div>`;
+        });
 
-                    extendedWrapper.innerHTML += `
-                        <div class="extended-row">
-                            <div class="extended-top-info">
-                                <div class="extended-left">
-                                    <span class="extended-pos ${posClass}">${posLabel}</span>
-                                    <span class="extended-name" title="${p.nombre}">${formatearNombreCorto(p.nombre)}</span>
-                                </div>
-                                <span class="extended-total-badge">Total RUA: ${p.rua}</span>
-                            </div>
-                            <div class="extended-grid-metrics">
-                                <div class="metric-box"><span>Migrado</span><b class="badge-mig">${p.migrados}</b></div>
-                                <div class="metric-box"><span>Falta</span><b class="badge-falta">${p.faltaSiche}</b></div>
-                                <div class="metric-box"><span>Pendiente</span><b class="badge-proc">${p.porProcesar}</b></div>
-                                <div class="metric-box"><span>Error</span><b class="badge-err">${p.erroresMigracion}</b></div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
+        popupContent += `</div></div>`;
+
+        const marker = L.marker([grupo.lat, grupo.lng]).bindPopup(popupContent);
+        marker.on('popupopen', () => lucide.createIcons());
+        markersLayer.addLayer(marker);
+      });
+
+      if (drawnItems.getLayers().length > 0) {
+        drawnItems.eachLayer(layer => {
+          let labelText = "";
+          if (layer instanceof L.Circle) {
+            const radio = layer.getRadius();
+            const radioTxt = radio >= 1000 ? `${(radio / 1000).toFixed(2)} km` : `${Math.round(radio)} m`;
+            labelText = `📍 Radio: ${radioTxt} | 👥 Personas: ${totalPersonasEnFigura} (${totalPuntosEnFigura} familias)`;
+          } else if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
+            labelText = `📐 Zona seleccionada | 👥 Personas: ${totalPersonasEnFigura} (${totalPuntosEnFigura} familias)`;
+          }
+
+          if (labelText) {
+            layer.unbindTooltip();
+            layer.bindTooltip(labelText, {
+              permanent: true,
+              direction: 'top',
+              className: 'draw-tooltip'
+            }).openTooltip();
+          }
+        });
+      }
+
+      document.getElementById('badgeConteo').textContent = `${filtrados.length} Persona(s) (${bounds.length} Puntos)`;
+
+      if (bounds.length > 0) {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
+      }
+    }
+
+    function actualizarEstadisticas(lista) {
+      let ninos = 0, adolescentes = 0, jovenes = 0, adultos = 0, ancianos = 0;
+
+      lista.forEach(item => {
+        const edad = calcularEdad(item.fn);
+        if (edad !== null) {
+          if (edad < 12) ninos++;
+          else if (edad <= 17) adolescentes++;
+          else if (edad <= 29) jovenes++;
+          else if (edad <= 59) adultos++;
+          else ancianos++;
         }
+      });
 
-        async function exportarFaltantesAExcel() {
-            const desde = document.getElementById('filtro-desde').value;
-            const hasta = document.getElementById('filtro-hasta').value;
-            
-            if(!desde || !hasta) {
-                alert("Seleccione las fechas para exportar.");
-                return;
-            }
-            
-            alert("Compilando reporte CSV de atenciones faltantes...");
-            
-            try {
-                const url = URL_ATENCION_SICHE + "?action=exportarFaltantes&desde=" + desde + "&hasta=" + hasta;
-                const response = await fetch(url);
-                const data = await response.json();
+      document.getElementById('stat_total').textContent = `${lista.length} pers.`;
+      document.getElementById('stat_ninos').textContent = ninos;
+      document.getElementById('stat_adolescentes').textContent = adolescentes;
+      document.getElementById('stat_jovenes').textContent = jovenes;
+      document.getElementById('stat_adultos').textContent = adultos;
+      document.getElementById('stat_ancianos').textContent = ancianos;
+    }
 
-                if (!data || data.length === 0) {
-                    alert("¡Felicidades! 100% de coberturas cuadradas con éxito.");
-                    return;
-                }
+    function limpiarFiltros() {
+      document.getElementById('f_ffamiliar').value = "";
+      document.getElementById('f_sector').value = "";
+      sectoresSeleccionados.clear();
+      document.getElementById('f_mz').value = "";
+      document.getElementById('f_dni').value = "";
+      document.getElementById('f_nombre').value = "";
+      document.getElementById('f_fn_desde').value = "";
+      document.getElementById('f_fn_hasta').value = "";
+      document.getElementById('badgeEdadEquivalente').classList.add('hidden');
+      filtroEtarioActivo = null;
+      ['ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'].forEach(b => {
+        document.getElementById(`btn_etario_${b}`).classList.remove('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
+      });
+      drawnItems.clearLayers();
+      aplicarFiltros();
+    }
 
-                let csvContent = "\uFEFF"; 
-                csvContent += "Fecha de Atención,DNI Paciente Rezagado,Personal de Salud\n";
-                
-                data.forEach(item => {
-                    csvContent += '"' + item.fecha + '","' + item.dni + '","' + item.personal + '"\n';
-                });
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const urlBlob = URL.createObjectURL(blob);
-                const link = document.createElement("a");
-                link.setAttribute("href", urlBlob);
-                link.setAttribute("download", "Faltantes_SICHE_" + desde + "_" + hasta + ".csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } catch (e) {
-                alert("Error de respuesta de red.");
-            }
-        }
-    </script>
+    window.onload = initMap;
+  </script>
 </body>
 </html>
