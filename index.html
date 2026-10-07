@@ -243,7 +243,6 @@
 
     function parsearFechaDDMMYYYY(strFecha) {
         if (!strFecha) return null;
-        // Espera formato dd/MM/yyyy
         let partes = strFecha.split('/');
         if (partes.length === 3) {
             return new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
@@ -263,7 +262,12 @@
         const hoy = new Date();
 
         datos.forEach((p) => {
-            let fechaAlta = p.meses?.[6] || ""; // MES-ALTA (Columna K / índice 6)
+            // Validación estricta: Solo si hay fecha real en MES-ALTA (Columna K / índice 6)
+            let fechaAlta = "";
+            if (p.meses && p.meses[6] && p.meses[6].trim() !== "" && p.meses[6] !== "---") {
+                fechaAlta = p.meses[6];
+            }
+
             let ultimaFecha = null;
             let arrayFechasVerificar = [
                 p.meses?.[0], p.meses?.[1], p.meses?.[2], 
@@ -271,7 +275,7 @@
             ];
 
             for (let i = arrayFechasVerificar.length - 1; i >= 0; i--) {
-                if (arrayFechasVerificar[i]) {
+                if (arrayFechasVerificar[i] && arrayFechasVerificar[i] !== "---") {
                     ultimaFecha = parsearFechaDDMMYYYY(arrayFechasVerificar[i]);
                     break;
                 }
@@ -281,7 +285,6 @@
             let clasificacion = "---";
             let claseClasificacion = "";
 
-            // REGLA: Si la columna K (MES-ALTA) tiene fecha, ya no considera cita y clasificación es "TRATADO"
             if (fechaAlta) {
                 clasificacion = "TRATADO";
                 claseClasificacion = "text-primary fw-bold";
