@@ -31,10 +31,7 @@
             background-color: #ffffff;
         }
         
-        .main-title {
-            font-weight: 700;
-            color: var(--primary-color);
-        }
+        .main-title { font-weight: 700; color: var(--primary-color); }
 
         .section-title { 
             background: linear-gradient(45deg, #e6fffa, #f0fff4); 
@@ -202,8 +199,8 @@
 <script>
     const URL_CENSO = "https://script.google.com/macros/s/AKfycbz-PaNW15W43wBS8AmlEHfFe4QrUnITK-8yEnvwoGUnpw7PdbpNvJhPCc4q5qDs8c3WWg/exec";
     
-    // CAMBIA ESTA URL POR TU URL DE GOOGLE APPS SCRIPT REAL
-    const URL_KARDEX_WEBAPP = "https://script.google.com/macros/s/AKfycbxPYvUNKZI0rXsUiCctQ_j_r1fEOy9YJnhaQDKUMh5ItH5xA1ZYWatZJ2plrfmq8GDg-g/exec";
+    // PEGUE AQUÍ SU URL DE GOOGLE APPS SCRIPT
+    const URL_KARDEX_WEBAPP = "https://script.google.com/macros/s/AKfycbxOeuoLKB6kCr5nv4Xh2gbXK3OC1AtB19ev5gTYGF9K1XSnNvKb3ZQ2x73DLSXU2kpO4A/exec";
 
     let listaKardexGlobal = [];
 
@@ -248,11 +245,11 @@
                 if(response.status === "ok") {
                     listaKardexGlobal = (response.data || []).map(item => ({
                         dni: item.dni,
-                        meses: [item.valB, "", "", "", "", "", ""], 
-                        nombres: item.valC, 
-                        sector: "",
-                        telefono: "",
-                        hbs: [],
+                        meses: item.meses || ["", "", "", "", "", "", ""], 
+                        nombres: item.nombres, 
+                        sector: item.sector || "",
+                        telefono: item.telefono || "",
+                        hbs: item.hbs || ["", "", "", "", ""],
                         clasificacion: "",
                         cita: ""
                     }));
@@ -312,6 +309,7 @@
             let fila = `<tr>
                 <td class="fw-bold">${p.dni || ''}</td>`;
 
+            // MES-1
             let valMes1 = (p.meses && p.meses[0]) ? p.meses[0] : "";
             if (valMes1) {
                 fila += `<td class="text-center"><span class="fecha-click" onclick="editarCelda('${p.dni}', 0)">${valMes1}</span></td>`;
@@ -323,6 +321,7 @@
                 <td>${p.sector || ''}</td>
                 <td>${p.telefono || ''}</td>`;
 
+            // MES-2 al MES-ALTA (Índices 1 al 6)
             for (let i = 1; i < 7; i++) {
                 let valMes = (p.meses && p.meses[i]) ? p.meses[i] : "";
                 if (valMes) {
@@ -332,6 +331,7 @@
                 }
             }
 
+            // Niveles de Hemoglobina Hb-1 a Hb-5
             for (let i = 0; i < 5; i++) {
                 let valHb = (p.hbs && p.hbs[i] !== undefined) ? p.hbs[i] : "";
                 fila += `<td class="text-center">${valHb}</td>`;
@@ -395,7 +395,7 @@
             "Hb-3": p.hbs?.[2] || "",
             "Hb-4": p.hbs?.[3] || "",
             "Hb-5": p.hbs?.[4] || "",
-            "Clasificación": p.clasificacion || "",
+            "Clasificación": p.clasificación || "",
             "Cita": p.cita || ""
         }));
 
