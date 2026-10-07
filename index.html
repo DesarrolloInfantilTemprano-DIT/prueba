@@ -1,1014 +1,448 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIGIS_FED - Mapa Georreferenciado</title>
-  
-  <!-- Tailwind CSS & Lucide Icons -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento de Anemia - Kardex SIGIS_FED</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Segoe+UI:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #276749;
+            --primary-hover: #22543d;
+            --secondary-color: #38a169;
+            --bg-soft: #f0fdf4;
+            --text-dark: #2d3748;
+            --card-radius: 16px;
+        }
+        
+        body { 
+            background-color: var(--bg-soft); 
+            font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+        }
 
-  <!-- Leaflet Draw (Trazar líneas / Polígonos de búsqueda) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+        .card { 
+            border: none; 
+            border-top: 6px solid var(--primary-color); 
+            border-radius: var(--card-radius); 
+            box-shadow: 0 10px 30px rgba(56, 161, 105, 0.1);
+            background-color: #ffffff;
+        }
+        
+        .main-title {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
 
-  <style>
-    #map { height: calc(100vh - 60px); width: 100%; z-index: 1; }
-    .loader {
-      border-top-color: #2563eb;
-      animation: spinner 0.6s linear infinite;
-    }
-    @keyframes spinner {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .custom-popup .leaflet-popup-content-wrapper {
-      padding: 0;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-    .custom-popup .leaflet-popup-content {
-      margin: 0;
-      width: 280px !important;
-    }
-    .draw-tooltip {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid #3b82f6;
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 11px;
-      border-radius: 6px;
-      padding: 4px 8px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-    }
-    .draw-tooltip::before {
-      border-top-color: rgba(15, 23, 42, 0.9);
-    }
-  </style>
+        .section-title { 
+            background: linear-gradient(45deg, #e6fffa, #f0fff4); 
+            padding: 12px 16px; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            color: #234e52; 
+            margin-bottom: 20px; 
+            border-left: 5px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-search { 
+            background-color: var(--primary-color); 
+            color: white; 
+            transition: 0.3s; 
+            border-radius: 0 10px 10px 0;
+        }
+        .btn-search:hover { background-color: var(--primary-hover); color: white; }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1.5px solid #cbd5e0;
+            padding: 10px 12px;
+            font-size: 0.95rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.15);
+        }
+
+        .form-label { font-weight: 600; font-size: 0.9rem; color: #4a5568; margin-bottom: 6px; }
+        
+        .table-kardex { font-size: 0.82rem; min-width: 1400px; }
+        .table-kardex th { background: #2d3748 !important; color: white !important; text-align: center; vertical-align: middle; padding: 10px; }
+        .fecha-click { color: #3182ce; text-decoration: underline; cursor: pointer; font-weight: bold; }
+        .mes-vacio { color: #a0aec0; font-style: italic; font-size: 0.75rem; text-align: center; cursor: pointer; }
+        .mes-vacio:hover { color: var(--primary-color); background-color: #f7fafc; }
+    </style>
 </head>
-<body class="bg-slate-100 font-sans text-slate-800 h-screen overflow-hidden flex flex-col">
+<body>
 
-  <!-- DATALIST GLOBAL DE SECTORES RESTRINGIDOS -->
-  <datalist id="listaSectores">
-    <option value="933-AA.VV. 25 DE ENERO"></option>
-    <option value="933-AA.VV. CARMEN GARAY"></option>
-    <option value="933-AA.VV. FUNDO NUEVA ESPERANZA"></option>
-    <option value="933-AA.VV. LOS LAURELES"></option>
-    <option value="933-AA.VV. PUEBLO LIBRE"></option>
-    <option value="933-AA.VV.01 DE MAYO"></option>
-    <option value="933-AA.VV.01 DE SETIEMBRE"></option>
-    <option value="933-AA.VV.07 DE MAYO"></option>
-    <option value="933-AA.VV.09 DE AGOSTO"></option>
-    <option value="933-AA.VV.15 DE AGOSTO"></option>
-    <option value="933-AA.VV.CESAR VALLEJO"></option>
-    <option value="933-AA.VV.CIUDAD COLINA"></option>
-    <option value="933-AA.VV.COLONIA TINGALESA"></option>
-    <option value="933-AA.VV.EDUARDO VILLASANTE"></option>
-    <option value="933-AA.VV.JOSE CARLOS MARIATEGUI"></option>
-    <option value="933-AA.VV.JOSE OLAYA BALANDRA"></option>
-    <option value="933-AA.VV.JUAN PICON QUEDO"></option>
-    <option value="933-AA.VV.JULIO MARTINEZ"></option>
-    <option value="933-AA.VV.LAS ALMENDRAS"></option>
-    <option value="933-AA.VV.LAS AMAZONAS"></option>
-    <option value="933-AA.VV.LAS PALMERAS"></option>
-    <option value="933-AA.VV.LOS ANGELES"></option>
-    <option value="933-AA.VV.LOS JARDINES"></option>
-    <option value="933-AA.VV.LOS PINOS"></option>
-    <option value="933-AA.VV.MARIA PARADO DE BELLIDO"></option>
-    <option value="933-AA.VV.MONTERRICO"></option>
-    <option value="933-AA.VV.NUEVA ESPERANZA"></option>
-    <option value="933-AA.VV.NUEVA JERUSALEN"></option>
-    <option value="933-AA.VV.NUEV AMANECER"></option>
-    <option value="933-AA.VV.PADRES DE FAMILIA"></option>
-    <option value="933-AA.VV.PANTOJA"></option>
-    <option value="933-AA.VV.PEDREGAL"></option>
-    <option value="933-AA.VV.POBLADORES DE CASTILLO GRANDE"></option>
-    <option value="933-AA.VV.SAN CARLOS"></option>
-    <option value="933-AA.VV.SAN ISIDRO"></option>
-    <option value="933-AA.VV.SAN MIGUEL"></option>
-    <option value="933-AA.VV.SANTA ROSA"></option>
-    <option value="933-SOL NACIENTE"></option>
-    <option value="933-COMUNIDAD ASERRADERO"></option>
-    <option value="933-COMUNIDAD CAPITAN SOTO"></option>
-    <option value="933-COMUNIDAD HUANGANAPAMPA"></option>
-    <option value="933-COMUNIDAD HUAYNACAPAC"></option>
-    <option value="933-COMUNIDAD JACINTILLO"></option>
-    <option value="933-COMUNIDAD LA CURVA"></option>
-    <option value="933-COMUNIDAD LA FLORIDA"></option>
-    <option value="933-COMUNIDAD MANCO CAPAC"></option>
-    <option value="933-COMUNIDAD MANTARO"></option>
-    <option value="933-COMUNIDAD MERCED DE LOCRO"></option>
-    <option value="933-COMUNIDAD MOYANO"></option>
-    <option value="933-COMUNIDAD NUEVA ALTURA"></option>
-    <option value="933-COMUNIDAD PACHACUTEC"></option>
-    <option value="933-COMUNIDAD PAPAYAL"></option>
-    <option value="933-COMUNIDAD PICUROYACU"></option>
-    <option value="933-COMUNIDAD SANTA ROSA DE CASTILLA"></option>
-    <option value="933-COMUNIDAD SHAMIRO"></option>
-    <option value="933-COMUNIDAD SINCHI ROCCA"></option>
-    <option value="933-COMUNIDAD VENADO PAMPA"></option>
-    <option value="933-COMUNIDAD YURIMAGUAS"></option>
-    <option value="933-SIN SECTOR"></option>
-  </datalist>
+<div class="container-fluid px-4 py-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            
+            <!-- FORMULARIO DE REGISTRO / GESTIÓN ANEMIA -->
+            <div class="card p-4 mb-4">
+                <h3 class="text-center mb-4 main-title"><i class="fas fa-notes-medical me-2 text-success"></i>Control y Seguimiento de Tratamiento de Anemia (AnemiaInfantil)</h3>
+                
+                <form id="kardexForm">
+                    <input type="hidden" id="pacienteId" value="">
 
-  <!-- CABECERA -->
-  <header class="bg-blue-800 text-white shadow-md z-10 px-3 md:px-4 py-2.5 flex justify-between items-center h-[60px]">
-    <div class="flex items-center space-x-2 md:space-x-3 truncate">
-      <button onclick="togglePanelFiltros()" title="Mostrar/Ocultar Filtros" class="p-1.5 bg-blue-700 hover:bg-blue-600 rounded-lg transition text-white flex items-center justify-center shrink-0">
-        <i data-lucide="filter" id="iconTogglePanel" class="w-5 h-5 text-emerald-400"></i>
-      </button>
-      <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400 hidden sm:block shrink-0"></i>
-      <div class="truncate">
-        <h1 class="text-xs sm:text-base font-bold leading-tight truncate">SIGIS_FED - Georreferenciación</h1>
-        <p class="text-[9px] sm:text-[10px] text-blue-200 truncate">Monitoreo de Familias y Personas</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2 shrink-0">
-      <span id="badgeConteo" class="bg-blue-900 text-emerald-300 text-[10px] sm:text-xs px-2.5 py-1 rounded-full font-bold border border-emerald-500/30">
-        Cargando...
-      </span>
-      <button onclick="cargarBaseDatos()" title="Recargar Datos" class="p-1.5 bg-blue-700 hover:bg-blue-600 rounded-lg transition text-white">
-        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-      </button>
-    </div>
-  </header>
+                    <div class="row mb-3 g-3">
+                        <div class="col-md-4 col-12">
+                            <label class="form-label">Consultar por DNI (Col. A)</label>
+                            <div class="input-group">
+                                <input type="text" id="dni" class="form-control" placeholder="Ingrese DNI..." required maxlength="8" pattern="\d*">
+                                <button type="button" class="btn btn-search" onclick="buscarPaciente()"><i class="fas fa-search me-1"></i> Buscar</button>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <label class="form-label">Nombres y Apellidos (Col. C)</label>
+                            <input type="text" id="nombres" class="form-control" required style="text-transform: uppercase; font-weight: 600;">
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <label class="form-label">Sector (Col. D)</label>
+                            <input type="text" id="sector" class="form-control" placeholder="Ej. 933-AA.VV...." style="text-transform: uppercase;">
+                        </div>
+                    </div>
 
-  <!-- PANEL PRINCIPAL CONTENEDOR (FILTROS + MAPA) -->
-  <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-4 col-12">
+                            <label class="form-label">Teléfono (Col. E)</label>
+                            <input type="text" id="telefono" class="form-control" placeholder="Nro de contacto">
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <label class="form-label">Mes a Registrar / Actualizar</label>
+                            <select id="mesSeleccionado" class="form-select" required>
+                                <option value="">Seleccione mes...</option>
+                                <option value="0">MES-1 (Col. B)</option>
+                                <option value="1">MES-2 (Col. F)</option>
+                                <option value="2">MES-3 (Col. G)</option>
+                                <option value="3">MES-4 (Col. H)</option>
+                                <option value="4">MES-5 (Col. I)</option>
+                                <option value="5">MES-6 (Col. J)</option>
+                                <option value="6">MES-ALTA (Col. K)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <label class="form-label">Fecha de Atención</label>
+                            <input type="date" id="fechaAtencion" class="form-control" required>
+                        </div>
+                        <div class="col-md-2 col-6">
+                            <label class="form-label">Nivel Hb (g/dL)</label>
+                            <input type="number" step="0.1" id="nivelHb" class="form-control" placeholder="Ej. 12.5">
+                        </div>
+                    </div>
 
-    <!-- OVERLAY CAPA OSCURA MÓVIL AL ABRIR FILTROS -->
-    <div id="overlayMobile" onclick="togglePanelFiltros()" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 md:hidden"></div>
-
-    <!-- BOTÓN FLOTANTE PARA REABRIR PANEL CUANDO ESTÁ OCULTO -->
-    <button id="btnAbrirPanelFlotante" onclick="togglePanelFiltros()" class="hidden absolute top-3 left-3 z-30 bg-blue-800 text-white p-2 rounded-lg shadow-xl hover:bg-blue-700 transition flex items-center gap-1.5 text-xs font-bold border border-blue-600">
-      <i data-lucide="filter" class="w-4 h-4 text-emerald-400"></i>
-      <span>Filtros</span>
-    </button>
-
-    <!-- PANEL LATERAL DE FILTROS Y ESTADÍSTICAS -->
-    <aside id="panelFiltros" class="fixed md:relative inset-y-0 left-0 w-full max-w-[320px] md:max-w-none md:w-80 bg-white border-r border-slate-200 shadow-2xl md:shadow-lg p-4 overflow-y-auto space-y-4 z-40 md:z-20 top-[60px] md:top-0 h-[calc(100vh-60px)] md:h-auto transition-all duration-300 ease-in-out">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h2 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-1.5">
-          <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i> Filtros de Búsqueda
-        </h2>
-        <div class="flex items-center gap-2">
-          <button onclick="limpiarFiltros()" class="text-[11px] text-blue-600 hover:underline font-semibold">
-            Limpiar Filtros
-          </button>
-          <button onclick="togglePanelFiltros()" title="Ocultar Panel" class="text-slate-400 hover:text-slate-600 p-1">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- MÓDULO DE MONITOREO ESPECIAL -->
-      <div class="bg-amber-50/80 p-3 rounded-lg border border-amber-200 space-y-2">
-        <div class="flex items-center gap-1.5 text-amber-900 font-bold text-xs uppercase border-b border-amber-200 pb-1">
-          <i data-lucide="activity" class="w-4 h-4 text-amber-600"></i>
-          <span>Módulo de Monitoreo</span>
-        </div>
-        
-        <div>
-          <label for="f_tipo_monitoreo" class="block text-[10px] font-bold text-amber-800 uppercase mb-0.5">Tipo de Consulta:</label>
-          <select id="f_tipo_monitoreo" onchange="cambiarTipoMonitoreo()" class="w-full px-2 py-1.5 border border-amber-300 rounded text-xs font-bold text-slate-700 bg-white outline-none focus:ring-2 focus:ring-amber-500">
-            <option value="">-- Sin Monitoreo Activo --</option>
-            <option value="InaCRED">Inasistente CRED (InaCRED)</option>
-            <option value="InaAnemia">Inasistente Anemia (InaAnemia)</option>
-            <option value="InaVAC">Vacunas Pendientes (InaVAC)</option>
-            <option value="Gestante">Gestantes (FPP)</option>
-            <option value="AnemiaInfantil">Niños Anémicos (+7 meses Alta)</option>
-            <option value="PAT">Pacientes TBC (PAT)</option>
-            <option value="HTA">Hipertensos (HTA)</option>
-            <option value="DM">Diabéticos (DM)</option>
-          </select>
-        </div>
-
-        <!-- BUSCADOR / SUBFILTRO ESPECÍFICO PARA VACUNAS PENDIENTES (InaVAC) -->
-        <div id="contenedorFiltroVacuna" class="hidden">
-          <label for="f_nombre_vacuna" class="block text-[10px] font-bold text-amber-800 uppercase mb-0.5">Vacuna Pendiente Deseada:</label>
-          <input type="text" id="f_nombre_vacuna" placeholder="Ej: Pentavalente, Neumococo..." oninput="aplicarFiltros()" class="w-full px-2 py-1 border border-amber-300 rounded text-xs outline-none bg-white font-semibold">
-        </div>
-
-        <!-- RANGO DE FECHAS PARA EL MONITOREO -->
-        <div id="contenedorFechasMonitoreo" class="hidden space-y-1 pt-1">
-          <span class="block text-[10px] font-bold text-amber-800 uppercase">Rango de Fechas Monitoreo:</span>
-          <div class="grid grid-cols-2 gap-1.5">
-            <div>
-              <span class="text-[9px] text-slate-500 block">Desde:</span>
-              <input type="date" id="f_mon_desde" onchange="aplicarFiltros()" class="w-full px-1.5 py-1 border border-amber-300 rounded text-[11px] bg-white outline-none">
+                    <div class="d-flex flex-column flex-md-row gap-2 justify-content-md-end mt-4">
+                        <button type="button" class="btn btn-secondary px-4" onclick="limpiarFormulario()">Limpiar / Nuevo</button>
+                        <button type="submit" id="btnGuardar" class="btn btn-success px-5">Guardar en Kardex <i class="fas fa-save ms-2"></i></button>
+                    </div>
+                </form>
             </div>
-            <div>
-              <span class="text-[9px] text-slate-500 block">Hasta:</span>
-              <input type="date" id="f_mon_hasta" onchange="aplicarFiltros()" class="w-full px-1.5 py-1 border border-amber-300 rounded text-[11px] bg-white outline-none">
+
+            <!-- TABLA KARDEX PRINCIPAL -->
+            <div class="card p-4">
+                <div class="section-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <span><i class="fas fa-table me-2"></i>Kardex General de Anemia (Pestaña: AnemiaInfantil)</span>
+                    <div class="d-flex gap-2 text-end">
+                        <button class="btn btn-sm btn-success text-white" onclick="exportarExcel()"><i class="fas fa-file-excel me-1"></i> Exportar Excel</button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="cargarKardex()"><i class="fas fa-sync"></i> Actualizar Tabla</button>
+                    </div>
+                </div>
+
+                <div class="row g-2 mb-3 p-3 bg-light rounded border">
+                    <div class="col-md-6 col-12">
+                        <label class="form-label small fw-bold text-secondary"><i class="fas fa-filter"></i> Filtrar por Paciente o DNI</label>
+                        <input type="text" id="filtroTabla" class="form-control form-control-sm" placeholder="Escriba nombre o DNI..." onkeyup="filtrarTablaLocal()">
+                    </div>
+                </div>
+
+                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                    <table id="tablaKardex" class="table table-bordered table-sm table-kardex table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 90px;">DNI (A)</th>
+                                <th>MES-1 (B)</th>
+                                <th>Nombres y Apellidos (C)</th>
+                                <th>Sector (D)</th>
+                                <th>Teléfono (E)</th>
+                                <th>MES-2 (F)</th>
+                                <th>MES-3 (G)</th>
+                                <th>MES-4 (H)</th>
+                                <th>MES-5 (I)</th>
+                                <th>MES-6 (J)</th>
+                                <th>MES-ALTA (K)</th>
+                                <th style="width: 60px;">Hb-1 (L)</th>
+                                <th style="width: 60px;">Hb-2 (M)</th>
+                                <th style="width: 60px;">Hb-3 (N)</th>
+                                <th style="width: 60px;">Hb-4 (O)</th>
+                                <th style="width: 60px;">Hb-5 (P)</th>
+                                <th>Clasificación (Q)</th>
+                                <th>Cita (R)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cuerpoKardex">
+                            <tr><td colspan="18" class="text-center text-muted">Haga clic en "Actualizar Tabla" para cargar los registros</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-          </div>
+
         </div>
-      </div>
-
-      <!-- FILTRO FICHA FAMILIAR -->
-      <div>
-        <label for="f_ffamiliar" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ficha Familiar</label>
-        <input type="text" id="f_ffamiliar" placeholder="Ej: 0001234" oninput="aplicarFiltros()"
-          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono font-bold uppercase focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-
-      <!-- FILTRO SECTOR (MÚLTIPLE) -->
-      <div>
-        <label for="f_sector" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Sector(es) Múltiple</label>
-        <div class="relative">
-          <input type="text" id="f_sector" placeholder="TODOS LOS SECTORES..." readonly onclick="abrirModalSector()"
-            class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold uppercase focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer pr-8 truncate">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute right-2.5 top-2 pointer-events-none"></i>
-        </div>
-      </div>
-
-      <!-- FILTRO MANZANA (MZ) - COINCIDENCIA EXACTA Y MÚLTIPLE SEPARADA POR COMAS -->
-      <div>
-        <label for="f_mz" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Manzana (Mz) [Separar por comas]</label>
-        <input type="text" id="f_mz" placeholder="Ej: 5, 12, A" oninput="aplicarFiltros()"
-          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-
-      <!-- FILTRO DNI -->
-      <div>
-        <label for="f_dni" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">DNI</label>
-        <input type="text" id="f_dni" placeholder="Ej: 70000000" maxlength="8" oninput="aplicarFiltros()"
-          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-
-      <!-- FILTRO APELLIDOS Y NOMBRES -->
-      <div>
-        <label for="f_nombre" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Apellidos y Nombres</label>
-        <input type="text" id="f_nombre" placeholder="BUSCAR POR NOMBRE..." oninput="aplicarFiltros()"
-          class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs uppercase focus:ring-2 focus:ring-blue-500 outline-none">
-      </div>
-
-      <!-- FILTRO RANGO DE FECHA DE NACIMIENTO CON MUESTRA DE EDADES CALCULADAS -->
-      <div class="bg-blue-50/70 p-3 rounded-lg border border-blue-100 space-y-2">
-        <div class="flex justify-between items-center">
-          <label class="block text-[11px] font-bold text-blue-900 uppercase">Rango Fecha Nacimiento</label>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-500 font-semibold block mb-0.5">Desde:</span>
-          <input type="date" id="f_fn_desde" onchange="actualizarInfoEdad(); aplicarFiltros();"
-            class="w-full px-2 py-1 border border-slate-300 rounded text-xs outline-none bg-white">
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-500 font-semibold block mb-0.5">Hasta:</span>
-          <input type="date" id="f_fn_hasta" onchange="actualizarInfoEdad(); aplicarFiltros();"
-            class="w-full px-2 py-1 border border-slate-300 rounded text-xs outline-none bg-white">
-        </div>
-
-        <div id="badgeEdadEquivalente" class="hidden mt-1.5 p-1.5 bg-blue-600 text-white text-[10px] rounded font-bold text-center flex items-center justify-center gap-1 shadow-sm">
-          <i data-lucide="user-check" class="w-3 h-3"></i>
-          <span id="textoEdadEquivalente">Rango: -</span>
-        </div>
-      </div>
-
-      <!-- PANEL DE ESTADÍSTICAS INTERACTIVO POR GRUPO ETARIO -->
-      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2 pb-6 md:pb-3">
-        <h3 class="text-xs font-bold text-slate-800 uppercase border-b pb-1 flex items-center justify-between">
-          <span>Estadística Demográfica</span>
-          <span id="stat_total" class="text-blue-700 font-extrabold text-[11px]">0 pers.</span>
-        </h3>
-        <p class="text-[10px] text-slate-500 font-medium">Haz clic en un grupo para ubicarlo en el mapa:</p>
-        <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-          <button id="btn_etario_ninos" onclick="toggleFiltroEtario('ninos')" class="bg-emerald-50 border border-emerald-300 p-1.5 rounded flex justify-between items-center hover:bg-emerald-100 transition text-left cursor-pointer">
-            <span class="text-emerald-800 font-bold">Niños (&lt;12)</span>
-            <span id="stat_ninos" class="font-extrabold text-emerald-900">0</span>
-          </button>
-          <button id="btn_etario_adolescentes" onclick="toggleFiltroEtario('adolescentes')" class="bg-teal-50 border border-teal-300 p-1.5 rounded flex justify-between items-center hover:bg-teal-100 transition text-left cursor-pointer">
-            <span class="text-teal-800 font-bold">Adolesc. (12-17)</span>
-            <span id="stat_adolescentes" class="font-extrabold text-teal-900">0</span>
-          </button>
-          <button id="btn_etario_jovenes" onclick="toggleFiltroEtario('jovenes')" class="bg-blue-50 border border-blue-300 p-1.5 rounded flex justify-between items-center hover:bg-blue-100 transition text-left cursor-pointer">
-            <span class="text-blue-800 font-bold">Jóvenes (18-29)</span>
-            <span id="stat_jovenes" class="font-extrabold text-blue-900">0</span>
-          </button>
-          <button id="btn_etario_adultos" onclick="toggleFiltroEtario('adultos')" class="bg-indigo-50 border border-indigo-300 p-1.5 rounded flex justify-between items-center hover:bg-indigo-100 transition text-left cursor-pointer">
-            <span class="text-indigo-800 font-bold">Adultos (30-59)</span>
-            <span id="stat_adultos" class="font-extrabold text-indigo-900">0</span>
-          </button>
-          <button id="btn_etario_ancianos" onclick="toggleFiltroEtario('ancianos')" class="bg-purple-50 border border-purple-300 p-1.5 rounded flex justify-between items-center hover:bg-purple-100 transition text-left cursor-pointer col-span-2">
-            <span class="text-purple-800 font-bold">Ancianos (60+)</span>
-            <span id="stat_ancianos" class="font-extrabold text-purple-900">0</span>
-          </button>
-        </div>
-      </div>
-
-    </aside>
-
-    <!-- MAPA LEAFLET -->
-    <main class="flex-1 relative">
-      <div id="map"></div>
-    </main>
-  </div>
-
-  <!-- MODAL DE SELECCIÓN DE SECTORES MÚLTIPLES -->
-  <div id="modalSector" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
-      <div class="bg-blue-700 text-white p-3.5 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <i data-lucide="map-pin" class="w-5 h-5"></i>
-          <h3 class="font-bold text-sm">Seleccionar Sectores Registrados</h3>
-        </div>
-        <button onclick="cerrarModalSector()" class="hover:bg-blue-800 p-1 rounded transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div class="p-3 border-b bg-slate-50 flex gap-2">
-        <input type="text" id="searchSectorInput" placeholder="ESCRIBA PARA BUSCAR SECTOR..." oninput="filtrarListaSectores()"
-          class="flex-1 px-3 py-2 border border-blue-400 rounded-lg text-xs uppercase font-semibold focus:ring-2 focus:ring-blue-500 outline-none">
-        <button onclick="marcarTodosSectores(true)" class="px-2.5 py-1.5 bg-blue-100 text-blue-800 text-[10px] font-bold rounded hover:bg-blue-200">
-          MARCAR
-        </button>
-        <button onclick="marcarTodosSectores(false)" class="px-2.5 py-1.5 bg-slate-200 text-slate-700 text-[10px] font-bold rounded hover:bg-slate-300">
-          DESMARCAR
-        </button>
-      </div>
-      <div id="contenedorListaSectores" class="p-2 overflow-y-auto flex-1 divide-y divide-slate-100 space-y-1">
-        <!-- Checkboxes generados por JS -->
-      </div>
-      <div class="p-3 bg-slate-100 border-t flex justify-end gap-2">
-        <button onclick="seleccionarSectorTodos()" class="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-300">
-          TODOS
-        </button>
-        <button onclick="confirmarSectoresSeleccionados()" class="px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 shadow">
-          ACEPTAR
-        </button>
-      </div>
     </div>
-  </div>
+</div>
 
-  <script>
-    lucide.createIcons();
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
+<script>
     const URL_CENSO = "https://script.google.com/macros/s/AKfycbz-PaNW15W43wBS8AmlEHfFe4QrUnITK-8yEnvwoGUnpw7PdbpNvJhPCc4q5qDs8c3WWg/exec";
-    const URL_MONITOREO = "https://script.google.com/macros/s/AKfycbyXroqRmutduY3ytB_4ZuhPo2RgAzD4x0AS53KfnGX8EVYVUyjJrZbNNiZif7-hkkCxGA/exec";
     
-    let baseDatos = [];
-    let baseMonitoreo = {}; // Almacena datos por hoja e.g. { InaCRED: { '70000000': { fecha: '...' } } }
-    let map = null;
-    let markersLayer = L.layerGroup();
-    let drawnItems = new L.FeatureGroup();
-    let sectoresSeleccionados = new Set();
-    let filtroEtarioActivo = null;
+    // CAMBIA ESTA URL POR TU URL DE GOOGLE APPS SCRIPT REAL
+    const URL_KARDEX_WEBAPP = "https://script.google.com/macros/s/AKfycbxPYvUNKZI0rXsUiCctQ_j_r1fEOy9YJnhaQDKUMh5ItH5xA1ZYWatZJ2plrfmq8GDg-g/exec";
 
-    function togglePanelFiltros() {
-      const panel = document.getElementById('panelFiltros');
-      const btnFlotante = document.getElementById('btnAbrirPanelFlotante');
-      const overlay = document.getElementById('overlayMobile');
+    let listaKardexGlobal = [];
 
-      if (panel.classList.contains('hidden')) {
-        panel.classList.remove('hidden');
-        if (overlay) overlay.classList.remove('hidden');
-        btnFlotante.classList.add('hidden');
-      } else {
-        panel.classList.add('hidden');
-        if (overlay) overlay.classList.add('hidden');
-        btnFlotante.classList.remove('hidden');
-      }
-      lucide.createIcons();
-      setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-    }
+    window.onload = function() {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fechaAtencion').value = hoy;
+        cargarKardex();
+    };
 
-    function initModalSectores() {
-      const datalist = document.getElementById('listaSectores');
-      const opciones = Array.from(datalist.options).map(opt => opt.value);
-      renderSectoresModal(opciones);
-    }
-
-    function renderSectoresModal(lista) {
-      const cont = document.getElementById('contenedorListaSectores');
-      cont.innerHTML = "";
-      if (lista.length === 0) {
-        cont.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 font-semibold">No se encontraron sectores</div>`;
-        return;
-      }
-      lista.forEach(sec => {
-        const isChecked = sectoresSeleccionados.has(sec);
-        const label = document.createElement('label');
-        label.className = "flex items-center gap-3 p-2 hover:bg-blue-50 cursor-pointer rounded transition text-xs font-bold text-slate-700 uppercase";
-        label.innerHTML = `
-          <input type="checkbox" value="${sec}" ${isChecked ? 'checked' : ''} onchange="toggleSectorCheckbox('${sec}', this.checked)" class="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
-          <span class="flex-1">${sec}</span>
-        `;
-        cont.appendChild(label);
-      });
-    }
-
-    function toggleSectorCheckbox(sec, checked) {
-      if (checked) {
-        sectoresSeleccionados.add(sec);
-      } else {
-        sectoresSeleccionados.delete(sec);
-      }
-    }
-
-    function marcarTodosSectores(estado) {
-      const datalist = document.getElementById('listaSectores');
-      const opciones = Array.from(datalist.options).map(opt => opt.value);
-      if (estado) {
-        opciones.forEach(sec => sectoresSeleccionados.add(sec));
-      } else {
-        sectoresSeleccionados.clear();
-      }
-      filtrarListaSectores();
-    }
-
-    function filtrarListaSectores() {
-      const q = document.getElementById('searchSectorInput').value.trim().toLowerCase();
-      const datalist = document.getElementById('listaSectores');
-      const opciones = Array.from(datalist.options).map(opt => opt.value);
-      const filtradas = opciones.filter(opt => opt.toLowerCase().includes(q));
-      renderSectoresModal(filtradas);
-    }
-
-    function abrirModalSector() {
-      document.getElementById('modalSector').classList.remove('hidden');
-      document.getElementById('searchSectorInput').value = "";
-      filtrarListaSectores();
-      document.getElementById('searchSectorInput').focus();
-    }
-
-    function cerrarModalSector() {
-      document.getElementById('modalSector').classList.add('hidden');
-    }
-
-    function seleccionarSectorTodos() {
-      sectoresSeleccionados.clear();
-      document.getElementById('f_sector').value = "";
-      cerrarModalSector();
-      aplicarFiltros();
-    }
-
-    function confirmarSectoresSeleccionados() {
-      const arraySectores = Array.from(sectoresSeleccionados);
-      if (arraySectores.length === 0) {
-        document.getElementById('f_sector').value = "";
-      } else {
-        document.getElementById('f_sector').value = arraySectores.join(', ');
-      }
-      cerrarModalSector();
-      aplicarFiltros();
-    }
-
-    function cambiarTipoMonitoreo() {
-      const tipo = document.getElementById('f_tipo_monitoreo').value;
-      const contVacuna = document.getElementById('contenedorFiltroVacuna');
-      const contFechas = document.getElementById('contenedorFechasMonitoreo');
-
-      if (tipo === "InaVAC") {
-        contVacuna.classList.remove('hidden');
-      } else {
-        contVacuna.classList.add('hidden');
-      }
-
-      if (tipo !== "") {
-        contFechas.classList.remove('hidden');
-        cargarMonitoreoHoja(tipo);
-      } else {
-        contFechas.classList.add('hidden');
-        aplicarFiltros();
-      }
-    }
-
-    async function cargarMonitoreoHoja(hojaNombre) {
-      if (baseMonitoreo[hojaNombre]) {
-        aplicarFiltros();
-        return;
-      }
-      document.getElementById('badgeConteo').textContent = `Cargando ${hojaNombre}...`;
-      try {
-        const response = await fetch(`${URL_MONITOREO}?action=obtenerMonitoreo&hoja=${encodeURIComponent(hojaNombre)}`);
-        const result = await response.json();
-
-        if (result && result.status === "ok") {
-          baseMonitoreo[hojaNombre] = {};
-          (result.data || []).forEach(row => {
-            const dniStr = row.dni ? row.dni.toString().trim() : "";
-            if (dniStr) {
-              baseMonitoreo[hojaNombre][dniStr] = {
-                valB: row.valB || "", // Fecha u otra información de col B
-                valC: row.valC || ""
-              };
-            }
-          });
-          aplicarFiltros();
-        } else {
-          baseMonitoreo[hojaNombre] = {};
-          aplicarFiltros();
-        }
-      } catch (e) {
-        console.error(`Error al cargar monitoreo ${hojaNombre}:`, e);
-        baseMonitoreo[hojaNombre] = {};
-        aplicarFiltros();
-      }
-    }
-
-    function toggleFiltroEtario(grupo) {
-      const botones = ['ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'];
-      
-      if (filtroEtarioActivo === grupo) {
-        filtroEtarioActivo = null;
-      } else {
-        filtroEtarioActivo = grupo;
-      }
-
-      botones.forEach(b => {
-        const btn = document.getElementById(`btn_etario_${b}`);
-        if (b === filtroEtarioActivo) {
-          btn.classList.add('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
-        } else {
-          btn.classList.remove('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
-        }
-      });
-
-      aplicarFiltros();
-    }
-
-    function initMap() {
-      map = L.map('map').setView([-9.288639, -76.008830], 14);
-
-      const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        attribution: '&copy; Google Maps'
-      });
-
-      const callejero = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      });
-
-      googleHybrid.addTo(map);
-
-      const baseMaps = {
-        "Satelital HD (Google Earth)": googleHybrid,
-        "Callejero": callejero
-      };
-
-      L.control.layers(baseMaps).addTo(map);
-      markersLayer.addTo(map);
-      map.addLayer(drawnItems);
-
-      const drawControl = new L.Control.Draw({
-        draw: {
-          polygon: true,
-          rectangle: true,
-          circle: true,
-          polyline: false,
-          marker: false,
-          circlemarker: false
-        },
-        edit: {
-          featureGroup: drawnItems,
-          remove: true
-        }
-      });
-      map.addControl(drawControl);
-
-      map.on(L.Draw.Event.CREATED, function (e) {
-        drawnItems.clearLayers();
-        drawnItems.addLayer(e.layer);
-        aplicarFiltros();
-      });
-
-      map.on(L.Draw.Event.EDITED, function () {
-        aplicarFiltros();
-      });
-
-      map.on(L.Draw.Event.DELETED, function () {
-        aplicarFiltros();
-      });
-
-      if (window.innerWidth < 768) {
-        document.getElementById('panelFiltros').classList.add('hidden');
-        document.getElementById('btnAbrirPanelFlotante').classList.remove('hidden');
-      }
-
-      initModalSectores();
-      cargarBaseDatos();
-    }
-
-    async function cargarBaseDatos() {
-      document.getElementById('badgeConteo').textContent = "Cargando...";
-      try {
-        const response = await fetch(`${URL_CENSO}?action=obtenerTodosMapas`);
-        const result = await response.json();
-
-        if (result && result.status === "ok") {
-          baseDatos = result.data || [];
-          aplicarFiltros();
-        } else {
-          document.getElementById('badgeConteo').textContent = "0 Registros";
-        }
-      } catch (error) {
-        console.error("Error al cargar mapa:", error);
-        document.getElementById('badgeConteo').textContent = "Error de conexión";
-      }
-    }
-
-    function parseFechaPeruana(strFecha) {
-      if (!strFecha) return null;
-      if (strFecha.includes('-')) {
-        const partes = strFecha.split('-');
-        if (partes[0].length === 4) return new Date(strFecha);
-      }
-      const partes = strFecha.split('/');
-      if (partes.length === 3) {
-        return new Date(partes[2], partes[1] - 1, partes[0]);
-      }
-      return null;
-    }
-
-    function calcularEdad(strFecha) {
-      const fn = parseFechaPeruana(strFecha);
-      if (!fn || isNaN(fn.getTime())) return null;
-      const hoy = new Date();
-      let edad = hoy.getFullYear() - fn.getFullYear();
-      const m = hoy.getMonth() - fn.getMonth();
-      if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) {
-        edad--;
-      }
-      return edad;
-    }
-
-    function obtenerTextoEdadDetallada(strFecha) {
-      const edad = calcularEdad(strFecha);
-      if (edad === null) return 'S/I';
-      
-      if (edad === 0) {
-        const fn = parseFechaPeruana(strFecha);
-        const hoy = new Date();
-        let meses = (hoy.getFullYear() - fn.getFullYear()) * 12 + (hoy.getMonth() - fn.getMonth());
-        if (hoy.getDate() < fn.getDate()) {
-          meses--;
-        }
-        if (meses < 0) meses = 0;
-        return `0 años ( ${meses} meses )`;
-      }
-      
-      return `${edad} años`;
-    }
-
-    function sumarMesesAFecha(strFecha, mesesASumar = 7) {
-      const d = parseFechaPeruana(strFecha);
-      if (!d) return strFecha || '-';
-      d.setMonth(d.getMonth() + mesesASumar);
-      const dia = String(d.getDate()).padStart(2, '0');
-      const mes = String(d.getMonth() + 1).padStart(2, '0');
-      const anio = d.getFullYear();
-      return `${dia}/${mes}/${anio}`;
-    }
-
-    function actualizarInfoEdad() {
-      const fnDesdeStr = document.getElementById('f_fn_desde').value;
-      const fnHastaStr = document.getElementById('f_fn_hasta').value;
-      const badge = document.getElementById('badgeEdadEquivalente');
-      const texto = document.getElementById('textoEdadEquivalente');
-
-      if (!fnDesdeStr && !fnHastaStr) {
-        badge.classList.add('hidden');
-        return;
-      }
-
-      let edadMin = null;
-      let edadMax = null;
-
-      if (fnHastaStr) edadMin = calcularEdad(fnHastaStr);
-      if (fnDesdeStr) edadMax = calcularEdad(fnDesdeStr);
-
-      badge.classList.remove('hidden');
-
-      if (edadMin !== null && edadMax !== null) {
-        if (edadMin > edadMax) {
-          const temp = edadMin; edadMin = edadMax; edadMax = temp;
-        }
-        texto.textContent = `Edades filtradas: ${edadMin} a ${edadMax} años`;
-      } else if (edadMin !== null) {
-        texto.textContent = `Edades filtradas: Desde ${edadMin} años`;
-      } else if (edadMax !== null) {
-        texto.textContent = `Edades filtradas: Hasta ${edadMax} años`;
-      }
-      lucide.createIcons();
-    }
-
-    function normalizarMz(mzStr) {
-      if (!mzStr) return "";
-      return mzStr.toString().toLowerCase().replace(/mz|\.|\s/g, '').trim();
-    }
-
-    // Filtrar y Renderizar los marcadores
-    function aplicarFiltros() {
-      const ffamiliar = document.getElementById('f_ffamiliar').value.trim().toLowerCase();
-      
-      const arraySectoresInput = Array.from(sectoresSeleccionados).map(s => s.toLowerCase());
-
-      const mzInputRaw = document.getElementById('f_mz').value.trim();
-      const arrayMzInput = mzInputRaw ? mzInputRaw.split(',').map(m => normalizarMz(m)).filter(m => m !== "") : [];
-
-      const dni = document.getElementById('f_dni').value.trim().toLowerCase();
-      const nombre = document.getElementById('f_nombre').value.trim().toLowerCase();
-
-      const fnDesdeStr = document.getElementById('f_fn_desde').value;
-      const fnHastaStr = document.getElementById('f_fn_hasta').value;
-
-      const dateDesde = fnDesdeStr ? new Date(fnDesdeStr) : null;
-      const dateHasta = fnHastaStr ? new Date(fnHastaStr) : null;
-
-      // Filtros de Monitoreo
-      const tipoMon = document.getElementById('f_tipo_monitoreo').value;
-      const nombreVacuna = document.getElementById('f_nombre_vacuna').value.trim().toLowerCase();
-      const monDesdeStr = document.getElementById('f_mon_desde').value;
-      const monHastaStr = document.getElementById('f_mon_hasta').value;
-
-      const dateMonDesde = monDesdeStr ? new Date(monDesdeStr) : null;
-      const dateMonHasta = monHastaStr ? new Date(monHastaStr) : null;
-
-      markersLayer.clearLayers();
-
-      const filtrados = baseDatos.filter(item => {
-        const itemDni = item.dni ? item.dni.toString().trim() : "";
-
-        // Filtro estricto por Módulo de Monitoreo
-        if (tipoMon) {
-          const datosHoja = baseMonitoreo[tipoMon];
-          if (!datosHoja || !datosHoja[itemDni]) return false;
-
-          const regMon = datosHoja[itemDni];
-
-          // Subfiltro de Vacuna Pendiente
-          if (tipoMon === "InaVAC" && nombreVacuna) {
-            if (!regMon.valB || !regMon.valB.toLowerCase().includes(nombreVacuna)) return false;
-          }
-
-          // Subfiltro por Rango de Fechas del Monitoreo
-          if (dateMonDesde || dateMonHasta) {
-            let fechaMonStr = regMon.valB;
-            // Para AnemiaInfantil se evalúa sobre la fecha de Alta calculada (+7 meses) o la fecha inicio
-            const fechaMonObj = parseFechaPeruana(fechaMonStr);
-            if (!fechaMonObj) return false;
-
-            if (dateMonDesde && fechaMonObj < dateMonDesde) return false;
-            if (dateMonHasta && fechaMonObj > dateMonHasta) return false;
-          }
-        }
-
-        if (ffamiliar && (!item.ffamiliar || !item.ffamiliar.toString().toLowerCase().includes(ffamiliar))) return false;
+    function buscarPaciente() {
+        let dni = document.getElementById('dni').value.trim();
+        if(!dni) return Swal.fire("Atención", "Ingrese un número de DNI", "warning");
         
-        if (arraySectoresInput.length > 0) {
-          if (!item.sector) return false;
-          const itemSector = item.sector.toString().toLowerCase();
-          const coincideSector = arraySectoresInput.some(sec => itemSector.includes(sec));
-          if (!coincideSector) return false;
+        Swal.fire({ title: 'Buscando en el Censo...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+        
+        fetch(`${URL_CENSO}?dni=${dni}`)
+            .then(res => res.json())
+            .then(data => {
+                Swal.close();
+                if (data.status === "error" || !data.nombreB) {
+                    Swal.fire("No encontrado en Censo", "El DNI no está en el censo. Puede registrar sus datos manualmente en los campos de abajo.", "info");
+                    document.getElementById('nombres').focus();
+                } else {
+                    document.getElementById('nombres').value = data.nombreB;
+                    document.getElementById('sector').value = data.sector || '';
+                    document.getElementById('telefono').value = data.telefono || '';
+                }
+            })
+            .catch(() => {
+                Swal.close();
+                Swal.fire("Aviso", "No se pudo conectar con el Censo. Ingrese los datos de forma manual.", "info");
+            });
+    }
+
+    function cargarKardex() {
+        const tbody = document.getElementById('cuerpoKardex');
+        tbody.innerHTML = '<tr><td colspan="18" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Cargando Kardex (AnemiaInfantil)...</td></tr>';
+        
+        fetch(`${URL_KARDEX_WEBAPP}?action=obtenerMonitoreo&hoja=AnemiaInfantil`)
+            .then(res => res.json())
+            .then(response => {
+                if(response.status === "ok") {
+                    listaKardexGlobal = (response.data || []).map(item => ({
+                        dni: item.dni,
+                        meses: [item.valB, "", "", "", "", "", ""], 
+                        nombres: item.valC, 
+                        sector: "",
+                        telefono: "",
+                        hbs: [],
+                        clasificacion: "",
+                        cita: ""
+                    }));
+                    dibujarTabla(listaKardexGlobal);
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="18" class="text-center text-danger">Error: ${response.message || 'No se pudieron obtener los datos'}</td></tr>`;
+                }
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="18" class="text-center text-danger">Error al conectar con el servidor de Google Apps Script</td></tr>';
+            });
+    }
+
+    function dibujarTabla(datos) {
+        const tbody = document.getElementById('cuerpoKardex');
+        tbody.innerHTML = "";
+        
+        if (!datos || datos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="18" class="text-center text-muted">No hay registros en el Kardex</td></tr>';
+            return;
         }
 
-        if (arrayMzInput.length > 0) {
-          const itemMz = normalizarMz(item.mz);
-          const coincideMz = arrayMzInput.some(m => itemMz === m);
-          if (!coincideMz) return false;
-        }
+        const hoy = new Date();
 
-        if (dni && (!item.dni || !item.dni.toString().toLowerCase().includes(dni))) return false;
-        if (nombre && (!item.nombreB || !item.nombreB.toString().toLowerCase().includes(nombre))) return false;
+        datos.forEach((p) => {
+            let ultimaFecha = null;
+            let arrayFechasVerificar = [
+                p.meses?.[0], p.meses?.[1], p.meses?.[2], 
+                p.meses?.[3], p.meses?.[4], p.meses?.[5], p.meses?.[6]
+            ];
 
-        if (dateDesde || dateHasta) {
-          const fnFecha = parseFechaPeruana(item.fn);
-          if (!fnFecha) return false;
-          if (dateDesde && fnFecha < dateDesde) return false;
-          if (dateHasta && fnFecha > dateHasta) return false;
-        }
-
-        if (filtroEtarioActivo) {
-          const edad = calcularEdad(item.fn);
-          if (edad === null) return false;
-          if (filtroEtarioActivo === 'ninos' && edad >= 12) return false;
-          if (filtroEtarioActivo === 'adolescentes' && (edad < 12 || edad > 17)) return false;
-          if (filtroEtarioActivo === 'jovenes' && (edad < 18 || edad > 29)) return false;
-          if (filtroEtarioActivo === 'adultos' && (edad < 30 || edad > 59)) return false;
-          if (filtroEtarioActivo === 'ancianos' && edad < 60) return false;
-        }
-
-        return true;
-      });
-
-      actualizarEstadisticas(filtrados);
-
-      const gruposCoordenadas = {};
-
-      filtrados.forEach((item) => {
-        if (!item.georeferencia) return;
-        const strGeoref = item.georeferencia.toString().replace(/;/g, ',').replace(/\s+/g, '');
-        const coords = strGeoref.split(',');
-        if (coords.length >= 2) {
-          const lat = parseFloat(coords[0].replace(',', '.'));
-          const lng = parseFloat(coords[1].replace(',', '.'));
-
-          if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
-            const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
-            if (!gruposCoordenadas[key]) {
-              gruposCoordenadas[key] = { lat, lng, ffamiliar: item.ffamiliar, integrantes: [] };
+            for (let i = arrayFechasVerificar.length - 1; i >= 0; i--) {
+                if (arrayFechasVerificar[i]) {
+                    ultimaFecha = new Date(arrayFechasVerificar[i] + "T00:00:00");
+                    break;
+                }
             }
-            gruposCoordenadas[key].integrantes.push(item);
-          }
-        }
-      });
 
-      const bounds = [];
-      let totalPersonasEnFigura = 0;
-      let totalPuntosEnFigura = 0;
+            let fechaCitaStr = "---";
+            let clasificacion = "---";
+            let claseClasificacion = "";
 
-      Object.values(gruposCoordenadas).forEach(grupo => {
-        if (drawnItems.getLayers().length > 0) {
-          let dentro = false;
-          const pt = L.latLng(grupo.lat, grupo.lng);
-          drawnItems.eachLayer(layer => {
-            if (layer instanceof L.Circle) {
-              if (layer.getLatLng().distanceTo(pt) <= layer.getRadius()) dentro = true;
-            } else if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-              if (layer.getBounds().contains(pt)) dentro = true;
+            if (ultimaFecha && !isNaN(ultimaFecha)) {
+                let fechaCitaObj = new Date(ultimaFecha);
+                fechaCitaObj.setDate(fechaCitaObj.getDate() + 30);
+                fechaCitaStr = fechaCitaObj.toLocaleDateString('es-ES');
+
+                if (hoy > fechaCitaObj) {
+                    clasificacion = "Inasistente";
+                    claseClasificacion = "text-danger fw-bold";
+                } else {
+                    clasificacion = "Puntual";
+                    claseClasificacion = "text-success fw-bold";
+                }
             }
-          });
-          if (!dentro) return;
-        }
 
-        totalPuntosEnFigura++;
-        totalPersonasEnFigura += grupo.integrantes.length;
-        bounds.push([grupo.lat, grupo.lng]);
+            let fila = `<tr>
+                <td class="fw-bold">${p.dni || ''}</td>`;
 
-        let countNinos = 0, countAdolescentes = 0, countJovenes = 0, countAdultos = 0, countAncianos = 0;
-
-        grupo.integrantes.forEach(ing => {
-          const edad = calcularEdad(ing.fn);
-          if (edad !== null) {
-            if (edad < 12) countNinos++;
-            else if (edad <= 17) countAdolescentes++;
-            else if (edad <= 29) countJovenes++;
-            else if (edad <= 59) countAdultos++;
-            else countAncianos++;
-          }
-        });
-
-        let popupContent = `
-          <div class="custom-popup font-sans text-xs">
-            <div class="bg-blue-800 text-white p-2.5 flex justify-between items-center">
-              <div>
-                <span class="text-[10px] uppercase text-blue-200 block font-bold">Ficha Familiar</span>
-                <span class="font-bold text-sm">${grupo.ffamiliar || 'S/N'}</span>
-              </div>
-              <span class="text-[10px] bg-emerald-500 text-slate-900 font-extrabold px-2 py-0.5 rounded-full">${grupo.integrantes.length} Integrante(s)</span>
-            </div>
-
-            <div class="p-2 bg-slate-100 border-b border-slate-200 text-[10px] text-slate-700">
-              <p><strong>Sector:</strong> ${grupo.integrantes[0].sector || '-'}</p>
-              <p><strong>Ref / Mz:</strong> ${grupo.integrantes[0].ref_direccion || '-'} (Mz ${grupo.integrantes[0].mz || '-'})</p>
-            </div>
-
-            <div class="p-2 bg-blue-50 border-b border-blue-100 text-[10px] grid grid-cols-3 gap-1 text-center font-bold">
-              <span class="text-emerald-700">Niños: ${countNinos}</span>
-              <span class="text-teal-700">Adol: ${countAdolescentes}</span>
-              <span class="text-blue-700">Jóv: ${countJovenes}</span>
-              <span class="text-indigo-700">Adult: ${countAdultos}</span>
-              <span class="text-purple-700 col-span-2">Ancianos (60+): ${countAncianos}</span>
-            </div>
-
-            <div class="p-2 space-y-2 max-h-48 overflow-y-auto">
-        `;
-
-        grupo.integrantes.forEach(ing => {
-          const edadTxt = obtenerTextoEdadDetallada(ing.fn);
-          const tel = ing.telefono ? ing.telefono.toString().trim() : '';
-          const ingDni = ing.dni ? ing.dni.toString().trim() : '';
-
-          // Detalle extra de monitoreo
-          let htmlMonitoreoInfo = "";
-          if (tipoMon && baseMonitoreo[tipoMon] && baseMonitoreo[tipoMon][ingDni]) {
-            const regM = baseMonitoreo[tipoMon][ingDni];
-            if (tipoMon === "AnemiaInfantil") {
-              const fechaAlta = sumarMesesAFecha(regM.valB, 7);
-              htmlMonitoreoInfo = `<p class="text-[10px] bg-red-100 text-red-800 p-1 rounded font-bold mt-1">🔴 Anemia Inicio: ${regM.valB || '-'} | Alta (+7m): ${fechaAlta}</p>`;
-            } else if (tipoMon === "InaVAC") {
-              htmlMonitoreoInfo = `<p class="text-[10px] bg-amber-100 text-amber-900 p-1 rounded font-bold mt-1">💉 Vacuna Pendiente: ${regM.valB || '-'}</p>`;
-            } else if (tipoMon === "Gestante") {
-              htmlMonitoreoInfo = `<p class="text-[10px] bg-purple-100 text-purple-900 p-1 rounded font-bold mt-1">🤰 Gestante FPP: ${regM.valB || '-'}</p>`;
+            let valMes1 = (p.meses && p.meses[0]) ? p.meses[0] : "";
+            if (valMes1) {
+                fila += `<td class="text-center"><span class="fecha-click" onclick="editarCelda('${p.dni}', 0)">${valMes1}</span></td>`;
             } else {
-              htmlMonitoreoInfo = `<p class="text-[10px] bg-amber-100 text-amber-900 p-1 rounded font-bold mt-1">⚠️ ${tipoMon}: ${regM.valB || 'Registrado'}</p>`;
+                fila += `<td class="mes-vacio" onclick="registrarCelda('${p.dni}', 0)">---</td>`;
             }
-          }
 
-          popupContent += `
-            <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm text-[11px] space-y-1">
-              <p class="font-bold text-blue-900 uppercase">${ing.nombreB || 'SIN NOMBRE'}</p>
-              <p class="text-slate-600"><strong>DNI:</strong> ${ing.dni || '-'} | <strong>Edad:</strong> ${edadTxt}</p>
-              <p class="text-slate-600"><strong>HC:</strong> ${ing.hclinica || '-'} | <strong>Tel:</strong> ${tel || '-'}</p>
-              ${htmlMonitoreoInfo}
-          `;
+            fila += `<td class="text-uppercase">${p.nombres || ''}</td>
+                <td>${p.sector || ''}</td>
+                <td>${p.telefono || ''}</td>`;
 
-          if (tel) {
-            popupContent += `
-              <div class="flex gap-1.5 pt-1">
-                <a href="tel:${tel}" class="flex-1 bg-blue-600 text-white text-[10px] font-bold py-1 rounded text-center flex items-center justify-center gap-1 hover:bg-blue-700">
-                  <i data-lucide="phone" class="w-3 h-3"></i> Llamar
-                </a>
-                <a href="https://wa.me/51${tel}" target="_blank" class="flex-1 bg-emerald-600 text-white text-[10px] font-bold py-1 rounded text-center flex items-center justify-center gap-1 hover:bg-emerald-700">
-                  <i data-lucide="message-circle" class="w-3 h-3"></i> WhatsApp
-                </a>
-              </div>
-            `;
-          }
+            for (let i = 1; i < 7; i++) {
+                let valMes = (p.meses && p.meses[i]) ? p.meses[i] : "";
+                if (valMes) {
+                    fila += `<td class="text-center"><span class="fecha-click" onclick="editarCelda('${p.dni}', ${i})">${valMes}</span></td>`;
+                } else {
+                    fila += `<td class="mes-vacio" onclick="registrarCelda('${p.dni}', ${i})">---</td>`;
+                }
+            }
 
-          popupContent += `</div>`;
+            for (let i = 0; i < 5; i++) {
+                let valHb = (p.hbs && p.hbs[i] !== undefined) ? p.hbs[i] : "";
+                fila += `<td class="text-center">${valHb}</td>`;
+            }
+
+            fila += `<td class="text-center ${claseClasificacion}">${clasificacion}</td>`;
+            fila += `<td class="text-center fw-bold text-primary">${fechaCitaStr}</td>`;
+            fila += `</tr>`;
+
+            tbody.innerHTML += fila;
         });
-
-        popupContent += `</div></div>`;
-
-        const marker = L.marker([grupo.lat, grupo.lng]).bindPopup(popupContent);
-        marker.on('popupopen', () => lucide.createIcons());
-        markersLayer.addLayer(marker);
-      });
-
-      if (drawnItems.getLayers().length > 0) {
-        drawnItems.eachLayer(layer => {
-          let labelText = "";
-          if (layer instanceof L.Circle) {
-            const radio = layer.getRadius();
-            const radioTxt = radio >= 1000 ? `${(radio / 1000).toFixed(2)} km` : `${Math.round(radio)} m`;
-            labelText = `📍 Radio: ${radioTxt} | 👥 Personas: ${totalPersonasEnFigura} (${totalPuntosEnFigura} familias)`;
-          } else if (layer instanceof L.Polygon || layer instanceof L.Rectangle) {
-            labelText = `📐 Zona seleccionada | 👥 Personas: ${totalPersonasEnFigura} (${totalPuntosEnFigura} familias)`;
-          }
-
-          if (labelText) {
-            layer.unbindTooltip();
-            layer.bindTooltip(labelText, {
-              permanent: true,
-              direction: 'top',
-              className: 'draw-tooltip'
-            }).openTooltip();
-          }
-        });
-      }
-
-      document.getElementById('badgeConteo').textContent = `${filtrados.length} Persona(s) (${bounds.length} Puntos)`;
-
-      if (bounds.length > 0) {
-        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 17 });
-      }
     }
 
-    function actualizarEstadisticas(lista) {
-      let ninos = 0, adolescentes = 0, jovenes = 0, adultos = 0, ancianos = 0;
+    function registrarCelda(dni, mesIndex) {
+        document.getElementById('dni').value = dni;
+        document.getElementById('mesSeleccionado').value = mesIndex;
+        buscarPaciente();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-      lista.forEach(item => {
-        const edad = calcularEdad(item.fn);
-        if (edad !== null) {
-          if (edad < 12) ninos++;
-          else if (edad <= 17) adolescentes++;
-          else if (edad <= 29) jovenes++;
-          else if (edad <= 59) adultos++;
-          else ancianos++;
+    function editarCelda(dni, mesIndex) {
+        registrarCelda(dni, mesIndex);
+        Swal.fire("Modo Edición", "Seleccione la nueva fecha y nivel de Hb para actualizar este mes.", "info");
+    }
+
+    function filtrarTablaLocal() {
+        let texto = document.getElementById('filtroTabla').value.toUpperCase().trim();
+        let filtrados = listaKardexGlobal.filter(p => 
+            (p.nombres && p.nombres.toUpperCase().includes(texto)) || 
+            (p.dni && p.dni.toString().includes(texto))
+        );
+        dibujarTabla(filtrados);
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('kardexForm').reset();
+        document.getElementById('pacienteId').value = "";
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fechaAtencion').value = hoy;
+    }
+
+    function exportarExcel() {
+        if (!listaKardexGlobal || listaKardexGlobal.length === 0) {
+            return Swal.fire("Sin datos", "No hay registros en el Kardex para exportar.", "warning");
         }
-      });
 
-      document.getElementById('stat_total').textContent = `${lista.length} pers.`;
-      document.getElementById('stat_ninos').textContent = ninos;
-      document.getElementById('stat_adolescentes').textContent = adolescentes;
-      document.getElementById('stat_jovenes').textContent = jovenes;
-      document.getElementById('stat_adultos').textContent = adultos;
-      document.getElementById('stat_ancianos').textContent = ancianos;
+        const datosExport = listaKardexGlobal.map(p => ({
+            "DNI": p.dni,
+            "MES-1": p.meses?.[0] || "",
+            "Nombres y Apellidos": p.nombres,
+            "Sector": p.sector,
+            "Teléfono": p.telefono,
+            "MES-2": p.meses?.[1] || "",
+            "MES-3": p.meses?.[2] || "",
+            "MES-4": p.meses?.[3] || "",
+            "MES-5": p.meses?.[4] || "",
+            "MES-6": p.meses?.[5] || "",
+            "MES-ALTA": p.meses?.[6] || "",
+            "Hb-1": p.hbs?.[0] || "",
+            "Hb-2": p.hbs?.[1] || "",
+            "Hb-3": p.hbs?.[2] || "",
+            "Hb-4": p.hbs?.[3] || "",
+            "Hb-5": p.hbs?.[4] || "",
+            "Clasificación": p.clasificacion || "",
+            "Cita": p.cita || ""
+        }));
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(datosExport);
+        XLSX.utils.book_append_sheet(wb, ws, "Kardex Anemia");
+        XLSX.writeFile(wb, "Kardex_Seguimiento_Anemia.xlsx");
     }
 
-    function limpiarFiltros() {
-      document.getElementById('f_tipo_monitoreo').value = "";
-      document.getElementById('f_nombre_vacuna').value = "";
-      document.getElementById('f_mon_desde').value = "";
-      document.getElementById('f_mon_hasta').value = "";
-      document.getElementById('contenedorFiltroVacuna').classList.add('hidden');
-      document.getElementById('contenedorFechasMonitoreo').classList.add('hidden');
+    document.getElementById('kardexForm').onsubmit = function(e) {
+        e.preventDefault();
 
-      document.getElementById('f_ffamiliar').value = "";
-      document.getElementById('f_sector').value = "";
-      sectoresSeleccionados.clear();
-      document.getElementById('f_mz').value = "";
-      document.getElementById('f_dni').value = "";
-      document.getElementById('f_nombre').value = "";
-      document.getElementById('f_fn_desde').value = "";
-      document.getElementById('f_fn_hasta').value = "";
-      document.getElementById('badgeEdadEquivalente').classList.add('hidden');
-      filtroEtarioActivo = null;
-      ['ninos', 'adolescentes', 'jovenes', 'adultos', 'ancianos'].forEach(b => {
-        document.getElementById(`btn_etario_${b}`).classList.remove('ring-2', 'ring-blue-600', 'shadow-md', 'scale-[1.02]');
-      });
-      drawnItems.clearLayers();
-      aplicarFiltros();
-    }
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled = true;
+        btn.innerHTML = "Guardando... <i class='fas fa-spinner fa-spin ms-2'></i>";
 
-    window.onload = initMap;
-  </script>
+        const datos = {
+            action: "guardarAnemia",
+            hoja: "AnemiaInfantil",
+            dni: document.getElementById('dni').value,
+            nombres: document.getElementById('nombres').value.toUpperCase(),
+            sector: document.getElementById('sector').value.toUpperCase(),
+            telefono: document.getElementById('telefono').value,
+            mesIndex: document.getElementById('mesSeleccionado').value,
+            fechaAtencion: document.getElementById('fechaAtencion').value,
+            nivelHb: document.getElementById('nivelHb').value
+        };
+
+        const params = new URLSearchParams(datos).toString();
+
+        fetch(`${URL_KARDEX_WEBAPP}?${params}`, { method: 'GET' })
+            .then(res => res.json())
+            .then(() => {
+                Swal.fire("¡Éxito!", "Registro guardado correctamente en AnemiaInfantil", "success");
+                limpiarFormulario();
+                cargarKardex();
+            })
+            .catch(() => {
+                Swal.fire("Aviso", "Petición enviada. Actualice la tabla para verificar los cambios.", "success");
+                limpiarFormulario();
+                cargarKardex();
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = "Guardar en Kardex <i class='fas fa-save ms-2'></i>";
+            });
+    };
+</script>
 </body>
 </html>
