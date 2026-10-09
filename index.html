@@ -27,7 +27,7 @@
         .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.15); }
         .form-control[readonly] { background-color: #edf2f7; color: #4a5568; }
         .form-label { font-weight: 600; font-size: 0.9rem; color: #4a5568; margin-bottom: 6px; }
-        .table-kardex { font-size: 0.82rem; min-width: 1400px; }
+        .table-kardex { font-size: 0.82rem; min-width: 1700px; }
         .table-kardex th { background: #2d3748 !important; color: white !important; text-align: center; vertical-align: middle; padding: 10px; }
         .fecha-click { color: #3182ce; text-decoration: underline; cursor: pointer; font-weight: bold; }
         .mes-vacio { color: #a0aec0; font-style: italic; font-size: 0.75rem; text-align: center; cursor: pointer; }
@@ -48,7 +48,7 @@
                     <input type="hidden" id="pacienteId" value="">
 
                     <div class="row mb-3 g-3">
-                        <div class="col-md-4 col-12">
+                        <div class="col-md-3 col-12">
                             <label class="form-label">Consultar por DNI (Col. A)</label>
                             <div class="input-group">
                                 <input type="text" id="dni" class="form-control" placeholder="Ingrese DNI..." required maxlength="8" pattern="\d*" onblur="verificarDniExistente()">
@@ -59,18 +59,22 @@
                             <label class="form-label">Nombres y Apellidos (Col. C) <span class="badge bg-secondary">Bloqueado</span></label>
                             <input type="text" id="nombres" class="form-control" required readonly style="text-transform: uppercase; font-weight: 600;">
                         </div>
-                        <div class="col-md-4 col-12">
+                        <div class="col-md-3 col-12">
                             <label class="form-label">Sector (Col. D) <span class="badge bg-secondary">Bloqueado</span></label>
                             <input type="text" id="sector" class="form-control" readonly style="text-transform: uppercase;">
+                        </div>
+                        <div class="col-md-2 col-12">
+                            <label class="form-label">Teléfono (Col. E) <span class="badge bg-secondary">Bloqueado</span></label>
+                            <input type="text" id="telefono" class="form-control" readonly>
                         </div>
                     </div>
 
                     <div class="row mb-4 g-3">
-                        <div class="col-md-4 col-12">
-                            <label class="form-label">Teléfono (Col. E) <span class="badge bg-secondary">Bloqueado</span></label>
-                            <input type="text" id="telefono" class="form-control" readonly>
+                        <div class="col-md-3 col-12">
+                            <label class="form-label">Fecha Nacimiento (Col. S) <span class="badge bg-secondary">Bloqueado</span></label>
+                            <input type="date" id="fechaNac" class="form-control" readonly>
                         </div>
-                        <div class="col-md-4 col-12">
+                        <div class="col-md-3 col-12">
                             <label class="form-label">Mes a Registrar / Actualizar</label>
                             <select id="mesSeleccionado" class="form-select" required>
                                 <option value="">Seleccione mes...</option>
@@ -90,6 +94,30 @@
                         <div class="col-md-2 col-6">
                             <label class="form-label">Nivel Hb (g/dL)</label>
                             <input type="number" step="0.1" id="nivelHb" class="form-control" placeholder="Ej. 12.5">
+                        </div>
+                        <div class="col-md-2 col-12">
+                            <label class="form-label">Personal Responsable</label>
+                            <select id="responsableAtencion" class="form-select" required>
+                                <option value="">Seleccione...</option>
+                                <option value="22506580 - JOSE LUIS LOPEZ MARIANO">22506580 - JOSE LUIS LOPEZ MARIANO</option>
+                                <option value="22978636 - VIVIANA GARCIA RAMIREZ">22978636 - VIVIANA GARCIA RAMIREZ</option>
+                                <option value="23009124 - ROSA FLORES REYES">23009124 - ROSA FLORES REYES</option>
+                                <option value="23018154 - JUDITH CASILDA MARCELLINI MORALES DE CAMONES">23018154 - JUDITH CASILDA MARCELLINI MORALES DE CAMONES</option>
+                                <option value="40033810 - TEOFILA LOPEZ ISIDRO">40033810 - TEOFILA LOPEZ ISIDRO</option>
+                                <option value="40362462 - MARCO ANTONIO HUERTA PEÑA">40362462 - MARCO ANTONIO HUERTA PEÑA</option>
+                                <option value="41009174 - IRENE MURRIETA PANDURO">41009174 - IRENE MURRIETA PANDURO</option>
+                                <option value="41142048 - ROGER RAUL JARA HUALCAS">41142048 - ROGER RAUL JARA HUALCAS</option>
+                                <option value="42638365 - YULIANA ANGELA PEÑA IBARRA">42638365 - YULIANA ANGELA PEÑA IBARRA</option>
+                                <option value="42932337 - ARTEMIO HADLY OLIVAS INOCENTE">42932337 - ARTEMIO HADLY OLIVAS INOCENTE</option>
+                                <option value="44021545 - GUSTABO ORTIZ MORALES">44021545 - GUSTABO ORTIZ MORALES</option>
+                                <option value="44296922 - MARITZA CAMPOS SALAZAR">44296922 - MARITZA CAMPOS SALAZAR</option>
+                                <option value="44383552 - CINTHIA CAROL GARAY GAYOSO">44383552 - CINTHIA CAROL GARAY GAYOSO</option>
+                                <option value="44409723 - LEONOR MONICA CRISANTO CABRERA">44409723 - LEONOR MONICA CRISANTO CABRERA</option>
+                                <option value="45777036 - NOHEMI DEBORA LOPEZ ISIDRO">45777036 - NOHEMI DEBORA LOPEZ ISIDRO</option>
+                                <option value="47038462 - MIRIAM SOTO TORIBIO">47038462 - MIRIAM SOTO TORIBIO</option>
+                                <option value="47536980 - GEORGE JORDY ALEGRIA DURAND">47536980 - GEORGE JORDY ALEGRIA DURAND</option>
+                                <option value="70912262 - CARMEN TARAZONA FERNANDEZ">70912262 - CARMEN TARAZONA FERNANDEZ</option>
+                            </select>
                         </div>
                     </div>
 
@@ -140,10 +168,18 @@
                                 <th style="width: 60px;">Hb-5 (P)</th>
                                 <th>Clasificación (Q)</th>
                                 <th>Cita (R)</th>
+                                <th>Fecha_Nac (S)</th>
+                                <th>Resp_1 (T)</th>
+                                <th>Resp_2 (U)</th>
+                                <th>Resp_3 (V)</th>
+                                <th>Resp_4 (W)</th>
+                                <th>Resp_5 (X)</th>
+                                <th>Resp_6 (Y)</th>
+                                <th>Resp_7 (Z)</th>
                             </tr>
                         </thead>
                         <tbody id="cuerpoKardex">
-                            <tr><td colspan="19" class="text-center text-muted">Haga clic en "Actualizar Tabla" para cargar los registros</td></tr>
+                            <tr><td colspan="27" class="text-center text-muted">Haga clic en "Actualizar Tabla" para cargar los registros</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -183,10 +219,21 @@
                 document.getElementById('nombres').value = encontrado.nombres;
                 document.getElementById('sector').value = encontrado.sector;
                 document.getElementById('telefono').value = encontrado.telefono;
+                document.getElementById('fechaNac').value = convertirAFechaInputHTML(encontrado.fechaNac || "");
             } else {
                 buscarPaciente();
             }
         }
+    }
+
+    function convertirAFechaInputHTML(fechaSucia) {
+        if (!fechaSucia) return "";
+        let texto = String(fechaSucia).trim();
+        let matchLatino = texto.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (matchLatino) {
+            return `${matchLatino[3]}-${matchLatino[2].padStart(2, '0')}-${matchLatino[1].padStart(2, '0')}`;
+        }
+        return texto;
     }
 
     function buscarPaciente() {
@@ -205,6 +252,7 @@
                     document.getElementById('nombres').value = data.nombreB;
                     document.getElementById('sector').value = data.sector || '';
                     document.getElementById('telefono').value = data.telefono || '';
+                    document.getElementById('fechaNac').value = convertirAFechaInputHTML(data.fn || '');
                 }
             })
             .catch(() => {
@@ -215,7 +263,7 @@
 
     function cargarKardex() {
         const tbody = document.getElementById('cuerpoKardex');
-        tbody.innerHTML = '<tr><td colspan="19" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Cargando Kardex (AnemiaInfantil)...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="27" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Cargando Kardex (AnemiaInfantil)...</td></tr>';
         
         fetch(`${URL_KARDEX_WEBAPP}?action=obtenerMonitoreo&hoja=AnemiaInfantil`)
             .then(res => res.json())
@@ -228,16 +276,16 @@
                         sector: item.sector || "",
                         telefono: item.telefono || "",
                         hbs: item.hbs || ["", "", "", "", ""],
-                        clasificacion: "",
-                        cita: ""
+                        fechaNac: item.fechaNac || "",
+                        resps: item.resps || ["", "", "", "", "", "", ""]
                     }));
                     dibujarTabla(listaKardexGlobal);
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="19" class="text-center text-danger">Error: ${response.message || 'No se pudieron obtener los datos'}</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="27" class="text-center text-danger">Error: ${response.message || 'No se pudieron obtener los datos'}</td></tr>`;
                 }
             })
             .catch(() => {
-                tbody.innerHTML = '<tr><td colspan="19" class="text-center text-danger">Error al conectar con el servidor de Google Apps Script</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="27" class="text-center text-danger">Error al conectar con el servidor de Google Apps Script</td></tr>';
             });
     }
 
@@ -255,14 +303,13 @@
         tbody.innerHTML = "";
         
         if (!datos || datos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="19" class="text-center text-muted">No hay registros en el Kardex</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="27" class="text-center text-muted">No hay registros en el Kardex</td></tr>';
             return;
         }
 
         const hoy = new Date();
 
         datos.forEach((p) => {
-            // Validación estricta: Solo si hay fecha real en MES-ALTA (Columna K / índice 6)
             let fechaAlta = "";
             if (p.meses && p.meses[6] && p.meses[6].trim() !== "" && p.meses[6] !== "---") {
                 fechaAlta = p.meses[6];
@@ -339,8 +386,15 @@
 
             fila += `<td class="text-center ${claseClasificacion}">${clasificacion}</td>`;
             fila += `<td class="text-center fw-bold text-secondary">${fechaCitaStr}</td>`;
-            fila += `</tr>`;
+            fila += `<td class="text-center">${p.fechaNac || ''}</td>`;
 
+            // Responsables Resp_1 a Resp_7 (Columnas T a Z)
+            for (let i = 0; i < 7; i++) {
+                let valResp = (p.resps && p.resps[i]) ? p.resps[i] : "";
+                fila += `<td class="small">${valResp}</td>`;
+            }
+
+            fila += `</tr>`;
             tbody.innerHTML += fila;
         });
     }
@@ -354,7 +408,7 @@
 
     function editarCelda(dni, mesIndex) {
         registrarCelda(dni, mesIndex);
-        Swal.fire("Modo Edición", "Seleccione la nueva fecha y nivel de Hb para actualizar este mes.", "info");
+        Swal.fire("Modo Edición", "Seleccione la nueva fecha, nivel de Hb y responsable para actualizar este mes.", "info");
     }
 
     function eliminarPaciente(dni) {
@@ -423,7 +477,15 @@
             "Hb-2": p.hbs?.[1] || "",
             "Hb-3": p.hbs?.[2] || "",
             "Hb-4": p.hbs?.[3] || "",
-            "Hb-5": p.hbs?.[4] || ""
+            "Hb-5": p.hbs?.[4] || "",
+            "Fecha_Nac": p.fechaNac || "",
+            "Resp_1": p.resps?.[0] || "",
+            "Resp_2": p.resps?.[1] || "",
+            "Resp_3": p.resps?.[2] || "",
+            "Resp_4": p.resps?.[3] || "",
+            "Resp_5": p.resps?.[4] || "",
+            "Resp_6": p.resps?.[5] || "",
+            "Resp_7": p.resps?.[6] || ""
         }));
 
         const wb = XLSX.utils.book_new();
@@ -446,9 +508,11 @@
             nombres: document.getElementById('nombres').value.toUpperCase(),
             sector: document.getElementById('sector').value.toUpperCase(),
             telefono: document.getElementById('telefono').value,
+            fechaNac: document.getElementById('fechaNac').value,
             mesIndex: document.getElementById('mesSeleccionado').value,
             fechaAtencion: document.getElementById('fechaAtencion').value,
-            nivelHb: document.getElementById('nivelHb').value
+            nivelHb: document.getElementById('nivelHb').value,
+            responsable: document.getElementById('responsableAtencion').value
         };
 
         const params = new URLSearchParams(datos).toString();
