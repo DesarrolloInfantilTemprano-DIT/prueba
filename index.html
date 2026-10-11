@@ -33,7 +33,6 @@
         .mes-vacio { color: #a0aec0; font-style: italic; font-size: 0.75rem; text-align: center; cursor: pointer; }
         .mes-vacio:hover { color: var(--primary-color); background-color: #f7fafc; }
 
-        /* Colores dinámicos para las filas */
         .fila-inasistente { background-color: #fff5f5 !important; }
         .fila-puntual { background-color: #f0fff4 !important; }
         .fila-tratado { background-color: #ebf8ff !important; }
@@ -400,7 +399,6 @@
         let filtrados = listaKardexGlobal.filter(p => {
             let coincideTexto = (p.nombres && p.nombres.toUpperCase().includes(texto)) || (p.dni && p.dni.toString().includes(texto));
             
-            // Determinar clasificación provisional para el filtro
             let fechaAlta = (p.meses?.[6] && p.meses[6].trim() !== "" && p.meses[6] !== "---") ? p.meses[6] : "";
             let ultimaFecha = null;
             let arrayFechasVerificar = [p.meses?.[0], p.meses?.[1], p.meses?.[2], p.meses?.[3], p.meses?.[4], p.meses?.[5]];
@@ -494,7 +492,6 @@
                 </td>
                 <td class="fw-bold">${p.dni || ''}</td>`;
 
-            // MES-1
             let valMes1 = (p.meses && p.meses[0]) ? p.meses[0] : "";
             if (valMes1) {
                 fila += `<td class="text-center"><span class="fecha-click" onclick="editarCelda('${p.dni}', 0)">${valMes1}</span></td>`;
@@ -506,7 +503,6 @@
                 <td>${p.sector || ''}</td>
                 <td>${p.telefono || ''}</td>`;
 
-            // MES-2 al MES-ALTA (Índices 1 al 6)
             for (let i = 1; i < 7; i++) {
                 let valMes = (p.meses && p.meses[i]) ? p.meses[i] : "";
                 if (valMes) {
@@ -516,7 +512,6 @@
                 }
             }
 
-            // Niveles de Hemoglobina Hb-1 a Hb-5
             for (let i = 0; i < 5; i++) {
                 let valHb = (p.hbs && p.hbs[i] !== undefined) ? p.hbs[i] : "";
                 fila += `<td class="text-center fw-bold">${valHb}</td>`;
@@ -531,7 +526,6 @@
             fila += `<td class="text-center">${p.fechaNac || ''}</td>`;
             fila += `<td class="text-center font-monospace fw-bold text-dark">${edadActualTexto}</td>`;
 
-            // Responsables Resp_1 a Resp_7 (Columnas T a Z)
             for (let i = 0; i < 7; i++) {
                 let valResp = (p.resps && p.resps[i]) ? p.resps[i] : "";
                 fila += `<td class="small text-truncate" style="max-width: 150px;" title="${valResp}">${valResp}</td>`;
@@ -562,18 +556,14 @@
                 }
             }
 
-            let clasif = "---";
             if (fechaAlta) {
-                clasif = "TRATADO";
                 statsMap[sector].tratado++;
             } else if (ultimaFecha && !isNaN(ultimaFecha)) {
                 let fechaCitaObj = new Date(ultimaFecha);
                 fechaCitaObj.setDate(fechaCitaObj.getDate() + 30);
                 if (hoy > fechaCitaObj) {
-                    clasif = "Inasistente";
                     statsMap[sector].inasistente++;
                 } else {
-                    clasif = "Puntual";
                     statsMap[sector].puntual++;
                 }
             }
@@ -705,33 +695,62 @@
             return Swal.fire("Sin datos", "No hay registros en el Kardex para exportar.", "warning");
         }
 
-        const datosExport = listaKardexGlobal.map(p => ({
-            "DNI": p.dni,
-            "MES-1": p.meses?.[0] || "",
-            "Nombres y Apellidos": p.nombres,
-            "Sector": p.sector,
-            "Teléfono": p.telefono,
-            "MES-2": p.meses?.[1] || "",
-            "MES-3": p.meses?.[2] || "",
-            "MES-4": p.meses?.[3] || "",
-            "MES-5": p.meses?.[4] || "",
-            "MES-6": p.meses?.[5] || "",
-            "MES-ALTA": p.meses?.[6] || "",
-            "Hb-1": p.hbs?.[0] || "",
-            "Hb-2": p.hbs?.[1] || "",
-            "Hb-3": p.hbs?.[2] || "",
-            "Hb-4": p.hbs?.[3] || "",
-            "Hb-5": p.hbs?.[4] || "",
-            "Fecha_Nac": p.fechaNac || "",
-            "Edad Actual": calcularEdadDetallada(p.fechaNac),
-            "Resp_1": p.resps?.[0] || "",
-            "Resp_2": p.resps?.[1] || "",
-            "Resp_3": p.resps?.[2] || "",
-            "Resp_4": p.resps?.[3] || "",
-            "Resp_5": p.resps?.[4] || "",
-            "Resp_6": p.resps?.[5] || "",
-            "Resp_7": p.resps?.[6] || ""
-        }));
+        const hoy = new Date();
+
+        const datosExport = listaKardexGlobal.map(p => {
+            let fechaAlta = (p.meses?.[6] && p.meses[6].trim() !== "" && p.meses[6] !== "---") ? p.meses[6] : "";
+            let ultimaFecha = null;
+            let arrayFechasVerificar = [p.meses?.[0], p.meses?.[1], p.meses?.[2], p.meses?.[3], p.meses?.[4], p.meses?.[5]];
+            for (let i = arrayFechasVerificar.length - 1; i >= 0; i--) {
+                if (arrayFechasVerificar[i] && arrayFechasVerificar[i] !== "---") {
+                    ultimaFecha = parsearFechaDDMMYYYY(arrayFechasVerificar[i]);
+                    break;
+                }
+            }
+
+            let fechaCitaStr = "---";
+            let clasificacion = "---";
+
+            if (fechaAlta) {
+                clasificacion = "TRATADO";
+                fechaCitaStr = "---";
+            } else if (ultimaFecha && !isNaN(ultimaFecha)) {
+                let fechaCitaObj = new Date(ultimaFecha);
+                fechaCitaObj.setDate(fechaCitaObj.getDate() + 30);
+                fechaCitaStr = fechaCitaObj.toLocaleDateString('es-ES');
+                clasificacion = (hoy > fechaCitaObj) ? "Inasistente" : "Puntual";
+            }
+
+            return {
+                "DNI": p.dni,
+                "MES-1": p.meses?.[0] || "",
+                "Nombres y Apellidos": p.nombres,
+                "Sector": p.sector,
+                "Teléfono": p.telefono,
+                "MES-2": p.meses?.[1] || "",
+                "MES-3": p.meses?.[2] || "",
+                "MES-4": p.meses?.[3] || "",
+                "MES-5": p.meses?.[4] || "",
+                "MES-6": p.meses?.[5] || "",
+                "MES-ALTA": p.meses?.[6] || "",
+                "Hb-1": p.hbs?.[0] || "",
+                "Hb-2": p.hbs?.[1] || "",
+                "Hb-3": p.hbs?.[2] || "",
+                "Hb-4": p.hbs?.[3] || "",
+                "Hb-5": p.hbs?.[4] || "",
+                "Clasificación": clasificacion,
+                "Cita": fechaCitaStr,
+                "Fecha_Nac": p.fechaNac || "",
+                "Edad Actual": calcularEdadDetallada(p.fechaNac),
+                "Resp_1": p.resps?.[0] || "",
+                "Resp_2": p.resps?.[1] || "",
+                "Resp_3": p.resps?.[2] || "",
+                "Resp_4": p.resps?.[3] || "",
+                "Resp_5": p.resps?.[4] || "",
+                "Resp_6": p.resps?.[5] || "",
+                "Resp_7": p.resps?.[6] || ""
+            };
+        });
 
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.json_to_sheet(datosExport);
@@ -746,6 +765,26 @@
         btn.disabled = true;
         btn.innerHTML = "Guardando... <i class='fas fa-spinner fa-spin ms-2'></i>";
 
+        // Calcular Clasificación y Cita actual en cliente para enviarlo al Google Script
+        let fechaAtencionInput = document.getElementById('fechaAtencion').value;
+        let partesAtencion = fechaAtencionInput.split('-');
+        let fechaAtencionStr = partesAtencion.length === 3 ? `${partesAtencion[2]}/${partesAtencion[1]}/${partesAtencion[0]}` : fechaAtencionInput;
+        
+        let mesIndex = parseInt(document.getElementById('mesSeleccionado').value);
+        let clasificacionEnvio = "Puntual";
+        let citaEnvio = "";
+
+        if (mesIndex === 6) {
+            clasificacionEnvio = "TRATADO";
+            citaEnvio = "---";
+        } else if (fechaAtencionInput) {
+            let fCita = new Date(fechaAtencionInput + "T00:00:00");
+            fCita.setDate(fCita.getDate() + 30);
+            citaEnvio = fCita.toLocaleDateString('es-ES');
+            let hoy = new Date();
+            clasificacionEnvio = (hoy > fCita) ? "Inasistente" : "Puntual";
+        }
+
         const datos = {
             action: "guardarAnemia",
             hoja: "AnemiaInfantil",
@@ -754,10 +793,12 @@
             sector: document.getElementById('sector').value.toUpperCase(),
             telefono: document.getElementById('telefono').value,
             fechaNac: document.getElementById('fechaNac').value,
-            mesIndex: document.getElementById('mesSeleccionado').value,
+            mesIndex: mesIndex,
             fechaAtencion: document.getElementById('fechaAtencion').value,
             nivelHb: document.getElementById('nivelHb').value,
-            responsable: document.getElementById('responsableAtencion').value
+            responsable: document.getElementById('responsableAtencion').value,
+            clasificacion: clasificacionEnvio,
+            cita: citaEnvio
         };
 
         const params = new URLSearchParams(datos).toString();
