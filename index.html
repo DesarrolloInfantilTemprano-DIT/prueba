@@ -28,8 +28,21 @@
         .form-control[readonly] { background-color: #eaeded; color: #566573; font-weight: 500; }
         .form-label { font-weight: 600; font-size: 0.88rem; color: #34495e; margin-bottom: 6px; }
         
+        /* TABLA Y ENCABEZADOS FIJOS (STICKY) */
         .table-kardex { font-size: 0.83rem; min-width: 1750px; }
-        .table-kardex th { background: #2c3e50 !important; color: white !important; text-align: center; vertical-align: middle; padding: 12px 8px; cursor: pointer; user-select: none; }
+        .table-kardex th, .table-stats th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            background: #2c3e50 !important; 
+            color: white !important; 
+            text-align: center; 
+            vertical-align: middle; 
+            padding: 12px 8px; 
+            user-select: none; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .table-kardex th { cursor: pointer; }
         .table-kardex th:hover { background: #34495e !important; }
         .table-kardex th i { font-size: 0.7rem; margin-left: 4px; color: #aab7b8; }
         
@@ -42,7 +55,11 @@
         .fila-puntual { background-color: #d4efdf !important; }
         .fila-tratado { background-color: #d4e6f1 !important; }
 
+        /* BADGES RESUMEN SUPERIOR */
         .badge-count { background: #e8f8f5; color: #117a65; font-weight: 700; padding: 6px 14px; border-radius: 20px; border: 1px solid #a3e4d7; }
+        .badge-puntual { background: #d4efdf; color: #196f3d; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: 1px solid #a9dfbf; }
+        .badge-inasistente { background: #fadbd8; color: #943126; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: 1px solid #f5b7b1; }
+        .badge-tratado { background: #d4e6f1; color: #1b4f72; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: 1px solid #a9cce3; }
     </style>
 </head>
 <body>
@@ -53,9 +70,16 @@
             
             <!-- FORMULARIO DE REGISTRO / GESTIÓN ANEMIA -->
             <div class="card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                     <h3 class="main-title mb-0"><i class="fas fa-heartbeat me-2 text-success"></i>Control y Seguimiento de Anemia (SIGIS_FED)</h3>
-                    <div class="badge-count"><i class="fas fa-users me-1"></i> <span id="contadorPacientes">0</span> Pacientes Registrados</div>
+                    
+                    <!-- RESUMEN TOTALES EN LA PARTE SUPERIOR -->
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <div class="badge-count"><i class="fas fa-users me-1"></i> Total: <span id="contadorPacientes">0</span></div>
+                        <div class="badge-puntual"><i class="fas fa-check-circle me-1"></i> Puntuales: <span id="cntPuntuales">0</span></div>
+                        <div class="badge-inasistente"><i class="fas fa-exclamation-circle me-1"></i> Inasistentes: <span id="cntInasistentes">0</span></div>
+                        <div class="badge-tratado"><i class="fas fa-user-shield me-1"></i> Tratados: <span id="cntTratados">0</span></div>
+                    </div>
                 </div>
                 
                 <form id="kardexForm">
@@ -153,8 +177,8 @@
                 </div>
                 <div class="collapse mt-3" id="collapseStats">
                     <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-                        <table class="table table-bordered table-sm align-middle bg-white mb-0">
-                            <thead class="table-dark">
+                        <table class="table table-bordered table-sm align-middle bg-white mb-0 table-stats">
+                            <thead>
                                 <tr>
                                     <th>Sector</th>
                                     <th class="text-center text-success">Puntuales</th>
@@ -381,7 +405,9 @@
                         fechaNac: item.fechaNac || "",
                         resps: item.resps || ["", "", "", "", "", "", ""]
                     }));
+                    
                     document.getElementById('contadorPacientes').innerText = listaKardexGlobal.length;
+                    actualizarResumenSuperior();
                     aplicarFiltrosLocales();
                     calcularEstadisticasSector(listaKardexGlobal);
                 } else {
@@ -391,6 +417,19 @@
             .catch(() => {
                 tbody.innerHTML = '<tr><td colspan="28" class="text-center text-danger">Error al conectar con el servidor de Google Apps Script</td></tr>';
             });
+    }
+
+    function actualizarResumenSuperior() {
+        let p = 0, i = 0, t = 0;
+        listaKardexGlobal.forEach(paciente => {
+            let clasif = obtenerClasificacionTexto(paciente);
+            if (clasif === "Puntual") p++;
+            else if (clasif === "Inasistente") i++;
+            else if (clasif === "TRATADO") t++;
+        });
+        document.getElementById('cntPuntuales').innerText = p;
+        document.getElementById('cntInasistentes').innerText = i;
+        document.getElementById('cntTratados').innerText = t;
     }
 
     function parsearFechaDDMMYYYY(strFecha) {
@@ -477,8 +516,6 @@
             return;
         }
 
-        const hoy = new Date();
-
         datos.forEach((p) => {
             let fechaAlta = (p.meses?.[6] && p.meses[6].trim() !== "" && p.meses[6] !== "---") ? p.meses[6] : "";
             let ultimaFecha = null;
@@ -525,7 +562,7 @@
                 <td>${p.sector || ''}</td>
                 <td>${p.telefono || ''}</td>`;
 
-            // Meses 1 al 6 y Alta (Columnas B, F, G, H, I, J, K)
+            // Meses 1 al 6 y Alta
             for (let i = 0; i < 7; i++) {
                 let valMes = (p.meses && p.meses[i]) ? p.meses[i] : "";
                 if (valMes) {
@@ -535,7 +572,7 @@
                 }
             }
 
-            // Niveles de Hb 1 a 5 (Columnas L a P)
+            // Niveles de Hb 1 a 5
             for (let i = 0; i < 5; i++) {
                 let valHb = (p.hbs && p.hbs[i] !== undefined) ? p.hbs[i] : "";
                 fila += `<td class="text-center fw-bold text-dark">${valHb}</td>`;
@@ -548,7 +585,7 @@
             fila += `<td class="text-center">${badgeClasif}</td>`;
             fila += `<td class="text-center fw-bold text-secondary">${fechaCitaStr}</td>`;
 
-            // Responsables 1 a 7 (Columnas T a Z)
+            // Responsables 1 a 7
             for (let i = 0; i < 7; i++) {
                 let valResp = (p.resps && p.resps[i]) ? p.resps[i] : "";
                 fila += `<td class="small text-truncate" style="max-width: 140px;" title="${valResp}">${valResp}</td>`;
@@ -581,16 +618,11 @@
         document.getElementById('fechaNac').value = convertirAFechaInputHTML(paciente.fechaNac || '');
         document.getElementById('mesSeleccionado').value = mesIndex;
         
-        // Cargar fecha de atención existente si la hay
         let fechaAtencionGuardada = paciente.meses?.[mesIndex] || "";
         document.getElementById('fechaAtencion').value = convertirAFechaInputHTML(fechaAtencionGuardada) || new Date().toISOString().split('T')[0];
 
-        // Cargar nivel de Hb si corresponde (Hb-1 a Hb-5 están en hbs[0] al hbs[4])
-        // Nota: Las atenciones MES-1 al MES-5 corresponden a Hb-1 a Hb-5. MES-ALTA (índice 6) también usa Hb-5.
         let hbIndex = mesIndex === 6 ? 4 : mesIndex;
         document.getElementById('nivelHb').value = (paciente.hbs && paciente.hbs[hbIndex] !== undefined) ? paciente.hbs[hbIndex] : "";
-
-        // Cargar responsable existente (resps[0] a resps[6])
         document.getElementById('responsableAtencion').value = (paciente.resps && paciente.resps[mesIndex]) ? paciente.resps[mesIndex] : "";
 
         controlarHbAlta();
