@@ -148,14 +148,17 @@
         
         .admin-trigger { text-align: center; margin-top: 12px; font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; font-weight: 600; }
 
-        .monitoreo-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 15px; padding: 20px; border-radius: 22px; display: block; }
-        .citado-card-monitoreo { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .select-asistencia { padding: 6px 10px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 12px; font-weight: 700; background: white; color: #1e293b; }
+        /* Estilos añadidos para el Monitoreo de Asistencia */
+        .monitor-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 15px; padding: 20px; border-radius: 22px; }
+        .monitor-table-container { max-height: 320px; overflow-y: auto; margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 14px; }
+        .monitor-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        .monitor-table th { background: #f8fafc; padding: 10px; border-bottom: 2px solid #e2e8f0; color: #475569; position: sticky; top: 0; z-index: 2; }
+        .monitor-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+        .select-asistencia { padding: 6px 10px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; }
 
         @media (max-width: 768px) {
             .container { border-radius: 0; padding: 20px 15px; width: 100%; margin: 0; box-shadow: none; border: none; }
             .main-layout { grid-template-columns: 1fr; gap: 15px; }
-            .citado-card-monitoreo { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -231,14 +234,14 @@
                         <input type="text" name="HC" id="hcInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="N° HC">
                     </div>
                     <div class="input-group">
-                        <label>CELULAR * (9 Dígitos)</label>
-                        <input type="text" name="CELULAR" id="telInput" required maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);" placeholder="Ej. 956003980">
+                        <label>CELULAR * (9 dígitos)</label>
+                        <input type="tel" name="CELULAR" id="telInput" required maxlength="9" pattern="[0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)" placeholder="Ej. 956003980">
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div class="input-group">
-                        <label>CELULAR 2 (Opcional)</label>
-                        <input type="text" name="CELULAR_2" id="tel2Input" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);" placeholder="Secundario">
+                        <label>CELULAR 2 (OPCIONAL - 9 dígitos)</label>
+                        <input type="tel" name="CELULAR_2" id="tel2Input" maxlength="9" pattern="[0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)" placeholder="Número secundario">
                     </div>
                     <div class="input-group">
                         <label>SECTOR / DIRECCIÓN *</label>
@@ -289,7 +292,7 @@
         <input type="hidden" name="FECHA_NACIMIENTO" id="finalNac">
         <input type="hidden" name="FECHA_CITA" id="finalCita">
         <input type="hidden" name="GPS" id="finalGps">
-        <input type="hidden" name="CONDICION" id="finalCondicion" value="Asistió">
+        <input type="hidden" name="CONDICION_ASISTENCIA" id="finalCondicion" value="Asistió">
         
         <input type="hidden" name="ES_EDICION" id="esEdicion" value="false">
         <input type="hidden" name="FECHA_ORIGINAL" id="fechaOriginal" value="">
@@ -299,14 +302,27 @@
         </div>
     </form>
 
-    <div class="form-section monitoreo-section">
-        <span class="section-title"><i class="fa-solid fa-clipboard-user" style="color: var(--primary)"></i> Monitoreo de Asistencia del Día</span>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-            <input type="date" id="fechaMonitoreo" style="max-width: 200px;">
-            <button type="button" class="btn-lupa" onclick="cargarCitadosDelDia()" style="padding: 10px 16px;"><i class="fa-solid fa-filter"></i> Consultar Citados</button>
+    <!-- Módulo añadido de Monitoreo de Asistencia del Día -->
+    <div class="form-section monitor-section">
+        <span class="section-title"><i class="fa-solid fa-clipboard-user"></i> Monitoreo de Asistencia de Citados</span>
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom: 10px;">
+            <input type="date" id="monitorFecha" style="max-width: 180px;" onchange="cargarMonitoreoAsistencia()">
+            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Modifique el estado de asistencia y se guardará automáticamente.</span>
         </div>
-        <div id="listaCitadosMonitoreo" style="max-height: 250px; overflow-y: auto;">
-            <p style="font-size: 12px; color: #64748b; text-align: center;">Seleccione una fecha para ver el listado y controlar la asistencia.</p>
+        <div class="monitor-table-container">
+            <table class="monitor-table">
+                <thead>
+                    <tr>
+                        <th>Turno</th>
+                        <th>Paciente / DNI</th>
+                        <th>Consultorio</th>
+                        <th>Condición de Asistencia</th>
+                    </tr>
+                </thead>
+                <tbody id="monitorTablaBody">
+                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando citas del día...</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -365,7 +381,12 @@
 
     let globalAnemia = "NO";
 
-    document.getElementById('fechaMonitoreo').valueAsDate = new Date();
+    // Inicializar fecha actual en el monitor de asistencia al cargar la página
+    window.addEventListener('DOMContentLoaded', () => {
+        const hoyIso = new Date().toISOString().split('T')[0];
+        document.getElementById('monitorFecha').value = hoyIso;
+        cargarMonitoreoAsistencia();
+    });
 
     function lanzarModal(texto, icono='ℹ️') {
         document.getElementById('modalText').innerText = texto;
@@ -577,68 +598,6 @@
         document.getElementById('edadInput').value = resultado;
     }
 
-    async function cargarCitadosDelDia() {
-        const fechaVal = document.getElementById('fechaMonitoreo').value;
-        const contenedor = document.getElementById('listaCitadosMonitoreo');
-
-        if (!fechaVal) {
-            lanzarModal("Seleccione una fecha para consultar", "⚠️");
-            return;
-        }
-
-        contenedor.innerHTML = '<p style="font-size: 12px; color: #4f46e5; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citados...</p>';
-
-        try {
-            const url = `${SCRIPT_CITAS}?obtenerCitadosWeb=true&desde=${fechaVal}&hasta=${fechaVal}&cons=TODOS`;
-            const resp = await fetch(url);
-            const json = await resp.json();
-
-            if (json.success && json.data && json.data.length > 0) {
-                contenedor.innerHTML = '';
-                json.data.forEach((citado) => {
-                    const condActual = citado.CONDICION || "Asistió";
-                    contenedor.innerHTML += `
-                        <div class="citado-card-monitoreo">
-                            <div>
-                                <strong style="font-size:13px; color:#1e293b;">${citado.NOMBRE}</strong><br>
-                                <span style="font-size:11px; color:#64748b;">DNI: ${citado.DNI} | Turno: <b>${citado.TURNO}</b> | Cons: <b>${citado.CONSULTORIO}</b></span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <select class="select-asistencia" onchange="actualizarCondicionAsistencia('${citado.DNI}', '${citado.FECHA DE CITA}', this.value)">
-                                    <option value="Asistió" ${condActual === 'Asistió' ? 'selected' : ''}>Asistió</option>
-                                    <option value="Faltó" ${condActual === 'Faltó' ? 'selected' : ''}>Faltó</option>
-                                    <option value="Reprogramó" ${condActual === 'Reprogramó' ? 'selected' : ''}>Reprogramó</option>
-                                </select>
-                            </div>
-                        </div>`;
-                });
-            } else {
-                contenedor.innerHTML = '<p style="font-size: 12px; color: #64748b; text-align: center;">No hay pacientes citados para esta fecha.</p>';
-            }
-        } catch (err) {
-            console.error(err);
-            contenedor.innerHTML = '<p style="font-size: 12px; color: #ef4444; text-align: center;">Error al cargar los citados.</p>';
-        }
-    }
-
-    async function actualizarCondicionAsistencia(dni, fechaCita, nuevaCondicion) {
-        try {
-            const params = new URLSearchParams();
-            params.append("ACCION", "actualizarCondicion");
-            params.append("DNI", dni);
-            params.append("FECHA_CITA", fechaCita);
-            params.append("CONDICION", nuevaCondicion);
-
-            await fetch(SCRIPT_CITAS, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            });
-        } catch (e) {
-            console.error("Error al actualizar condición:", e);
-        }
-    }
-
     async function descargarExcel() {
         const desde = document.getElementById('repDesde').value;
         const hasta = document.getElementById('repHasta').value;
@@ -684,6 +643,56 @@
         } catch (err) {
             window.open(url, '_blank');
             cerrarModal();
+        }
+    }
+
+    // Funciones del Monitoreo de Asistencia añadidas
+    async function cargarMonitoreoAsistencia() {
+        const fechaVal = document.getElementById('monitorFecha').value;
+        const tbody = document.getElementById('monitorTablaBody');
+        if (!fechaVal) return;
+
+        const fLatino = aLatino(fechaVal);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando citas...</td></tr>`;
+
+        try {
+            const res = await fetch(`${SCRIPT_CITAS}?listarDia=true&fecha=${fLatino}`);
+            const data = await res.json();
+
+            if (data && data.citas && data.citas.length > 0) {
+                tbody.innerHTML = '';
+                data.citas.forEach(cita => {
+                    const condActual = cita.condicion || "Asistió";
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b>${cita.turno}</b></td>
+                            <td>${cita.nombre} <br><small style="color:#64748b;">DNI: ${cita.dni}</small></td>
+                            <td><span style="background:var(--primary-light); color:var(--primary); padding:2px 8px; border-radius:8px; font-weight:700;">${cita.consultorio}</span></td>
+                            <td>
+                                <select class="select-asistencia" onchange="actualizarCondicionAsistencia('${cita.dni}', '${fLatino}', '${cita.consultorio}', this.value)">
+                                    <option value="Asistió" ${condActual === 'Asistió' ? 'selected' : ''}>Asistió</option>
+                                    <option value="Faltó" ${condActual === 'Faltó' ? 'selected' : ''}>Faltó</option>
+                                    <option value="Reprogramó" ${condActual === 'Reprogramó' ? 'selected' : ''}>Reprogramó</option>
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No hay citas registradas para esta fecha.</td></tr>`;
+            }
+        } catch (e) {
+            console.error(e);
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ef4444;">Error al cargar las citas del día.</td></tr>`;
+        }
+    }
+
+    async function actualizarCondicionAsistencia(dni, fecha, consultorio, nuevaCondicion) {
+        try {
+            const url = `${SCRIPT_CITAS}?action=actualizarCondicion&dni=${dni}&fecha=${fecha}&consultorio=${consultorio}&condicion=${encodeURIComponent(nuevaCondicion)}`;
+            await fetch(url, { mode: 'no-cors' });
+        } catch (e) {
+            console.error("Error al actualizar la condición de asistencia", e);
         }
     }
 
@@ -737,13 +746,6 @@
 
     document.getElementById('citaForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const telVal = document.getElementById('telInput').value.trim();
-        if(telVal.length !== 9) {
-            lanzarModal("El número de celular principal debe tener exactamente 9 dígitos.", "⚠️");
-            return;
-        }
-
         if(document.getElementById('edadInput').value === "") {
             lanzarModal("Verifique las fechas.", "⚠️");
             return;
@@ -766,7 +768,6 @@
             params.append(key, value);
         }
         params.append("ALERTA_ANEMIA", globalAnemia);
-        params.append("CONDICION", "Asistió");
 
         try {
             const urlUpdateTel = `${SCRIPT_CENSO}?action=actualizarTel&dni=${dni}&telefono=${tel}`;
