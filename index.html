@@ -227,12 +227,18 @@
                     </div>
                     <div class="input-group">
                         <label>CELULAR *</label>
-                        <input type="text" name="CELULAR" id="telInput" required placeholder="Número telefónico">
+                        <input type="text" name="CELULAR" id="telInput" required placeholder="Número principal">
                     </div>
                 </div>
-                <div class="input-group">
-                    <label>SECTOR / DIRECCIÓN *</label>
-                    <input type="text" name="SECTOR" id="sectorInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="Sector de vivienda">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div class="input-group">
+                        <label>CELULAR 2 (OPCIONAL)</label>
+                        <input type="text" name="CELULAR_2" id="tel2Input" placeholder="Número secundario">
+                    </div>
+                    <div class="input-group">
+                        <label>SECTOR / DIRECCIÓN *</label>
+                        <input type="text" name="SECTOR" id="sectorInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="Sector de vivienda">
+                    </div>
                 </div>
             </div>
 
@@ -277,7 +283,7 @@
 
         <input type="hidden" name="FECHA_NACIMIENTO" id="finalNac">
         <input type="hidden" name="FECHA_CITA" id="finalCita">
-        <input type="hidden" name="GPS" id="finalGps"> <!-- GPS extraído de la Columna L del Censo -->
+        <input type="hidden" name="GPS" id="finalGps">
         
         <input type="hidden" name="ES_EDICION" id="esEdicion" value="false">
         <input type="hidden" name="FECHA_ORIGINAL" id="fechaOriginal" value="">
@@ -337,9 +343,8 @@
     rotarFondo();
     setInterval(rotarFondo, 20000);
 
-    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbw46XDS948z7at2wdnZUBH5MOp6az0gJLUYV41ew1WUgD45suOHalK0VKbCzLKCpLNZ/exec'; 
+    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbwHVoE88voV3NSgtylRMe2CMIrhOw7L0TwEdNNAUNiHv5-WGNo9ltxXqhaq1urdfdVa/exec'; 
     const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
-    // SCRIPT_MAPA eliminado por completo según requerimiento.
 
     let globalAnemia = "NO";
 
@@ -367,6 +372,7 @@
             el.readOnly = true; el.style.background = "#f1f5f9"; el.value = "";
         });
         document.getElementById('telInput').value = ""; 
+        document.getElementById('tel2Input').value = ""; 
         document.getElementById('finalGps').value = "";
         document.getElementById('btnEnviar').disabled = true;
         cancelarEdicion();
@@ -389,7 +395,6 @@
         cancelarEdicion();
         
         try {
-            // 1. Consulta al Censo (extrae datos y GPS de la columna L)
             let respCeno;
             try {
                 const resCensoRaw = await fetch(`${SCRIPT_CENSO}?action=buscar&dni=${dni}`);
@@ -405,16 +410,16 @@
                 return; 
             }
 
-            // Rellenar campos, incluyendo el GPS de la Columna L
+            // Rellenar campos, incluyendo Teléfono principal, TELEFONO-2 (Columna M) y el GPS
             document.getElementById('nombreInput').value = respCeno.nombreB || "";
             document.getElementById('nacInput').value    = respCeno.fn || "";
             document.getElementById('hcInput').value     = respCeno.hclinica || "";
-            document.getElementById('telInput').value    = respCeno.telefono || "";
+            document.getElementById('telInput').value    = respCeno.telefono || respCeno['TELFONO-1'] || "";
+            document.getElementById('tel2Input').value   = respCeno['TELEFONO-2'] || respCeno['TELFONO-2'] || "";
             document.getElementById('sectorInput').value = respCeno.sector || "";
-            document.getElementById('finalGps').value    = respCeno.gps || respCeno.GPS || ""; // GPS de Columna L
+            document.getElementById('finalGps').value    = respCeno.georeferencia || respCeno.gps || respCeno.GPS || "";
             document.getElementById('btnEnviar').disabled = false;
 
-            // 2. Consulta del historial de citas
             let rH = null;
             try {
                 const resCitasRaw = await fetch(`${SCRIPT_CITAS}?dni=${dni}`);
@@ -448,7 +453,6 @@
                 document.getElementById('boxHistorial').style.display = 'block';
             }
 
-            // 3. Consulta de Anemia
             let respAnemicosCitas = null;
             try {
                 respAnemicosCitas = await fetch(`${SCRIPT_CITAS}?action=buscarAnemico&dni=${dni}`).then(r => r.json());
@@ -661,6 +665,7 @@
         const btn = document.getElementById('btnEnviar');
         const dni = document.getElementById('dniInput').value;
         const tel = document.getElementById('telInput').value;
+        const tel2 = document.getElementById('tel2Input').value;
         const esEdit = document.getElementById('esEdicion').value === "true";
 
         btn.disabled = true; btn.innerText = esEdit ? "ACTUALIZANDO..." : "REGISTRANDO...";
@@ -676,6 +681,16 @@
         params.append("ALERTA_ANEMIA", globalAnemia);
 
         try {
+            // Actualizar teléfono 1 en el Censo
+            const urlUpdateTel = `${SCRIPT_CENSO}?action=actualizarTel&dni=${dni}&telefono=${tel}`;
+            fetch(urlUpdateTel, { mode: 'no-cors' });
+
+            // Actualizar TELEFONO-2 (Columna M) dinámicamente en el Censo
+            if (tel2) {
+                const urlUpdateTel2 = `${SCRIPT_CENSO}?action=actualizarColumna&dni=${dni}&columna=TELEFONO-2&valor=${encodeURIComponent(tel2)}`;
+                fetch(urlUpdateTel2, { mode: 'no-cors' });
+            }
+
             const response = await fetch(SCRIPT_CITAS, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -683,7 +698,7 @@
             });
             const resultText = await response.text();
 
-            lanzarModal(esEdit ? "CITA REPROGRAMADA CORRECTAMENTE" : "REGISTRO Y CELULAR ACTUALIZADOS", "✅");
+            lanzarModal(esEdit ? "CITA REPROGRAMADA CORRECTAMENTE" : "REGISTRO Y TELÉFONOS ACTUALIZADOS", "✅");
             
             cancelarEdicion();
             setTimeout(() => location.reload(), 2000); 
