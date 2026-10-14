@@ -148,7 +148,6 @@
         
         .admin-trigger { text-align: center; margin-top: 12px; font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; font-weight: 600; }
 
-        /* Estilos para la sección de Monitoreo de Asistencia Diaria */
         .monitoreo-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 15px; padding: 20px; border-radius: 22px; display: block; }
         .citado-card-monitoreo { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
         .select-asistencia { padding: 6px 10px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 12px; font-weight: 700; background: white; color: #1e293b; }
@@ -300,7 +299,6 @@
         </div>
     </form>
 
-    <!-- SECCIÓN DE MONITOREO DE CITADOS DEL DÍA -->
     <div class="form-section monitoreo-section">
         <span class="section-title"><i class="fa-solid fa-clipboard-user" style="color: var(--primary)"></i> Monitoreo de Asistencia del Día</span>
         <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
@@ -362,12 +360,11 @@
     rotarFondo();
     setInterval(rotarFondo, 20000);
 
-    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbypHyuBfglI9XLp5I8Ht_1CTPPKliJ8P0U2Bt8PmUwOlnVcyC5CV1WFCjTOXNAHTjZ1/exec'; 
+    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbxR23zj9DCTwHXeKS_JQW0Bboc2VyLULuMLMOZZ8QhSvfw0aO-Ax7vEE4iZShl3V3PQ/exec; 
     const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
 
     let globalAnemia = "NO";
 
-    // Establecer fecha actual por defecto en el selector de monitoreo
     document.getElementById('fechaMonitoreo').valueAsDate = new Date();
 
     function lanzarModal(texto, icono='ℹ️') {
@@ -436,7 +433,7 @@
             document.getElementById('nacInput').value    = respCeno.fn || "";
             document.getElementById('hcInput').value     = respCeno.hclinica || "";
             document.getElementById('telInput').value    = respCeno.telefono || respCeno['TELFONO-1'] || "";
-            document.getElementById('tel2Input').value   = respCeno['TELEFONO-2'] || respCeno['TELFONO-2'] || "";
+            document.getElementById('tel2Input').value   = respCeno['TELEFONO-2'] || "";
             document.getElementById('sectorInput').value = respCeno.sector || "";
             document.getElementById('finalGps').value    = respCeno.georeferencia || respCeno.gps || respCeno.GPS || "";
             document.getElementById('btnEnviar').disabled = false;
@@ -580,7 +577,6 @@
         document.getElementById('edadInput').value = resultado;
     }
 
-    // --- FUNCIÓN PARA CARGAR Y GESTIONAR CITADOS DEL DÍA ---
     async function cargarCitadosDelDia() {
         const fechaVal = document.getElementById('fechaMonitoreo').value;
         const contenedor = document.getElementById('listaCitadosMonitoreo');
@@ -770,7 +766,7 @@
             params.append(key, value);
         }
         params.append("ALERTA_ANEMIA", globalAnemia);
-        params.append("CONDICION", "Asistió"); // Por defecto al registrar
+        params.append("CONDICION", "Asistió");
 
         try {
             const urlUpdateTel = `${SCRIPT_CENSO}?action=actualizarTel&dni=${dni}&telefono=${tel}`;
