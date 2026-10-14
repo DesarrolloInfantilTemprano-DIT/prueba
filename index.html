@@ -148,14 +148,9 @@
         
         .admin-trigger { text-align: center; margin-top: 12px; font-size: 11px; color: #94a3b8; cursor: pointer; text-decoration: underline; font-weight: 600; }
 
-        .monitoreo-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 15px; padding: 20px; border-radius: 22px; display: block; }
-        .citado-card-monitoreo { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px 16px; border-radius: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .select-asistencia { padding: 6px 10px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 12px; font-weight: 700; background: white; color: #1e293b; }
-
         @media (max-width: 768px) {
             .container { border-radius: 0; padding: 20px 15px; width: 100%; margin: 0; box-shadow: none; border: none; }
             .main-layout { grid-template-columns: 1fr; gap: 15px; }
-            .citado-card-monitoreo { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -231,14 +226,14 @@
                         <input type="text" name="HC" id="hcInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="N° HC">
                     </div>
                     <div class="input-group">
-                        <label>CELULAR * (9 Dígitos)</label>
-                        <input type="number" name="CELULAR" id="telInput" required maxlength="9" oninput="if(this.value.length > 9) this.value = this.value.slice(0, 9);" placeholder="Ej. 956003980">
+                        <label>CELULAR *</label>
+                        <input type="text" name="CELULAR" id="telInput" required placeholder="Número principal">
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div class="input-group">
-                        <label>CELULAR 2 (9 Dígitos - Opcional)</label>
-                        <input type="number" name="CELULAR_2" id="tel2Input" maxlength="9" oninput="if(this.value.length > 9) this.value = this.value.slice(0, 9);" placeholder="Secundario">
+                        <label>CELULAR 2 (OPCIONAL)</label>
+                        <input type="text" name="CELULAR_2" id="tel2Input" placeholder="Número secundario">
                     </div>
                     <div class="input-group">
                         <label>SECTOR / DIRECCIÓN *</label>
@@ -289,7 +284,6 @@
         <input type="hidden" name="FECHA_NACIMIENTO" id="finalNac">
         <input type="hidden" name="FECHA_CITA" id="finalCita">
         <input type="hidden" name="GPS" id="finalGps">
-        <input type="hidden" name="CONDICION" id="finalCondicion" value="Asistió">
         
         <input type="hidden" name="ES_EDICION" id="esEdicion" value="false">
         <input type="hidden" name="FECHA_ORIGINAL" id="fechaOriginal" value="">
@@ -298,17 +292,6 @@
             <button type="submit" id="btnEnviar" class="btn-submit">CONFIRMAR REGISTRO</button>
         </div>
     </form>
-
-    <div class="form-section monitoreo-section">
-        <span class="section-title"><i class="fa-solid fa-clipboard-user" style="color: var(--primary)"></i> Monitoreo de Asistencia del Día</span>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
-            <input type="date" id="fechaMonitoreo" style="max-width: 200px;">
-            <button type="button" class="btn-lupa" onclick="cargarCitadosDelDia()" style="padding: 10px 16px;"><i class="fa-solid fa-filter"></i> Consultar Citados</button>
-        </div>
-        <div id="listaCitadosMonitoreo" style="max-height: 250px; overflow-y: auto;">
-            <p style="font-size: 12px; color: #64748b; text-align: center;">Seleccione una fecha para ver el listado y controlar la asistencia.</p>
-        </div>
-    </div>
 
     <span class="toggle-report" onclick="toggleReporte()"><i class="fa-solid fa-file-export"></i> MOSTRAR OPCIONES DE EXPORTACIÓN</span>
 
@@ -360,13 +343,10 @@
     rotarFondo();
     setInterval(rotarFondo, 20000);
 
-    // URLs originales restauradas
     const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbxR23zj9DCTwHXeKS_JQW0Bboc2VyLULuMLMOZZ8QhSvfw0aO-Ax7vEE4iZShl3V3PQ/exec'; 
     const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
 
     let globalAnemia = "NO";
-
-    document.getElementById('fechaMonitoreo').valueAsDate = new Date();
 
     function lanzarModal(texto, icono='ℹ️') {
         document.getElementById('modalText').innerText = texto;
@@ -434,7 +414,7 @@
             document.getElementById('nacInput').value    = respCeno.fn || "";
             document.getElementById('hcInput').value     = respCeno.hclinica || "";
             document.getElementById('telInput').value    = respCeno.telefono || respCeno['TELFONO-1'] || "";
-            document.getElementById('tel2Input').value   = respCeno['TELEFONO-2'] || "";
+            document.getElementById('tel2Input').value   = respCeno['TELEFONO-2'] || respCeno['TELFONO-2'] || "";
             document.getElementById('sectorInput').value = respCeno.sector || "";
             document.getElementById('finalGps').value    = respCeno.georeferencia || respCeno.gps || respCeno.GPS || "";
             document.getElementById('btnEnviar').disabled = false;
@@ -578,68 +558,6 @@
         document.getElementById('edadInput').value = resultado;
     }
 
-    async function cargarCitadosDelDia() {
-        const fechaVal = document.getElementById('fechaMonitoreo').value;
-        const contenedor = document.getElementById('listaCitadosMonitoreo');
-
-        if (!fechaVal) {
-            lanzarModal("Seleccione una fecha para consultar", "⚠️");
-            return;
-        }
-
-        contenedor.innerHTML = '<p style="font-size: 12px; color: #4f46e5; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citados...</p>';
-
-        try {
-            const url = `${SCRIPT_CITAS}?obtenerCitadosWeb=true&desde=${fechaVal}&hasta=${fechaVal}&cons=TODOS`;
-            const resp = await fetch(url);
-            const json = await resp.json();
-
-            if (json.success && json.data && json.data.length > 0) {
-                contenedor.innerHTML = '';
-                json.data.forEach((citado) => {
-                    const condActual = citado.CONDICION || "Asistió";
-                    contenedor.innerHTML += `
-                        <div class="citado-card-monitoreo">
-                            <div>
-                                <strong style="font-size:13px; color:#1e293b;">${citado.NOMBRE}</strong><br>
-                                <span style="font-size:11px; color:#64748b;">DNI: ${citado.DNI} | Turno: <b>${citado.TURNO}</b> | Cons: <b>${citado.CONSULTORIO}</b></span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <select class="select-asistencia" onchange="actualizarCondicionAsistencia('${citado.DNI}', '${citado.FECHA DE CITA}', this.value)">
-                                    <option value="Asistió" ${condActual === 'Asistió' ? 'selected' : ''}>Asistió</option>
-                                    <option value="Faltó" ${condActual === 'Faltó' ? 'selected' : ''}>Faltó</option>
-                                    <option value="Reprogramó" ${condActual === 'Reprogramó' ? 'selected' : ''}>Reprogramó</option>
-                                </select>
-                            </div>
-                        </div>`;
-                });
-            } else {
-                contenedor.innerHTML = '<p style="font-size: 12px; color: #64748b; text-align: center;">No hay pacientes citados para esta fecha.</p>';
-            }
-        } catch (err) {
-            console.error(err);
-            contenedor.innerHTML = '<p style="font-size: 12px; color: #ef4444; text-align: center;">Error al cargar los citados.</p>';
-        }
-    }
-
-    async function actualizarCondicionAsistencia(dni, fechaCita, nuevaCondicion) {
-        try {
-            const params = new URLSearchParams();
-            params.append("ACCION", "actualizarCondicion");
-            params.append("DNI", dni);
-            params.append("FECHA_CITA", fechaCita);
-            params.append("CONDICION", nuevaCondicion);
-
-            await fetch(SCRIPT_CITAS, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params.toString()
-            });
-        } catch (e) {
-            console.error("Error al actualizar condición:", e);
-        }
-    }
-
     async function descargarExcel() {
         const desde = document.getElementById('repDesde').value;
         const hasta = document.getElementById('repHasta').value;
@@ -738,13 +656,6 @@
 
     document.getElementById('citaForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const telVal = document.getElementById('telInput').value.trim();
-        if(telVal.length !== 9) {
-            lanzarModal("El número de celular principal debe tener exactamente 9 dígitos.", "⚠️");
-            return;
-        }
-
         if(document.getElementById('edadInput').value === "") {
             lanzarModal("Verifique las fechas.", "⚠️");
             return;
@@ -767,7 +678,6 @@
             params.append(key, value);
         }
         params.append("ALERTA_ANEMIA", globalAnemia);
-        params.append("CONDICION", "Asistió");
 
         try {
             const urlUpdateTel = `${SCRIPT_CENSO}?action=actualizarTel&dni=${dni}&telefono=${tel}`;
