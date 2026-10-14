@@ -232,13 +232,13 @@
                     </div>
                     <div class="input-group">
                         <label>CELULAR * (9 Dígitos)</label>
-                        <input type="number" name="CELULAR" id="telInput" required maxlength="9" oninput="if(this.value.length > 9) this.value = this.value.slice(0, 9);" placeholder="Ej. 956003980">
+                        <input type="text" name="CELULAR" id="telInput" required maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);" placeholder="Ej. 956003980">
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div class="input-group">
-                        <label>CELULAR 2 (9 Dígitos - Opcional)</label>
-                        <input type="number" name="CELULAR_2" id="tel2Input" maxlength="9" oninput="if(this.value.length > 9) this.value = this.value.slice(0, 9);" placeholder="Secundario">
+                        <label>CELULAR 2 (Opcional)</label>
+                        <input type="text" name="CELULAR_2" id="tel2Input" maxlength="9" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);" placeholder="Secundario">
                     </div>
                     <div class="input-group">
                         <label>SECTOR / DIRECCIÓN *</label>
