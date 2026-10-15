@@ -49,7 +49,7 @@
         }
 
         .container {
-            width: 96%; max-width: 1250px; margin: 20px auto;
+            width: 96%; max-width: 1350px; margin: 20px auto;
             background: var(--card); border-radius: 36px; padding: 25px 35px;
             box-shadow: 0 25px 60px -15px rgba(79, 70, 229, 0.15), 0 0 0 10px rgba(255, 255, 255, 0.6); 
             border: 2px solid #ffffff; display: flex; flex-direction: column; 
@@ -151,14 +151,15 @@
         .monitor-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; align-items: end; }
         .btn-buscar-monitor { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; border-radius: 16px; padding: 12px 18px; font-weight: 800; cursor: pointer; font-size: 13px; height: 46px; }
         .monitor-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 14px; }
-        .monitor-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; min-width: 1200px; }
+        .monitor-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; min-width: 1300px; }
         .monitor-table th { background: #f8fafc; padding: 12px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
         .monitor-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
-        .select-asistencia { padding: 4px 8px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; }
+        .select-asistencia, .select-profesional { padding: 4px 8px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; width: 100%; }
         
         .btn-acciones-monitor { display: flex; gap: 10px; margin-top: 15px; }
         .btn-actualizar-asistencia { flex: 2; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; }
         .btn-excel-monitor { flex: 1; padding: 14px; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-reprogramar-fila { background: #f59e0b; color: white; border: none; padding: 5px 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 10px; white-space: nowrap; }
 
         @media (max-width: 768px) {
             .container { border-radius: 0; padding: 20px 15px; width: 100%; margin: 0; box-shadow: none; border: none; }
@@ -363,10 +364,11 @@
                         <th>GPS</th>
                         <th>RESPONSABLE ATENCIÓN</th>
                         <th>Condición de Asistencia</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody id="monitorTablaBody">
-                    <tr><td colspan="13" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR CITAS".</td></tr>
+                    <tr><td colspan="14" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR CITAS".</td></tr>
                 </tbody>
             </table>
         </div>
@@ -428,12 +430,14 @@
 
     let globalAnemia = "NO";
     let datasetMonitorGlobal = [];
+    let listaProfesionalesGlobal = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         const hoyIso = new Date().toISOString().split('T')[0];
         document.getElementById('monDesde').value = hoyIso;
         document.getElementById('monHasta').value = hoyIso;
         cargarConsultoriosDinamicos();
+        cargarProfesionalesAdmin();
     });
 
     async function cargarConsultoriosDinamicos() {
@@ -458,6 +462,18 @@
             }
         } catch (e) {
             console.error("Error al cargar consultorios desde ADMIN", e);
+        }
+    }
+
+    async function cargarProfesionalesAdmin() {
+        try {
+            const res = await fetch(`${SCRIPT_ADMIN}?getProfesionales=true`);
+            const data = await res.json();
+            if (data && data.profesionales) {
+                listaProfesionalesGlobal = data.profesionales;
+            }
+        } catch (e) {
+            console.error("Error al cargar profesionales desde ADMIN", e);
         }
     }
 
@@ -633,6 +649,17 @@
         validarTodo();
     }
 
+    function prepararEdicionDesdeMonitor(dni, fechaCita, turno, consultorio) {
+        document.getElementById('dniInput').value = dni;
+        toggleMonitoreo(); // Ocultar monitor para mostrar el formulario arriba
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        buscarDNI().then(() => {
+            setTimeout(() => {
+                cargarCitaParaEdicion(fechaCita, turno, consultorio);
+            }, 600);
+        });
+    }
+
     function cancelarEdicion() {
         document.getElementById('esEdicion').value = "false";
         document.getElementById('fechaOriginal').value = "";
@@ -737,9 +764,13 @@
             return;
         }
 
-        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citas...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citas...</td></tr>`;
 
         try {
+            if (listaProfesionalesGlobal.length === 0) {
+                await cargarProfesionalesAdmin();
+            }
+
             const url = `${SCRIPT_CITAS}?obtenerCitadosWeb=true&desde=${desde}&hasta=${hasta}&cons=${encodeURIComponent(cons)}&turno=${encodeURIComponent(turno)}`;
             const res = await fetch(url);
             const json = await res.json();
@@ -749,11 +780,11 @@
                 renderizarTablaMonitor(datasetMonitorGlobal);
             } else {
                 datasetMonitorGlobal = [];
-                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;">No se encontraron citas en este rango.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#94a3b8;">No se encontraron citas en este rango.</td></tr>`;
             }
         } catch (e) {
             console.error(e);
-            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#ef4444;">Error al cargar datos del monitoreo.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#ef4444;">Error al cargar datos del monitoreo.</td></tr>`;
         }
     }
 
@@ -768,7 +799,7 @@
         });
 
         if (listaFiltrada.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;">No hay resultados con los criterios aplicados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; color:#94a3b8;">No hay resultados con los criterios aplicados.</td></tr>`;
             return;
         }
 
@@ -789,6 +820,12 @@
             const respAtn = c["RESPONSABLE ATENCIÓN"] || c.responsable_atencion || "";
             const condActual = c.CONDICIÓN || c.condicion || "Asistió";
 
+            let optionsProf = `<option value="">Seleccione profesional</option>`;
+            listaProfesionalesGlobal.forEach(prof => {
+                let sel = (prof.trim().toUpperCase() === respAtn.trim().toUpperCase()) ? 'selected' : '';
+                optionsProf += `<option value="${prof}" ${sel}>${prof}</option>`;
+            });
+
             tbody.innerHTML += `
                 <tr data-dni="${dni}" data-fecha="${fechaCita}" data-consultorio="${consultorio}">
                     <td><b>${fechaCita}</b></td>
@@ -802,13 +839,22 @@
                     <td>${hcl}</td>
                     <td>${sector}</td>
                     <td>${gps}</td>
-                    <td>${respAtn}</td>
+                    <td>
+                        <select class="select-profesional">
+                            ${optionsProf}
+                        </select>
+                    </td>
                     <td>
                         <select class="select-asistencia">
                             <option value="Asistió" ${condActual === 'Asistió' ? 'selected' : ''}>Asistió</option>
                             <option value="Faltó" ${condActual === 'Faltó' ? 'selected' : ''}>Faltó</option>
                             <option value="Reprogramó" ${condActual === 'Reprogramó' ? 'selected' : ''}>Reprogramó</option>
                         </select>
+                    </td>
+                    <td>
+                        <button type="button" class="btn-reprogramar-fila" onclick="prepararEdicionDesdeMonitor('${dni}', '${fechaCita}', '${turno}', '${consultorio}')">
+                            <i class="fa-solid fa-pen-to-square"></i> Reprogramar
+                        </button>
                     </td>
                 </tr>
             `;
@@ -835,13 +881,21 @@
             const dni = fila.getAttribute('data-dni');
             const fecha = fila.getAttribute('data-fecha');
             const consultorio = fila.getAttribute('data-consultorio');
-            const select = fila.querySelector('.select-asistencia');
+            const selectCond = fila.querySelector('.select-asistencia');
+            const selectProf = fila.querySelector('.select-profesional');
 
-            if (dni && fecha && consultorio && select) {
-                const condicion = select.value;
+            if (dni && fecha && consultorio && selectCond) {
+                const condicion = selectCond.value;
+                const responsable = selectProf ? selectProf.value : "";
                 try {
-                    const url = `${SCRIPT_CITAS}?action=actualizarCondicion&dni=${dni}&fecha=${fecha}&consultorio=${encodeURIComponent(consultorio)}&condicion=${encodeURIComponent(condicion)}`;
-                    await fetch(url, { mode: 'no-cors' });
+                    const url1 = `${SCRIPT_CITAS}?action=actualizarCondicion&dni=${dni}&fecha=${fecha}&consultorio=${encodeURIComponent(consultorio)}&condicion=${encodeURIComponent(condicion)}`;
+                    await fetch(url1, { mode: 'no-cors' });
+
+                    if (responsable) {
+                        const url2 = `${SCRIPT_CITAS}?action=actualizarColumna&columnaDestino=RESPONSABLE%20ATENCIÓN&dni=${dni}&fecha=${fecha}&consultorio=${encodeURIComponent(consultorio)}&valor=${encodeURIComponent(responsable)}`;
+                        await fetch(url2, { mode: 'no-cors' });
+                    }
+
                     actualizados++;
                 } catch (e) {
                     console.error("Error actualizando DNI: " + dni, e);
