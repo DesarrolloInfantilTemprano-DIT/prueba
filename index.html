@@ -49,7 +49,7 @@
         }
 
         .container {
-            width: 96%; max-width: 1150px; margin: 20px auto;
+            width: 96%; max-width: 1250px; margin: 20px auto;
             background: var(--card); border-radius: 36px; padding: 25px 35px;
             box-shadow: 0 25px 60px -15px rgba(79, 70, 229, 0.15), 0 0 0 10px rgba(255, 255, 255, 0.6); 
             border: 2px solid #ffffff; display: flex; flex-direction: column; 
@@ -148,19 +148,23 @@
 
         /* Estilos para el Monitoreo de Asistencia */
         .monitor-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 10px; display: none; padding: 20px; border-radius: 22px; }
-        .monitor-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 15px; align-items: end; }
+        .monitor-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; align-items: end; }
         .btn-buscar-monitor { background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; border-radius: 16px; padding: 12px 18px; font-weight: 800; cursor: pointer; font-size: 13px; height: 46px; }
-        .monitor-table-container { max-height: 380px; overflow-y: auto; overflow-x: auto; margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 14px; }
-        .monitor-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 650px; }
-        .monitor-table th { background: #f8fafc; padding: 12px 10px; border-bottom: 2px solid #e2e8f0; color: #475569; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
-        .monitor-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
-        .select-asistencia { padding: 6px 10px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; }
-        .btn-actualizar-asistencia { width: 100%; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; margin-top: 15px; font-size: 13px; text-transform: uppercase; }
+        .monitor-table-container { max-height: 400px; overflow-y: auto; overflow-x: auto; margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 14px; }
+        .monitor-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; min-width: 1200px; }
+        .monitor-table th { background: #f8fafc; padding: 12px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+        .monitor-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
+        .select-asistencia { padding: 4px 8px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; }
+        
+        .btn-acciones-monitor { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-actualizar-asistencia { flex: 2; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; }
+        .btn-excel-monitor { flex: 1; padding: 14px; background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
         @media (max-width: 768px) {
             .container { border-radius: 0; padding: 20px 15px; width: 100%; margin: 0; box-shadow: none; border: none; }
             .main-layout { grid-template-columns: 1fr; gap: 15px; }
             .monitor-filters { grid-template-columns: 1fr 1fr; }
+            .btn-acciones-monitor { flex-direction: column; }
         }
     </style>
 </head>
@@ -348,18 +352,29 @@
                     <tr>
                         <th>Fecha Cita</th>
                         <th>Turno</th>
-                        <th>Paciente / DNI</th>
-                        <th>Edad Cita</th>
                         <th>Consultorio</th>
+                        <th>Paciente / DNI</th>
+                        <th>FECHA_NACIMIENTO</th>
+                        <th>Edad Cita</th>
+                        <th>TELFONO-1</th>
+                        <th>TELFONO-2</th>
+                        <th>HCL</th>
+                        <th>SECTOR</th>
+                        <th>GPS</th>
+                        <th>RESPONSABLE ATENCIÓN</th>
                         <th>Condición de Asistencia</th>
                     </tr>
                 </thead>
                 <tbody id="monitorTablaBody">
-                    <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR CITAS".</td></tr>
+                    <tr><td colspan="13" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR CITAS".</td></tr>
                 </tbody>
             </table>
         </div>
-        <button type="button" class="btn-actualizar-asistencia" onclick="guardarCambiosAsistencia()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR CAMBIOS DE ASISTENCIA</button>
+        
+        <div class="btn-acciones-monitor">
+            <button type="button" class="btn-actualizar-asistencia" onclick="guardarCambiosAsistencia()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR CAMBIOS DE ASISTENCIA</button>
+            <button type="button" class="btn-excel-monitor" onclick="descargarExcelMonitor()"><i class="fa-solid fa-file-excel"></i> EXPORTAR A EXCEL</button>
+        </div>
     </div>
 
     <!-- Exportación -->
@@ -407,9 +422,9 @@
     rotarFondo();
     setInterval(rotarFondo, 20000);
 
-    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbwJwNyHUjd7gAQDmBPfphN11_RdAyPh_yQM4YKaAyjo5JZIOxqaLSvpbKoYxldZ4QLw/exec'; 
+    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbzI3DHUw7p0HBlFk3hB-2jA7fuQ8R6mYJDzK8p21IlZ6sW87ERCRAwot9GmnOiv_0px/exec'; 
     const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
-    const SCRIPT_ADMIN = 'https://script.google.com/macros/s/AKfycbw0wVSPf4IokjxoXl3s-ghFuXLPKhHLsQX1JYS2Q-At5GYDzOhiE1QflLGIGv3GAZpk/exec';
+    const SCRIPT_ADMIN = 'https://script.google.com/macros/s/AKfycbxtEqnitm5yrIUiRLBJ8THeB89hDf6CHGSLHZaQgnoQdCFj3f4m3n_mr098k8m0ArmL/exec';
 
     let globalAnemia = "NO";
     let datasetMonitorGlobal = [];
@@ -722,7 +737,7 @@
             return;
         }
 
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citas...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;"><i class="fa-solid fa-spinner fa-spin"></i> Cargando citas...</td></tr>`;
 
         try {
             const url = `${SCRIPT_CITAS}?obtenerCitadosWeb=true&desde=${desde}&hasta=${hasta}&cons=${encodeURIComponent(cons)}&turno=${encodeURIComponent(turno)}`;
@@ -734,11 +749,11 @@
                 renderizarTablaMonitor(datasetMonitorGlobal);
             } else {
                 datasetMonitorGlobal = [];
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No se encontraron citas en este rango.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;">No se encontraron citas en este rango.</td></tr>`;
             }
         } catch (e) {
             console.error(e);
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444;">Error al cargar datos del monitoreo.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#ef4444;">Error al cargar datos del monitoreo.</td></tr>`;
         }
     }
 
@@ -747,30 +762,47 @@
         const txtBuscar = document.getElementById('monBuscarTexto').value.toLowerCase().trim();
 
         const listaFiltrada = lista.filter(item => {
-            const matchTexto = !txtBuscar || 
-                (item.dni && item.dni.toLowerCase().includes(txtBuscar)) || 
-                (item.nombre && item.nombre.toLowerCase().includes(txtBuscar));
-            return matchTexto;
+            const dniVal = (item.DNI || item.dni || "").toString().toLowerCase();
+            const nomVal = (item.NOMBRE || item.nombre || "").toString().toLowerCase();
+            return !txtBuscar || dniVal.includes(txtBuscar) || nomVal.includes(txtBuscar);
         });
 
         if (listaFiltrada.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay resultados con los criterios aplicados.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="13" style="text-align:center; color:#94a3b8;">No hay resultados con los criterios aplicados.</td></tr>`;
             return;
         }
 
         tbody.innerHTML = '';
         listaFiltrada.forEach(c => {
-            const condActual = c.condicion || "Asistió";
-            const fechaLatina = c.fecha || c["FECHA DE CITA"] || "";
-            const edad = c.edad || "-";
+            const dni = c.DNI || c.dni || "";
+            const nombre = c.NOMBRE || c.nombre || "";
+            const fechaCita = c.FECHA_CITA || c.fecha || "";
+            const turno = c.TURNO || c.turno || "";
+            const consultorio = c.CONSULTORIO || c.consultorio || "";
+            const fecNac = c.FECHA_NACIMIENTO || c.fecha_nacimiento || "";
+            const edad = c.EDAD || c.edad || "-";
+            const telf1 = c["TELFONO-1"] || c.celular || "";
+            const telf2 = c["TELFONO-2"] || c.celular_2 || "";
+            const hcl = c.HCL || c.hc || "";
+            const sector = c.SECTOR || c.sector || "";
+            const gps = c.GPS || c.gps || "";
+            const respAtn = c["RESPONSABLE ATENCIÓN"] || c.responsable_atencion || "";
+            const condActual = c.CONDICIÓN || c.condicion || "Asistió";
 
             tbody.innerHTML += `
-                <tr data-dni="${c.dni || c.DNI}" data-fecha="${fechaLatina}" data-consultorio="${c.consultorio || c.CONSULTORIO}">
-                    <td><b>${fechaLatina}</b></td>
-                    <td><b>${c.turno || c.TURNO}</b></td>
-                    <td>${c.nombre || c.NOMBRE}<br><small style="color:#64748b;">DNI: ${c.dni || c.DNI}</small></td>
+                <tr data-dni="${dni}" data-fecha="${fechaCita}" data-consultorio="${consultorio}">
+                    <td><b>${fechaCita}</b></td>
+                    <td><b>${turno}</b></td>
+                    <td><span style="background:var(--primary-light); color:var(--primary); padding:3px 8px; border-radius:8px; font-weight:700;">${consultorio}</span></td>
+                    <td>${nombre}<br><small style="color:#64748b;">DNI: ${dni}</small></td>
+                    <td>${fecNac}</td>
                     <td>${edad}</td>
-                    <td><span style="background:var(--primary-light); color:var(--primary); padding:3px 8px; border-radius:8px; font-weight:700;">${c.consultorio || c.CONSULTORIO}</span></td>
+                    <td>${telf1}</td>
+                    <td>${telf2}</td>
+                    <td>${hcl}</td>
+                    <td>${sector}</td>
+                    <td>${gps}</td>
+                    <td>${respAtn}</td>
                     <td>
                         <select class="select-asistencia">
                             <option value="Asistió" ${condActual === 'Asistió' ? 'selected' : ''}>Asistió</option>
@@ -819,6 +851,54 @@
 
         lanzarModal(`¡Se actualizaron correctamente ${actualizados} registros!`, "✅");
         setTimeout(() => { cerrarModal(); cargarMonitoreoAsistencia(); }, 1500);
+    }
+
+    async function descargarExcelMonitor() {
+        const desde = document.getElementById('monDesde').value;
+        const hasta = document.getElementById('monHasta').value;
+        const cons = document.getElementById('monConsultorio').value;
+        const turno = document.getElementById('monTurno').value;
+
+        if (!desde || !hasta) {
+            lanzarModal("Seleccione un rango de fechas válido.", "⚠️");
+            return;
+        }
+
+        const url = `${SCRIPT_CITAS}?exportar=true&desde=${desde}&hasta=${hasta}&cons=${encodeURIComponent(cons)}&turno=${encodeURIComponent(turno)}`;
+        lanzarModal("Generando reporte Excel...", "⏳");
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error();
+            
+            const textoResp = await response.text();
+            try {
+                const respuestaJson = JSON.parse(textoResp);
+                if (respuestaJson.success && respuestaJson.base64Data) {
+                    const caracteresBinarios = atob(respuestaJson.base64Data);
+                    const numerosBinarios = new Array(caracteresBinarios.length);
+                    for (let i = 0; i < caracteresBinarios.length; i++) {
+                        numerosBinarios[i] = caracteresBinarios.charCodeAt(i);
+                    }
+                    const blobXlsx = new Blob([new Uint8Array(numerosBinarios)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    
+                    const linkDescarga = document.createElement('a');
+                    linkDescarga.href = URL.createObjectURL(blobXlsx);
+                    linkDescarga.setAttribute('download', respuestaJson.archivoNombre || 'Monitoreo_Citados.xlsx');
+                    document.body.appendChild(linkDescarga);
+                    linkDescarga.click();
+                    document.body.removeChild(linkDescarga);
+                    cerrarModal();
+                    return;
+                }
+            } catch(e) {
+                window.open(url, '_blank');
+                cerrarModal();
+            }
+        } catch (err) {
+            window.open(url, '_blank');
+            cerrarModal();
+        }
     }
 
     const validarTodo = async () => {
