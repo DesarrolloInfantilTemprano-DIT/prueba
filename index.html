@@ -757,12 +757,36 @@
                 const condicion = selectCond.value;
                 const responsable = selectProf ? selectProf.value : "";
                 try {
-                    const url1 = `${SCRIPT_CITAS}?action=actualizarCondicion&dni=${dni}&fecha=${fecha}&consultorio=${encodeURIComponent(consultorio)}&condicion=${encodeURIComponent(condicion)}`;
-                    await fetch(url1, { mode: 'no-cors' });
+                    // 1. Actualizar Condición mediante POST
+                    const paramsCond = new URLSearchParams();
+                    paramsCond.append("action", "actualizarCondicion");
+                    paramsCond.append("dni", dni);
+                    paramsCond.append("fecha", fecha);
+                    paramsCond.append("consultorio", consultorio);
+                    paramsCond.append("condicion", condicion);
+                    paramsCond.append("columnaDestino", "CONDICIÓN");
 
+                    await fetch(SCRIPT_CITAS, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: paramsCond.toString()
+                    });
+
+                    // 2. Actualizar Responsable Atención mediante POST
                     if (responsable) {
-                        const url2 = `${SCRIPT_CITAS}?action=actualizarColumna&columnaDestino=RESPONSABLE%20ATENCIÓN&dni=${dni}&fecha=${fecha}&consultorio=${encodeURIComponent(consultorio)}&valor=${encodeURIComponent(responsable)}`;
-                        await fetch(url2, { mode: 'no-cors' });
+                        const paramsResp = new URLSearchParams();
+                        paramsResp.append("action", "actualizarColumna");
+                        paramsResp.append("dni", dni);
+                        paramsResp.append("fecha", fecha);
+                        paramsResp.append("consultorio", consultorio);
+                        paramsResp.append("valor", responsable);
+                        paramsResp.append("columnaDestino", "RESPONSABLE ATENCIÓN");
+
+                        await fetch(SCRIPT_CITAS, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: paramsResp.toString()
+                        });
                     }
 
                     actualizados++;
