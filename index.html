@@ -73,6 +73,38 @@
         }
         @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* Estilos para el Modal Selector Estilo App (Tipo Selector de Sector) */
+        .selector-modal-overlay {
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(44, 62, 80, 0.6); z-index: 10000; align-items: center; justify-content: center;
+            backdrop-filter: blur(6px);
+        }
+        .selector-modal-content {
+            background: white; width: 92%; max-width: 480px; border-radius: 24px; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; max-height: 85vh;
+            animation: popUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid var(--primary-light);
+        }
+        .selector-modal-header {
+            background: var(--primary); color: white; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .selector-modal-header h3 { margin: 0; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .selector-modal-header .close-btn { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+        .selector-modal-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+        .selector-search-input {
+            width: 100%; padding: 12px 16px; border-radius: 14px; border: 2px solid #cbd5e1;
+            font-size: 13px; font-weight: 600; outline: none; background: #f8fafc;
+        }
+        .selector-search-input:focus { border-color: var(--primary); background: white; }
+        .selector-list-container { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+        .selector-item-row {
+            padding: 12px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;
+            font-size: 13px; font-weight: 700; color: #1e293b; cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .selector-item-row:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+        .selector-modal-footer { padding: 12px 16px; background: #f1f5f9; display: flex; justify-content: flex-end; border-top: 1px solid #e2e8f0; }
+        .selector-btn-cancelar { background: #cbd5e1; border: none; color: #334155; padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 12px; }
+
         .header { text-align: center; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .header-main-row { display: flex; align-items: center; gap: 15px; }
         .header .avatar-icon {
@@ -123,6 +155,14 @@
         }
         input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15); }
 
+        /* Estilo personalizado tipo botón desplegable para consultorios / profesionales */
+        .selector-trigger-btn {
+            width: 100%; padding: 12px 16px; border-radius: 16px; border: 2px solid #cbd5e1;
+            font-size: 14px; font-weight: 600; color: #1e293b; background-color: white; outline: none;
+            display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-align: left;
+        }
+        .selector-trigger-btn:hover { border-color: var(--primary); background: #f8fafc; }
+
         .btn-lupa {
             background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; border: none; border-radius: 16px; 
             padding: 0 20px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center;
@@ -147,7 +187,7 @@
         .monitor-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; min-width: 1300px; }
         .monitor-table th { background: #f8fafc; padding: 12px 8px; border-bottom: 2px solid #e2e8f0; color: #475569; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
         .monitor-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #1e293b; vertical-align: middle; }
-        .select-asistencia, .select-profesional { padding: 4px 8px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; width: 100%; }
+        .select-asistencia { padding: 4px 8px; border-radius: 8px; border: 2px solid #cbd5e1; font-size: 11px; font-weight: 700; background: #fff; cursor: pointer; width: 100%; }
         
         .btn-acciones-monitor { display: flex; gap: 10px; margin-top: 15px; }
         .btn-actualizar-asistencia { flex: 2; padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-weight: 800; cursor: pointer; font-size: 13px; text-transform: uppercase; }
@@ -172,6 +212,25 @@
         <div id="modalIcon" style="font-size: 48px; margin-bottom: 15px;"></div>
         <p id="modalText" style="font-weight: 700; color: #1e293b; margin-bottom: 25px; font-size: 15px; line-height: 1.5;"></p>
         <button onclick="cerrarModal()" style="background: linear-gradient(135deg, var(--primary), #6366f1); color: white; border: none; padding: 14px 30px; border-radius: 16px; font-weight: 800; cursor: pointer; width: 100%;">Aceptar</button>
+    </div>
+</div>
+
+<!-- Modal Selector Genérico Estilo App -->
+<div id="appSelectorModal" class="selector-modal-overlay">
+    <div class="selector-modal-content">
+        <div class="selector-modal-header">
+            <h3 id="appSelectorTitle"><i class="fa-solid fa-list"></i> Seleccionar Opción</h3>
+            <button class="close-btn" onclick="cerrarAppSelector()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="selector-modal-body">
+            <input type="text" id="appSelectorSearch" class="selector-search-input" placeholder="Escriba para buscar..." oninput="filtrarOpcionesSelector()">
+            <div id="appSelectorList" class="selector-list-container">
+                <!-- Opciones dinámicas -->
+            </div>
+        </div>
+        <div class="selector-modal-footer">
+            <button type="button" class="selector-btn-cancelar" onclick="cerrarAppSelector()">CANCELAR</button>
+        </div>
     </div>
 </div>
 
@@ -255,9 +314,11 @@
 
                 <div class="input-group">
                     <label>CONSULTORIO *</label>
-                    <select name="CONSULTORIO" id="consInput" required>
-                        <option value="">Cargando consultorios...</option>
-                    </select>
+                    <input type="hidden" name="CONSULTORIO" id="consInput" required>
+                    <button type="button" class="selector-trigger-btn" id="btnConsTrigger" onclick="abrirSelectorConsultorio()">
+                        <span id="txtConsSeleccionado">Seleccione consultorio</span>
+                        <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                    </button>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div class="input-group">
@@ -314,9 +375,11 @@
             </div>
             <div>
                 <label>Consultorio:</label>
-                <select id="monConsultorio">
-                    <option value="TODOS">TODOS LOS CONSULTORIOS</option>
-                </select>
+                <input type="hidden" id="monConsultorio" value="TODOS">
+                <button type="button" class="selector-trigger-btn" id="btnMonConsTrigger" onclick="abrirSelectorMonConsultorio()" style="height: 46px; background: white;">
+                    <span id="txtMonConsSeleccionado">TODOS LOS CONSULTORIOS</span>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
+                </button>
             </div>
             <div>
                 <label>Turno:</label>
@@ -393,6 +456,11 @@
     let globalAnemia = "NO";
     let datasetMonitorGlobal = [];
     let listaProfesionalesGlobal = [];
+    let listaConsultoriosGlobal = [];
+
+    // Variables para el Modal Selector Global
+    let selectorCallbackActual = null;
+    let opcionesSelectorActual = [];
 
     window.addEventListener('DOMContentLoaded', () => {
         const hoyIso = new Date().toISOString().split('T')[0];
@@ -407,20 +475,12 @@
             const res = await fetch(`${SCRIPT_ADMIN}?getConsultorios=true`);
             const data = await res.json();
             if (data && data.consultorios) {
-                const selects = ['consInput', 'monConsultorio'];
-                selects.forEach(id => {
-                    const sel = document.getElementById(id);
-                    if (!sel) return;
-                    const valorActual = sel.value;
-                    
-                    let htmlDefault = (id === 'consInput') ? `<option value="">Seleccione consultorio</option>` : `<option value="TODOS">TODOS LOS CONSULTORIOS</option>`;
-                    
-                    sel.innerHTML = htmlDefault;
-                    data.consultorios.forEach(c => {
-                        sel.innerHTML += `<option value="${c}">${c}</option>`;
-                    });
-                    if (valorActual) sel.value = valorActual;
-                });
+                listaConsultoriosGlobal = data.consultorios;
+                const selCons = document.getElementById('consInput');
+                if (selCons && !selCons.value && listaConsultoriosGlobal.length > 0) {
+                    selCons.value = listaConsultoriosGlobal[0];
+                    document.getElementById('txtConsSeleccionado').innerText = listaConsultoriosGlobal[0];
+                }
             }
         } catch (e) {
             console.error("Error al cargar consultorios desde ADMIN", e);
@@ -437,6 +497,70 @@
         } catch (e) {
             console.error("Error al cargar profesionales desde ADMIN", e);
         }
+    }
+
+    // Funciones para el Modal Selector Estilo App
+    function abrirAppSelector(titulo, opciones, callback) {
+        document.getElementById('appSelectorTitle').innerHTML = `<i class="fa-solid fa-list"></i> ${titulo}`;
+        opcionesSelectorActual = opciones;
+        selectorCallbackActual = callback;
+        document.getElementById('appSelectorSearch').value = '';
+        renderizarOpcionesSelector(opciones);
+        document.getElementById('appSelectorModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('appSelectorSearch').focus(), 150);
+    }
+
+    function renderizarOpcionesSelector(lista) {
+        const contenedor = document.getElementById('appSelectorList');
+        contenedor.innerHTML = '';
+        if (lista.length === 0) {
+            contenedor.innerHTML = `<div style="padding:15px; text-align:center; color:#94a3b8; font-weight:600; font-size:12px;">No se encontraron resultados</div>`;
+            return;
+        }
+        lista.forEach(op => {
+            const row = document.createElement('div');
+            row.className = 'selector-item-row';
+            row.innerHTML = `<span>${op}</span><i class="fa-solid fa-chevron-right" style="font-size:11px; color:#94a3b8;"></i>`;
+            row.onclick = () => {
+                if (selectorCallbackActual) selectorCallbackActual(op);
+                cerrarAppSelector();
+            };
+            contenedor.appendChild(row);
+        });
+    }
+
+    function filtrarOpcionesSelector() {
+        const txt = document.getElementById('appSelectorSearch').value.toLowerCase().trim();
+        const filtradas = opcionesSelectorActual.filter(op => op.toLowerCase().includes(txt));
+        renderizarOpcionesSelector(filtradas);
+    }
+
+    function cerrarAppSelector() {
+        document.getElementById('appSelectorModal').style.display = 'none';
+        selectorCallbackActual = null;
+    }
+
+    function abrirSelectorConsultorio() {
+        abrirAppSelector("Seleccionar Consultorio", listaConsultoriosGlobal, (val) => {
+            document.getElementById('consInput').value = val;
+            document.getElementById('txtConsSeleccionado').innerText = val;
+            validarTodo();
+        });
+    }
+
+    function abrirSelectorMonConsultorio() {
+        const opciones = ["TODOS", ...listaConsultoriosGlobal];
+        abrirAppSelector("Consultorio de Monitoreo", opciones, (val) => {
+            document.getElementById('monConsultorio').value = val;
+            document.getElementById('txtMonConsSeleccionado').innerText = (val === "TODOS") ? "TODOS LOS CONSULTORIOS" : val;
+        });
+    }
+
+    function abrirSelectorProfesionalFila(btnElement, dni, fecha, consultorio) {
+        abrirAppSelector("Seleccionar Responsable de Atención", listaProfesionalesGlobal, (val) => {
+            btnElement.querySelector('.txt-prof-sel').innerText = val;
+            btnElement.dataset.valorSeleccionado = val;
+        });
     }
 
     function lanzarModal(texto, icono='ℹ️') {
@@ -553,8 +677,8 @@
             document.getElementById('citaInput').value = `${partes[2]}-${partes[1].padStart(2,'0')}-${partes[0].padStart(2,'0')}`;
         }
         
-        const selectCons = document.getElementById('consInput');
-        selectCons.value = consultorio;
+        document.getElementById('consInput').value = consultorio;
+        document.getElementById('txtConsSeleccionado').innerText = consultorio;
         document.getElementById('turnoInput').value = turno;
         document.getElementById('modoEdicionBox').style.display = 'flex';
         
@@ -583,7 +707,7 @@
         document.getElementById('modoEdicionBox').style.display = 'none';
         const btn = document.getElementById('btnEnviar');
         btn.innerText = "CONFIRMAR REGISTRO";
-        btn.style.background = "linear-gradient(135deg, #4f46e5, #6366f1)";
+        btn.style.background = "linear-gradient(135deg, var(--primary), #6366f1)";
     }
 
     document.getElementById('dniInput').addEventListener('input', (e) => {
@@ -687,13 +811,9 @@
             const sector = c.SECTOR || c.sector || "";
             const gps = c.GPS || c.gps || "";
             const respAtn = c["RESPONSABLE ATENCIÓN"] || c.responsable_atencion || "";
-            const condActual = c.CONDICIÓN || c.condicion || "Asistió";
-
-            let optionsProf = `<option value="">Seleccione profesional</option>`;
-            listaProfesionalesGlobal.forEach(prof => {
-                let sel = (prof.trim().toUpperCase() === respAtn.trim().toUpperCase()) ? 'selected' : '';
-                optionsProf += `<option value="${prof}" ${sel}>${prof}</option>`;
-            });
+            
+            // Soporte robusto para leer tanto CONDICIÍON como CONDICIÓN del Excel
+            const condActual = c.CONDICIÍON || c.CONDICIÓN || c.condicion || "Asistió";
 
             tbody.innerHTML += `
                 <tr data-dni="${dni}" data-fecha="${fechaCita}" data-consultorio="${consultorio}">
@@ -709,9 +829,10 @@
                     <td>${sector}</td>
                     <td>${gps}</td>
                     <td>
-                        <select class="select-profesional">
-                            ${optionsProf}
-                        </select>
+                        <button type="button" class="selector-trigger-btn select-profesional-btn" data-valor-seleccionado="${respAtn}" onclick="abrirSelectorProfesionalFila(this, '${dni}', '${fechaCita}', '${consultorio}')" style="padding: 6px 12px; font-size: 11px; height: 32px;">
+                            <span class="txt-prof-sel">${respAtn || "Seleccione profesional"}</span>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 10px; color: var(--primary);"></i>
+                        </button>
                     </td>
                     <td>
                         <select class="select-asistencia">
@@ -751,20 +872,20 @@
             const fecha = fila.getAttribute('data-fecha');
             const consultorio = fila.getAttribute('data-consultorio');
             const selectCond = fila.querySelector('.select-asistencia');
-            const selectProf = fila.querySelector('.select-profesional');
+            const btnProf = fila.querySelector('.select-profesional-btn');
 
             if (dni && fecha && consultorio && selectCond) {
                 const condicion = selectCond.value;
-                const responsable = selectProf ? selectProf.value : "";
+                const responsable = btnProf ? btnProf.dataset.valorSeleccionado : "";
                 try {
-                    // 1. Actualizar Condición mediante POST
+                    // 1. Actualizar Condición mediante POST (apuntando a CONDICIÍON tal cual está en el Excel)
                     const paramsCond = new URLSearchParams();
                     paramsCond.append("action", "actualizarCondicion");
                     paramsCond.append("dni", dni);
                     paramsCond.append("fecha", fecha);
                     paramsCond.append("consultorio", consultorio);
                     paramsCond.append("condicion", condicion);
-                    paramsCond.append("columnaDestino", "CONDICIÓN");
+                    paramsCond.append("columnaDestino", "CONDICIÍON");
 
                     await fetch(SCRIPT_CITAS, {
                         method: 'POST',
@@ -797,6 +918,7 @@
         }
 
         lanzarModal(`¡Se actualizaron correctamente ${actualizados} registros!`, "✅");
+        // Refrescar únicamente la tabla de monitoreo sin recargar toda la página completa
         setTimeout(() => { cerrarModal(); cargarMonitoreoAsistencia(); }, 1500);
     }
 
@@ -894,7 +1016,6 @@
     document.getElementById('checkAdicional').addEventListener('change', validarTodo);
     document.getElementById('citaInput').addEventListener('change', validarTodo);
     document.getElementById('turnoInput').addEventListener('change', validarTodo);
-    document.getElementById('consInput').addEventListener('change', validarTodo);
 
     document.getElementById('citaForm').addEventListener('submit', async function(e) {
         e.preventDefault();
