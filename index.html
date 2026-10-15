@@ -128,11 +128,6 @@
             padding: 0 20px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center;
         }
 
-        .historial-box { background: #f8fafc; border-radius: 22px; padding: 15px 20px; margin-bottom: 15px; display: none; border: 2px solid #e2e8f0; }
-        .historial-item { font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0; }
-        .historial-item b { color: var(--primary); background: white; padding: 4px 10px; border-radius: 10px; font-size: 11px; }
-        .btn-edit-historial { background: #ffffff; border: 1px solid #cbd5e1; color: var(--primary); cursor: pointer; font-size: 13px; padding: 5px 10px; border-radius: 10px; }
-
         .submit-container { margin-top: 10px; width: 100%; }
         .btn-submit {
             width: 100%; padding: 16px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white;
@@ -142,9 +137,7 @@
         .badge-adicional { display: none; background: #fff7ed; border: 2px solid #fed7aa; padding: 12px; border-radius: 16px; margin-top: 10px; }
         .contador-vivos { background: #e0f2fe; color: #0369a1; padding: 12px 16px; border-radius: 16px; font-size: 12px; font-weight: 700; margin-bottom: 14px; display: none; border: 1px solid #bae6fd; align-items: center; gap: 10px; }
 
-        .toggle-report, .toggle-monitor { text-align: center; margin-top: 15px; font-size: 12px; font-weight: 800; color: var(--primary); cursor: pointer; display: block; padding: 8px; }
-        .report-section { border-top: 4px solid var(--secondary); background: #ffffff; margin-top: 8px; display: none; padding: 20px; border-radius: 22px; }
-        .btn-excel { width: 100%; padding: 14px; background: var(--secondary); color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .toggle-monitor { text-align: center; margin-top: 15px; font-size: 12px; font-weight: 800; color: var(--primary); cursor: pointer; display: block; padding: 8px; }
 
         /* Estilos para el Monitoreo de Asistencia */
         .monitor-section { border-top: 4px solid var(--primary); background: #ffffff; margin-top: 10px; display: none; padding: 20px; border-radius: 22px; }
@@ -202,11 +195,6 @@
             <div id="inaMsg" style="width: 100%; line-height: 1.4;"></div>
         </div>
         <div id="anemiaDetails" style="display:none;" class="anemia-info-card"></div>
-    </div>
-
-    <div id="boxHistorial" class="historial-box">
-        <span class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Historial (Toca 📝 para Modificar)</span>
-        <div id="listaHistorial"></div>
     </div>
 
     <form id="citaForm">
@@ -378,32 +366,6 @@
             <button type="button" class="btn-excel-monitor" onclick="descargarExcelMonitor()"><i class="fa-solid fa-file-excel"></i> EXPORTAR A EXCEL</button>
         </div>
     </div>
-
-    <!-- Exportación -->
-    <span class="toggle-report" onclick="toggleReporte()"><i class="fa-solid fa-file-export"></i> MOSTRAR OPCIONES DE EXPORTACIÓN</span>
-
-    <div id="seccionReporte" class="form-section report-section">
-        <span class="section-title"><i class="fa-solid fa-file-excel"></i> Descargar Lista de Citados</span>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 10px;">
-            <div><label>Desde:</label><input type="date" id="repDesde"></div>
-            <div><label>Hasta:</label><input type="date" id="repHasta"></div>
-        </div>
-        <div class="input-group">
-            <label>Filtrar Consultorio:</label>
-            <select id="repConsultorio">
-                <option value="TODOS">TODOS LOS CONSULTORIOS</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <label>Filtrar Turno:</label>
-            <select id="repTurno">
-                <option value="TODOS">TODOS LOS TURNOS</option>
-                <option value="MAÑANA">MAÑANA</option>
-                <option value="TARDE">TARDE</option>
-            </select>
-        </div>
-        <button type="button" class="btn-excel" onclick="descargarExcel()"><i class="fa-solid fa-download"></i> DESCARGAR EXCEL</button>
-    </div>
 </div>
 
 <script>
@@ -445,7 +407,7 @@
             const res = await fetch(`${SCRIPT_ADMIN}?getConsultorios=true`);
             const data = await res.json();
             if (data && data.consultorios) {
-                const selects = ['consInput', 'monConsultorio', 'repConsultorio'];
+                const selects = ['consInput', 'monConsultorio'];
                 selects.forEach(id => {
                     const sel = document.getElementById(id);
                     if (!sel) return;
@@ -493,18 +455,6 @@
         } else {
             m.style.display = 'block';
             t.innerHTML = '<i class="fa-solid fa-eye-slash"></i> OCULTAR MONITOREO DE ASISTENCIA';
-        }
-    }
-
-    function toggleReporte() {
-        const r = document.getElementById('seccionReporte');
-        const t = document.querySelector('.toggle-report');
-        if (r.style.display === 'block') {
-            r.style.display = 'none';
-            t.innerHTML = '<i class="fa-solid fa-file-export"></i> MOSTRAR OPCIONES DE EXPORTACIÓN';
-        } else {
-            r.style.display = 'block';
-            t.innerHTML = '<i class="fa-solid fa-eye-slash"></i> OCULTAR OPCIONES DE EXPORTACIÓN';
         }
     }
 
@@ -558,39 +508,6 @@
             document.getElementById('sectorInput').value = respCeno.sector || "";
             document.getElementById('finalGps').value    = respCeno.georeferencia || respCeno.gps || respCeno.GPS || "";
             document.getElementById('btnEnviar').disabled = false;
-
-            let rH = null;
-            try {
-                const resCitasRaw = await fetch(`${SCRIPT_CITAS}?dni=${dni}`);
-                rH = await resCitasRaw.json();
-            } catch (errCitas) {
-                console.warn("No se pudo obtener el historial:", errCitas);
-            }
-
-            if(rH && rH.encontrado && rH.historial) {
-                const list = document.getElementById('listaHistorial');
-                list.innerHTML = '';
-                
-                rH.historial.reverse().forEach(c => {
-                    let fLimpia = c.fecha;
-                    if(fLimpia.includes("-")) {
-                         const partes = fLimpia.split("T")[0].split("-");
-                         fLimpia = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                    }
-                    const colorBadge = c.consultorio === 'CRED' ? 'var(--primary)' : 'var(--warning)';
-                    list.innerHTML += `
-                    <div class="historial-item">
-                        <span>${fLimpia} - ${c.turno}</span> 
-                        <div>
-                            <b style="background:${colorBadge}20; color:${colorBadge}">${c.consultorio}</b>
-                            <button type="button" class="btn-edit-historial" onclick="cargarCitaParaEdicion('${fLimpia}', '${c.turno}', '${c.consultorio}')" title="Editar cita">
-                                <i class="fa-solid fa-pen-to-square"></i>
-                            </button>
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('boxHistorial').style.display = 'block';
-            }
 
             let respAnemicosCitas = null;
             try {
@@ -702,54 +619,6 @@
         resultado += dias + (dias === 1 ? " Día" : " Días");
 
         document.getElementById('edadInput').value = resultado;
-    }
-
-    async function descargarExcel() {
-        const desde = document.getElementById('repDesde').value;
-        const hasta = document.getElementById('repHasta').value;
-        const cons = document.getElementById('repConsultorio').value;
-        const turno = document.getElementById('repTurno').value;
-
-        if (!desde || !hasta) {
-            lanzarModal("Seleccione un rango de fechas válido", "⚠️");
-            return;
-        }
-
-        const url = `${SCRIPT_CITAS}?exportar=true&desde=${desde}&hasta=${hasta}&cons=${cons}&turno=${turno}`;
-        lanzarModal("Procesando datos para descarga...", "⏳");
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error();
-            
-            const textoResp = await response.text();
-            try {
-                const respuestaJson = JSON.parse(textoResp);
-                if (respuestaJson.success && respuestaJson.base64Data) {
-                    const caracteresBinarios = atob(respuestaJson.base64Data);
-                    const numerosBinarios = new Array(caracteresBinarios.length);
-                    for (let i = 0; i < caracteresBinarios.length; i++) {
-                        numerosBinarios[i] = caracteresBinarios.charCodeAt(i);
-                    }
-                    const blobXlsx = new Blob([new Uint8Array(numerosBinarios)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    
-                    const linkDescarga = document.createElement('a');
-                    linkDescarga.href = URL.createObjectURL(blobXlsx);
-                    linkDescarga.setAttribute('download', respuestaJson.archivoNombre || 'Reporte_Citados.xlsx');
-                    document.body.appendChild(linkDescarga);
-                    linkDescarga.click();
-                    document.body.removeChild(linkDescarga);
-                    cerrarModal();
-                    return;
-                }
-            } catch(e) {
-                window.open(url, '_blank');
-                cerrarModal();
-            }
-        } catch (err) {
-            window.open(url, '_blank');
-            cerrarModal();
-        }
     }
 
     async function cargarMonitoreoAsistencia() {
