@@ -333,7 +333,7 @@
                     </div>
                 </div>
 
-                <div id="boxAdicional" class="badge-adicional">
+                <div id="boxAdicional" class="badge-adicional" style="display: none !important;">
                     <label style="display:flex; align-items:center; gap:10px; color:#9a3412; font-size:13px; cursor:pointer;">
                         <input type="checkbox" name="ES_ADICIONAL" id="checkAdicional" value="true" style="width:auto; margin:0;">
                         <span><b>CUPOS AGOTADOS.</b> Registrar como adicional.</span>
@@ -979,10 +979,6 @@
         
         if(!fecha || !cons) return;
 
-        const dia = new Date(fecha + 'T00:00:00').getDay();
-        if(dia === 0) { lanzarModal("Domingos no hay atención", "❌"); document.getElementById('citaInput').value=""; return; }
-        if(dia === 6 && turno === "TARDE") { lanzarModal("Sábados solo turno Mañana", "⚠️"); document.getElementById('turnoInput').value="MAÑANA"; return; }
-
         // 1. Consultar ocupación actual en SCRIPT_CITAS primero
         const fLatino = aLatino(fecha);
         const rCitas = await fetch(`${SCRIPT_CITAS}?validarCupo=true&fecha=${fLatino}&turno=${turno}&consultorio=${encodeURIComponent(cons)}`);
@@ -1018,32 +1014,25 @@
         const textoContador = document.getElementById('textoContador');
         infoDiv.style.display = 'flex';
 
-        // 3. Regla estricta: Si no está programado en la hoja TOPE, bloquear registro
+        // Ocultar opción de adicional permanentemente
+        document.getElementById('boxAdicional').style.display = 'none';
+        if(checkAdi) checkAdi.checked = false;
+
+        // 3. Reglas de negocio: Validación de programación y cupos máximos estrictos
         if (!tieneTopePersonalizado) {
             textoContador.innerHTML = `<b style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> NO HAY PROGRAMACIÓN CONFIGURADA PARA ESTA FECHA Y TURNO.</b>`;
-            document.getElementById('boxAdicional').style.display = 'none';
-            checkAdi.checked = false;
             btn.disabled = true;
             btn.innerText = "NO HAY PROGRAMACIÓN DISPONIBLE";
             btn.style.background = "#94a3b8";
         } else {
-            // Si SÍ está programado, validar cupos y adicionales normalmente
             textoContador.innerText = `Hay ${ocupadosActuales} de ${limiteMax} citas reservadas para esta fecha en el turno ${turno}.`;
 
             if (ocupadosActuales >= limiteMax) {
-                document.getElementById('boxAdicional').style.display = 'block';
-                if (!checkAdi.checked) {
-                    btn.disabled = true; 
-                    btn.innerText = "MARQUE EL CHECK DE ADICIONAL";
-                    btn.style.background = "#94a3b8";
-                } else {
-                    btn.disabled = false;
-                    btn.innerText = esEdit ? "REPROGRAMAR COMO ADICIONAL" : "REGISTRAR COMO ADICIONAL";
-                    btn.style.background = "linear-gradient(135deg, var(--warning), #f59e0b)";
-                }
+                // Bloquear por completo si se llenaron los cupos (Sin adicionales)
+                btn.disabled = true;
+                btn.innerText = "CUPOS LLENOS";
+                btn.style.background = "#94a3b8";
             } else {
-                document.getElementById('boxAdicional').style.display = 'none';
-                checkAdi.checked = false; 
                 btn.disabled = false;
                 btn.innerText = esEdit ? "REPROGRAMAR / ACTUALIZAR CITA" : "GUARDAR CITA"; 
                 btn.style.background = esEdit ? "linear-gradient(135deg, var(--warning), #f59e0b)" : "linear-gradient(135deg, #4f46e5, #6366f1)";
