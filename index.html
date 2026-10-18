@@ -448,7 +448,7 @@
     rotarFondo();
     setInterval(rotarFondo, 20000);
 
-    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbyeCXRTo4QBU1_7D_MDXcFY2gSgVoiILUj6Bw1vpoMbut8Nn3WgAqorDVSW_Ey2XDOj/exec'; 
+    const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbyCXZyCSHkBnTeqZwZCCZcq8jl0qFiInhfcNpUseFs7g1PvhNFoCI4aV3LHfeHmiHXb/exec'; 
     const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
     const SCRIPT_ADMIN = 'https://script.google.com/macros/s/AKfycbw1vFCkWi9mEhshhOQYBkf1D4OQbQWA4EzXEolOEaLCtp-12PqK8YAMQb5uKDPVIFH1/exec';
 
@@ -661,6 +661,7 @@
             }
 
             calcularEdadCita();
+            validarTodo(); // Validar disponibilidad y duplicados al buscar DNI
         } catch(e) { 
             console.error(e); 
             lanzarModal("Error general al procesar la consulta.", "❌");
@@ -707,6 +708,7 @@
         const btn = document.getElementById('btnEnviar');
         btn.innerText = "GUARDAR CITA";
         btn.style.background = "linear-gradient(135deg, var(--primary), #6366f1)";
+        validarTodo();
     }
 
     document.getElementById('dniInput').addEventListener('input', (e) => {
@@ -973,17 +975,26 @@
         const fecha = document.getElementById('citaInput').value;
         const turno = document.getElementById('turnoInput').value;
         const cons = document.getElementById('consInput').value;
+        const dni = document.getElementById('dniInput').value.trim();
         const btn = document.getElementById('btnEnviar');
         const checkAdi = document.getElementById('checkAdicional');
         const esEdit = document.getElementById('esEdicion').value === "true";
+        const fechaOrig = document.getElementById('fechaOriginal').value;
         
         if(!fecha || !cons) return;
 
-        // 1. Consultar ocupación actual en SCRIPT_CITAS primero
         const fLatino = aLatino(fecha);
-        const rCitas = await fetch(`${SCRIPT_CITAS}?validarCupo=true&fecha=${fLatino}&turno=${turno}&consultorio=${encodeURIComponent(cons)}`);
+
+        // 1. Consultar ocupación actual y verificación de duplicado del paciente en SCRIPT_CITAS
+        let urlValidacion = `${SCRIPT_CITAS}?validarCupo=true&fecha=${fLatino}&turno=${turno}&consultorio=${encodeURIComponent(cons)}`;
+        if(dni.length === 8) {
+            urlValidacion += `&dni=${dni}&esEdicion=${esEdit}&fechaOriginal=${encodeURIComponent(fechaOrig)}`;
+        }
+
+        const rCitas = await fetch(urlValidacion);
         const dCitas = await rCitas.json();
         const ocupadosActuales = (dCitas && dCitas.ocupados !== undefined) ? dCitas.ocupados : 0;
+        const pacienteDuplicado = dCitas && dCitas.duplicado === true;
 
         let limiteMax = 0;
         let tieneTopePersonalizado = false;
@@ -1018,8 +1029,13 @@
         document.getElementById('boxAdicional').style.display = 'none';
         if(checkAdi) checkAdi.checked = false;
 
-        // 3. Reglas de negocio: Validación de programación y cupos máximos estrictos
-        if (!tieneTopePersonalizado) {
+        // 3. Reglas de negocio: Validación de paciente duplicado, programación y cupos máximos
+        if (pacienteDuplicado) {
+            textoContador.innerHTML = `<b style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> EL PACIENTE YA TIENE CITA EN EL SERVICIO PARA LA FECHA Y TURNO.</b>`;
+            btn.disabled = true;
+            btn.innerText = "PACIENTE YA CITADO EN ESTE TURNO";
+            btn.style.background = "#94a3b8";
+        } else if (!tieneTopePersonalizado) {
             textoContador.innerHTML = `<b style="color: #ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> NO HAY PROGRAMACIÓN CONFIGURADA PARA ESTA FECHA Y TURNO.</b>`;
             btn.disabled = true;
             btn.innerText = "NO HAY PROGRAMACIÓN DISPONIBLE";
