@@ -984,17 +984,45 @@
         if(dia === 0) { lanzarModal("Domingos no hay atención", "❌"); document.getElementById('citaInput').value=""; return; }
         if(dia === 6 && turno === "TARDE") { lanzarModal("Sábados solo turno Mañana", "⚠️"); document.getElementById('turnoInput').value="MAÑANA"; return; }
 
+        // 1. Definir límite por defecto según el turno
+        let limiteMax = (turno === "MAÑANA") ? 18 : 6;
+
+        // 2. Consultar tope personalizado en SCRIPT_ADMIN directamente desde el cliente
+        try {
+            const rAdmin = await fetch(`${SCRIPT_ADMIN}?getTopes=true`);
+            const dAdmin = await rAdmin.json();
+            
+            if (dAdmin && dAdmin.topes && Array.isArray(dAdmin.topes)) {
+                const topeEncontrado = dAdmin.topes.find(t => {
+                    const fMatch = (t.fecha === fecha);
+                    const cMatch = (t.consultorio || "").toUpperCase().trim() === cons.toUpperCase().trim();
+                    const tMatch = (t.turno || "").toUpperCase().trim() === turno.toUpperCase().trim();
+                    return fMatch && cMatch && tMatch;
+                });
+
+                if (topeEncontrado && !isNaN(topeEncontrado.cantidad) && topeEncontrado.cantidad > 0) {
+                    limiteMax = Number(topeEncontrado.cantidad);
+                }
+            }
+        } catch (e) {
+            console.warn("No se pudo obtener el tope desde SCRIPT_ADMIN:", e);
+        }
+
+        // 3. Consultar ocupación actual en SCRIPT_CITAS
         const fLatino = aLatino(fecha);
-        const r = await fetch(`${SCRIPT_CITAS}?validarCupo=true&fecha=${fLatino}&turno=${turno}&consultorio=${encodeURIComponent(cons)}`);
-        const d = await r.json();
+        const rCitas = await fetch(`${SCRIPT_CITAS}?validarCupo=true&fecha=${fLatino}&turno=${turno}&consultorio=${encodeURIComponent(cons)}`);
+        const dCitas = await rCitas.json();
         
-        const limiteMax = (d.limite !== undefined) ? d.limite : ((turno === "MAÑANA") ? 18 : 6);
+        const ocupadosActuales = (dCitas && dCitas.ocupados !== undefined) ? dCitas.ocupados : 0;
+
+        // 4. Mostrar estado y mensaje de ocupación exacta
         const infoDiv = document.getElementById('infoCitas');
         const textoContador = document.getElementById('textoContador');
         infoDiv.style.display = 'flex';
-        textoContador.innerText = `Hay ${d.ocupados} de ${limiteMax} citas reservadas para esta fecha en el turno ${turno}.`;
+        textoContador.innerText = `Hay ${ocupadosActuales} de ${limiteMax} citas reservadas para esta fecha en el turno ${turno}.`;
 
-        if (d.ocupados >= limiteMax) {
+        // 5. Validar cupos acumulados y activar badge adicional si se alcanza o supera el tope
+        if (ocupadosActuales >= limiteMax) {
             document.getElementById('boxAdicional').style.display = 'block';
             if (!checkAdi.checked) {
                 btn.disabled = true; btn.innerText = "MARQUE EL CHECK DE ADICIONAL";
