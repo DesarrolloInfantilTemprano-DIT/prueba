@@ -259,7 +259,7 @@
         <div class="main-layout">
             
             <div class="form-section">
-                <span class="section-title"><i class="fa-solid fa-id-card" style="color: var(--accent-kids)"></i> Información del Niño</span>
+                <span class="section-title"><i class="fa-solid fa-id-card" style="color: var(--accent-kids)"></i> Información del Usuario</span>
                 <div class="input-group">
                     <label>DNI *</label>
                     <div style="display: flex; gap: 8px;">
@@ -287,17 +287,17 @@
                         <input type="text" name="HC" id="hcInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="N° HC">
                     </div>
                     <div class="input-group">
-                        <label>CELULAR * (9 dígitos)</label>
+                        <label>CELULAR *</label>
                         <input type="tel" name="CELULAR" id="telInput" required maxlength="9" pattern="[0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)" placeholder="Ej. 956003980">
                     </div>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div class="input-group">
-                        <label>CELULAR 2 (OPCIONAL - 9 dígitos)</label>
+                        <label>CELULAR 2 (OPCIONAL)</label>
                         <input type="tel" name="CELULAR_2" id="tel2Input" maxlength="9" pattern="[0-9]{9}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9)" placeholder="Número secundario">
                     </div>
                     <div class="input-group">
-                        <label>SECTOR / DIRECCIÓN *</label>
+                        <label>SECTOR*</label>
                         <input type="text" name="SECTOR" id="sectorInput" required readonly style="background:#f1f5f9; color: #475569;" placeholder="Sector de vivienda">
                     </div>
                 </div>
@@ -336,7 +336,7 @@
                 <div id="boxAdicional" class="badge-adicional">
                     <label style="display:flex; align-items:center; gap:10px; color:#9a3412; font-size:13px; cursor:pointer;">
                         <input type="checkbox" name="ES_ADICIONAL" id="checkAdicional" value="true" style="width:auto; margin:0;">
-                        <span><b>CUPOS AGOTADOS.</b> Acepto registrar como adicional.</span>
+                        <span><b>CUPOS AGOTADOS.</b> Registrar como adicional.</span>
                     </label>
                 </div>
             </div>
@@ -352,7 +352,7 @@
         <input type="hidden" name="FECHA_ORIGINAL" id="fechaOriginal" value="">
         
         <div class="submit-container">
-            <button type="submit" id="btnEnviar" class="btn-submit">CONFIRMAR REGISTRO</button>
+            <button type="submit" id="btnEnviar" class="btn-submit">GUARDAR CITA</button>
         </div>
     </form>
 
@@ -376,14 +376,14 @@
                 <label>Consultorio:</label>
                 <input type="hidden" id="monConsultorio" value="TODOS">
                 <button type="button" class="selector-trigger-btn" id="btnMonConsTrigger" onclick="abrirSelectorMonConsultorio()" style="height: 46px; background: white;">
-                    <span id="txtMonConsSeleccionado">TODOS LOS CONSULTORIOS</span>
+                    <span id="txtMonConsSeleccionado">TODOS</span>
                     <i class="fa-solid fa-chevron-down" style="color: var(--primary);"></i>
                 </button>
             </div>
             <div>
                 <label>Turno:</label>
                 <select id="monTurno">
-                    <option value="TODOS">TODOS LOS TURNOS</option>
+                    <option value="TODOS">TODOS</option>
                     <option value="MAÑANA">MAÑANA</option>
                     <option value="TARDE">TARDE</option>
                 </select>
@@ -418,13 +418,13 @@
                     </tr>
                 </thead>
                 <tbody id="monitorTablaBody">
-                    <tr><td colspan="14" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR CITAS".</td></tr>
+                    <tr><td colspan="14" style="text-align:center; color:#94a3b8;">Establezca los filtros y presione "BUSCAR".</td></tr>
                 </tbody>
             </table>
         </div>
         
         <div class="btn-acciones-monitor">
-            <button type="button" class="btn-actualizar-asistencia" onclick="guardarCambiosAsistencia()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR CAMBIOS DE ASISTENCIA</button>
+            <button type="button" class="btn-actualizar-asistencia" onclick="guardarCambiosAsistencia()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR ASISTENCIA</button>
             <button type="button" class="btn-excel-monitor" onclick="descargarExcelMonitor()"><i class="fa-solid fa-file-excel"></i> EXPORTAR A EXCEL</button>
         </div>
     </div>
