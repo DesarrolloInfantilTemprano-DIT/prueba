@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -38,13 +39,10 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
-    h2, h3 {
+    h2 {
       color: var(--primary-color);
       margin-top: 0;
       padding-bottom: 8px;
-    }
-
-    h2 {
       border-bottom: 2px solid var(--primary-color);
       text-align: center;
       font-size: 1.5rem;
@@ -55,7 +53,7 @@
       border: 1px solid #e2e8f0;
       border-radius: 10px;
       padding: 20px;
-      margin-bottom: 25px;
+      margin-top: 25px;
     }
 
     .section-title {
@@ -157,6 +155,25 @@
       background-color: var(--primary-hover);
     }
 
+    .btn-search {
+      background-color: #0284c7;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-search:hover {
+      background-color: #0369a1;
+    }
+
     .btn-cancel {
       background-color: #94a3b8;
       color: white;
@@ -174,6 +191,7 @@
       border-radius: 8px;
       border: 1px solid var(--border-color);
       background-color: #fff;
+      display: none; /* Oculta por defecto hasta presionar Buscar */
     }
 
     table {
@@ -413,17 +431,17 @@
       </div>
     </form>
 
-    <!-- Sección de Consulta e Historial -->
+    <!-- Sección de Consulta e Historial de Registros -->
     <div class="section-card">
       <div class="section-title">Consulta e Historial de Registros</div>
       <div class="form-grid">
         <div class="form-group">
           <label for="filtroDesde">Desde:</label>
-          <input type="date" id="filtroDesde" onchange="aplicarFiltrosLocales()">
+          <input type="date" id="filtroDesde">
         </div>
         <div class="form-group">
           <label for="filtroHasta">Hasta:</label>
-          <input type="date" id="filtroHasta" onchange="aplicarFiltrosLocales()">
+          <input type="date" id="filtroHasta">
         </div>
         
         <!-- Consultorio Filtro -->
@@ -445,8 +463,13 @@
         </div>
       </div>
 
-      <!-- Tabla de Registros -->
-      <div class="table-container">
+      <!-- Botón de Búsqueda -->
+      <button type="button" class="btn-search" onclick="ejecutarConsulta()">
+        🔍 Buscar Registros
+      </button>
+
+      <!-- Tabla de Registros (Oculta por defecto) -->
+      <div class="table-container" id="contenedorTabla">
         <table>
           <thead>
             <tr>
@@ -459,7 +482,7 @@
           </thead>
           <tbody id="tablaCuerpo">
             <tr>
-              <td colspan="5" style="text-align: center;">Cargando registros...</td>
+              <td colspan="5" style="text-align: center;">Haga clic en Buscar para obtener datos.</td>
             </tr>
           </tbody>
         </table>
@@ -503,16 +526,15 @@
     // =========================================================================
     // URL DEL GOOGLE APPS SCRIPT ADMINISTRACION
     // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGHN6XKIcWZqMRFMlfAUaaj87-qowqBPBv4sOSffQK8h1X9_LP2ta2gwNRWTU2fRMF/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWCu9LW3plqqE78CXs0nNd9fbJaVjtPyUz27cXQ7tkomBgVmrtgds3xQN7ih6--AeV/exec";
 
     let consultoriosGlobales = [];
-    let turnosGlobales = ["MAÑANA", "TARDE"];
+    let turnosGlobales = ["MAÑANA", "TARDE", "NOCHE"];
     let registrosLocales = [];
-    let objetivoModal = 'form'; // 'form' o 'filtro'
+    let objetivoModal = 'form'; 
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarConsultorios();
-      cargarTablaTope();
     });
 
     // Alternar visibilidad entre fecha única y rango de fechas
@@ -545,8 +567,14 @@
         });
     }
 
-    // 2. Cargar datos de HOJA TOPE
-    function cargarTablaTope() {
+    // 2. Ejecutar Consulta (Mostrar Tabla y obtener datos del Backend)
+    function ejecutarConsulta() {
+      const contenedorTabla = document.getElementById("contenedorTabla");
+      contenedorTabla.style.display = "block";
+      
+      const tbody = document.getElementById("tablaCuerpo");
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Cargando datos...</td></tr>';
+
       fetch(`${SCRIPT_URL}?action=getDataTope`)
         .then(res => res.json())
         .then(data => {
@@ -554,6 +582,7 @@
           aplicarFiltrosLocales();
         })
         .catch(err => {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error al consultar datos.</td></tr>';
           console.error("Error al obtener registros:", err);
         });
     }
@@ -566,7 +595,6 @@
       const turno = document.getElementById("valFiltroTurno").value;
 
       let filtrados = registrosLocales.filter(reg => {
-        // Normalizar fecha dd/mm/yyyy a yyyy-mm-dd
         let fechaRegISO = normalizarFechaISO(reg.fecha);
 
         if (desde && fechaRegISO < desde) return false;
@@ -585,7 +613,7 @@
       tbody.innerHTML = "";
 
       if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No se encontraron registros.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No se encontraron registros para los criterios seleccionados.</td></tr>';
         return;
       }
 
@@ -646,7 +674,7 @@
       }
 
       // Validar duplicados si es un registro nuevo
-      if (!rowIndex) {
+      if (!rowIndex && registrosLocales.length > 0) {
         for (let f of fechasAGuardar) {
           let fFormateada = normalizarFechaDDMMYYYY(f);
           let duplicado = registrosLocales.find(r => 
@@ -665,57 +693,53 @@
         }
       }
 
-      // Procesar envíos
+      // Enviar lote o único registro al Backend
       mostrarMensaje("Guardando registro(s)...", "loading");
 
-      let promesas = fechasAGuardar.map(fechaItem => {
-        const payload = {
-          action: rowIndex ? "update" : "create",
-          rowIndex: rowIndex,
-          fecha: fechaItem,
-          consultorio: consultorio,
-          turno: turno,
-          cantidad: cantidad
-        };
+      const payload = {
+        action: rowIndex ? "update" : "createBatch",
+        rowIndex: rowIndex,
+        fechas: fechasAGuardar,
+        fecha: fechasAGuardar[0], // Compatibilidad si envía única
+        consultorio: consultorio,
+        turno: turno,
+        cantidad: cantidad
+      };
 
-        return fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        mostrarMensaje("¡Operación completada con éxito!", "success");
+        limpiarFormulario();
+        setTimeout(() => {
+          ocultarMensaje();
+          if (document.getElementById("contenedorTabla").style.display === "block") {
+            ejecutarConsulta();
+          }
+        }, 1200);
+      })
+      .catch(err => {
+        mostrarMensaje("Ocurrió un error al guardar.", "warning");
+        console.error(err);
       });
-
-      Promise.all(promesas)
-        .then(() => {
-          mostrarMensaje("¡Operación completada con éxito!", "success");
-          limpiarFormulario();
-          setTimeout(() => {
-            ocultarMensaje();
-            cargarTablaTope();
-          }, 1200);
-        })
-        .catch(err => {
-          mostrarMensaje("Ocurrió un error al guardar.", "warning");
-          console.error(err);
-        });
     });
 
     // 4. Edición de Registro
     function prepararEdicion(rowIndex, fecha, consultorio, turno, cantidad) {
       document.getElementById("rowIndex").value = rowIndex;
 
-      // Seleccionar modo de fecha única
       document.querySelectorAll('input[name="modoFecha"]')[0].checked = true;
       toggleModoFecha();
 
       document.getElementById("fecha").value = normalizarFechaISO(fecha);
 
-      // Seleccionar Consultorio
       document.getElementById("valConsultorio").value = consultorio;
       document.getElementById("triggerConsultorio").textContent = consultorio;
 
-      // Seleccionar Turno
       document.getElementById("valTurno").value = turno;
       document.getElementById("triggerTurno").textContent = turno;
 
@@ -743,7 +767,7 @@
         mostrarMensaje("Registro eliminado correctamente.", "success");
         setTimeout(() => {
           ocultarMensaje();
-          cargarTablaTope();
+          ejecutarConsulta();
         }, 1200);
       });
     }
@@ -786,7 +810,6 @@
           } else {
             document.getElementById("valFiltroConsultorio").value = item;
             document.getElementById("triggerFiltroConsultorio").textContent = item;
-            aplicarFiltrosLocales();
           }
           cerrarModal("modalConsultorio");
         };
@@ -813,7 +836,6 @@
           } else {
             document.getElementById("valFiltroTurno").value = item;
             document.getElementById("triggerFiltroTurno").textContent = item;
-            aplicarFiltrosLocales();
           }
           cerrarModal("modalTurno");
         };
@@ -821,7 +843,7 @@
       });
     }
 
-    // Útiles
+    // Auxiliares
     function limpiarFormulario() {
       document.getElementById("topeForm").reset();
       document.getElementById("rowIndex").value = "";
