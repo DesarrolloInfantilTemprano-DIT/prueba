@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -8,12 +7,18 @@
     :root {
       --primary-color: #0f766e;
       --primary-hover: #0d9488;
+      --accent-color: #6366f1;
       --bg-color: #f0fdf4;
       --card-bg: #ffffff;
       --text-color: #1e293b;
       --border-color: #cbd5e1;
       --danger-color: #ef4444;
       --warning-color: #f59e0b;
+      --modal-header-bg: #5b51d8;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -25,7 +30,7 @@
     }
 
     .container {
-      max-width: 900px;
+      max-width: 950px;
       margin: 0 auto;
       background: var(--card-bg);
       padding: 25px;
@@ -33,12 +38,48 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
     }
 
-    h2 {
+    h2, h3 {
       color: var(--primary-color);
       margin-top: 0;
+      padding-bottom: 8px;
+    }
+
+    h2 {
       border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 10px;
       text-align: center;
+      font-size: 1.5rem;
+    }
+
+    .section-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+    }
+
+    /* Toggle Modo Fecha */
+    .mode-toggle {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
+    .mode-toggle label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .form-grid {
@@ -56,76 +97,95 @@
     label {
       font-weight: 600;
       margin-bottom: 5px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
-    input, select {
+    input[type="date"], input[type="number"] {
       padding: 10px;
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s;
+      background-color: #fff;
     }
 
-    input:focus, select:focus {
-      border-color: var(--primary-color);
+    /* Selectores personalizados estilo Modal */
+    .custom-select-trigger {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+      color: var(--text-color);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .custom-select-trigger:hover {
+      border-color: var(--accent-color);
+    }
+
+    .custom-select-trigger::after {
+      content: '▾';
+      font-size: 0.8rem;
+      color: #64748b;
     }
 
     .btn-group {
       display: flex;
       gap: 10px;
-      margin-bottom: 25px;
+      margin-top: 10px;
     }
 
-    button {
-      flex: 1;
-      padding: 12px;
+    button.btn-submit {
+      width: 100%;
+      padding: 14px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
+      background-color: var(--primary-color);
+      color: white;
       transition: background 0.2s, transform 0.1s;
     }
 
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .btn-save {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .btn-save:hover {
+    button.btn-submit:hover {
       background-color: var(--primary-hover);
     }
 
     .btn-cancel {
       background-color: #94a3b8;
       color: white;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
       display: none;
     }
 
-    .btn-cancel:hover {
-      background-color: #64748b;
-    }
-
-    /* Tabla de registros */
+    /* Tabla */
     .table-container {
       overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background-color: #fff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 10px;
     }
 
     th, td {
       text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.92rem;
     }
 
     th {
@@ -140,11 +200,12 @@
 
     .action-btn {
       padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
       cursor: pointer;
       border: none;
-      margin-right: 5px;
+      font-weight: 600;
+      margin-right: 4px;
     }
 
     .btn-edit {
@@ -157,24 +218,130 @@
       color: white;
     }
 
+    /* Modales emergentes */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: white;
+      width: 90%;
+      max-width: 420px;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      transform: translateY(20px);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.active .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      background: var(--modal-header-bg);
+      color: white;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .modal-header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 16px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .modal-search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background-color: #f8fafc;
+      margin-bottom: 12px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .modal-option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .modal-option-item {
+      padding: 12px 16px;
+      background-color: #f8fafc;
+      border: 1px solid #f1f5f9;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: #334155;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .modal-option-item:hover, .modal-option-item.selected {
+      background-color: #eef2ff;
+      border-color: #c7d2fe;
+      color: var(--modal-header-bg);
+    }
+
+    .modal-option-item::after {
+      content: '›';
+      font-size: 1.3rem;
+      color: #94a3b8;
+    }
+
     .status-msg {
       text-align: center;
       padding: 10px;
       margin-bottom: 15px;
-      border-radius: 6px;
+      border-radius: 8px;
       display: none;
       font-weight: 600;
     }
 
-    .status-loading {
-      background-color: #e0f2fe;
-      color: #0369a1;
-    }
-
-    .status-success {
-      background-color: #dcfce7;
-      color: #15803d;
-    }
+    .status-loading { background-color: #e0f2fe; color: #0369a1; }
+    .status-success { background-color: #dcfce7; color: #15803d; }
+    .status-warning { background-color: #fef3c7; color: #b45309; }
   </style>
 </head>
 <body>
@@ -184,32 +351,56 @@
 
     <div id="statusMsg" class="status-msg"></div>
 
-    <!-- Formulario de Entrada -->
+    <!-- Formulario Principal -->
     <form id="topeForm">
-      <input type="hidden" id="rowIndex" value=""> <!-- Guarda la fila cuando se edita -->
+      <input type="hidden" id="rowIndex" value="">
+
+      <!-- Modo de Selección de Fecha -->
+      <div class="mode-toggle">
+        <label>
+          <input type="radio" name="modoFecha" value="unica" checked onchange="toggleModoFecha()"> Fecha Única
+        </label>
+        <label>
+          <input type="radio" name="modoFecha" value="rango" onchange="toggleModoFecha()"> Rango de Fechas (Desde - Hasta)
+        </label>
+      </div>
 
       <div class="form-grid">
-        <div class="form-group">
+        <!-- Campo Fecha Única -->
+        <div class="form-group" id="groupFechaUnica">
           <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha" required>
+          <input type="date" id="fecha">
         </div>
 
+        <!-- Campos Rango de Fechas -->
+        <div class="form-group" id="groupFechaDesde" style="display: none;">
+          <label for="fechaDesde">Desde:</label>
+          <input type="date" id="fechaDesde">
+        </div>
+        <div class="form-group" id="groupFechaHasta" style="display: none;">
+          <label for="fechaHasta">Hasta:</label>
+          <input type="date" id="fechaHasta">
+        </div>
+
+        <!-- Consultorio con Modal -->
         <div class="form-group">
-          <label for="consultorio">Consultorio:</label>
-          <select id="consultorio" required>
-            <option value="">Cargando consultorios...</option>
-          </select>
+          <label>Consultorio:</label>
+          <div class="custom-select-trigger" id="triggerConsultorio" onclick="abrirModalConsultorio('form')">
+            Seleccione un consultorio...
+          </div>
+          <input type="hidden" id="valConsultorio">
         </div>
 
+        <!-- Turno con Modal -->
         <div class="form-group">
-          <label for="turno">Turno:</label>
-          <select id="turno" required>
-            <option value="MAÑANA">MAÑANA</option>
-            <option value="TARDE">TARDE</option>
-            <option value="NOCHE">NOCHE</option>
-          </select>
+          <label>Turno:</label>
+          <div class="custom-select-trigger" id="triggerTurno" onclick="abrirModalTurno('form')">
+            MAÑANA
+          </div>
+          <input type="hidden" id="valTurno" value="MAÑANA">
         </div>
 
+        <!-- Cantidad -->
         <div class="form-group">
           <label for="cantidad">Cantidad (Tope):</label>
           <input type="number" id="cantidad" min="1" required placeholder="Ej. 12">
@@ -217,157 +408,322 @@
       </div>
 
       <div class="btn-group">
-        <button type="submit" id="btnGuardar" class="btn-save">Guardar Asignación</button>
+        <button type="submit" id="btnGuardar" class="btn-submit">Guardar Asignación</button>
         <button type="button" id="btnCancelar" class="btn-cancel" onclick="limpiarFormulario()">Cancelar Edición</button>
       </div>
     </form>
 
-    <!-- Tabla para mostrar y administrar los registros -->
-    <h3>Registros Existentes</h3>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Consultorio</th>
-            <th>Turno</th>
-            <th>Cantidad</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tablaCuerpo">
-          <tr>
-            <td colspan="5" style="text-align: center;">Cargando datos...</td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Sección de Consulta e Historial -->
+    <div class="section-card">
+      <div class="section-title">Consulta e Historial de Registros</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="filtroDesde">Desde:</label>
+          <input type="date" id="filtroDesde" onchange="aplicarFiltrosLocales()">
+        </div>
+        <div class="form-group">
+          <label for="filtroHasta">Hasta:</label>
+          <input type="date" id="filtroHasta" onchange="aplicarFiltrosLocales()">
+        </div>
+        
+        <!-- Consultorio Filtro -->
+        <div class="form-group">
+          <label>Consultorio:</label>
+          <div class="custom-select-trigger" id="triggerFiltroConsultorio" onclick="abrirModalConsultorio('filtro')">
+            TODOS
+          </div>
+          <input type="hidden" id="valFiltroConsultorio" value="TODOS">
+        </div>
+
+        <!-- Turno Filtro -->
+        <div class="form-group">
+          <label>Turno:</label>
+          <div class="custom-select-trigger" id="triggerFiltroTurno" onclick="abrirModalTurno('filtro')">
+            TODOS
+          </div>
+          <input type="hidden" id="valFiltroTurno" value="TODOS">
+        </div>
+      </div>
+
+      <!-- Tabla de Registros -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Consultorio</th>
+              <th>Turno</th>
+              <th>Cantidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaCuerpo">
+            <tr>
+              <td colspan="5" style="text-align: center;">Cargando registros...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SELECTOR DE CONSULTORIO -->
+  <div class="modal-overlay" id="modalConsultorio">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span>☰</span> Seleccionar Consultorio
+        </div>
+        <button class="modal-close" onclick="cerrarModal('modalConsultorio')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="modal-search-input" id="searchConsultorio" placeholder="Escriba para buscar..." oninput="filtrarOpcionesConsultorio()">
+        <div class="modal-option-list" id="listaOpcionesConsultorio"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SELECTOR DE TURNO -->
+  <div class="modal-overlay" id="modalTurno">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span>☰</span> Seleccionar Turno
+        </div>
+        <button class="modal-close" onclick="cerrarModal('modalTurno')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="modal-search-input" id="searchTurno" placeholder="Escriba para buscar..." oninput="filtrarOpcionesTurno()">
+        <div class="modal-option-list" id="listaOpcionesTurno"></div>
+      </div>
     </div>
   </div>
 
   <script>
     // =========================================================================
-    // URL DEL GOOGLE APPS SCRIPT ADMINISTRATIVO
+    // URL DEL GOOGLE APPS SCRIPT ADMINISTRACION
     // =========================================================================
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGHN6XKIcWZqMRFMlfAUaaj87-qowqBPBv4sOSffQK8h1X9_LP2ta2gwNRWTU2fRMF/exec";
+
+    let consultoriosGlobales = [];
+    let turnosGlobales = ["MAÑANA", "TARDE"];
+    let registrosLocales = [];
+    let objetivoModal = 'form'; // 'form' o 'filtro'
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarConsultorios();
       cargarTablaTope();
     });
 
-    const form = document.getElementById("topeForm");
-    const statusMsg = document.getElementById("statusMsg");
+    // Alternar visibilidad entre fecha única y rango de fechas
+    function toggleModoFecha() {
+      const modo = document.querySelector('input[name="modoFecha"]:checked').value;
+      const grpUnica = document.getElementById("groupFechaUnica");
+      const grpDesde = document.getElementById("groupFechaDesde");
+      const grpHasta = document.getElementById("groupFechaHasta");
 
-    // Mostrar mensaje de estado
-    function mostrarMensaje(texto, tipo = "loading") {
-      statusMsg.innerText = texto;
-      statusMsg.className = `status-msg status-${tipo}`;
-      statusMsg.style.display = "block";
+      if (modo === "unica") {
+        grpUnica.style.display = "flex";
+        grpDesde.style.display = "none";
+        grpHasta.style.display = "none";
+      } else {
+        grpUnica.style.display = "none";
+        grpDesde.style.display = "flex";
+        grpHasta.style.display = "flex";
+      }
     }
 
-    function ocultarMensaje() {
-      statusMsg.style.display = "none";
-    }
-
-    // 1. Cargar lista de consultorios desde la hoja "ADMIN" (Columna C)
+    // 1. Cargar Consultorios desde HOJA ADMIN
     function cargarConsultorios() {
       fetch(`${SCRIPT_URL}?action=getConsultorios`)
         .then(res => res.json())
         .then(data => {
-          const select = document.getElementById("consultorio");
-          select.innerHTML = '<option value="">Seleccione un consultorio...</option>';
-          data.forEach(item => {
-            if (item) {
-              const option = document.createElement("option");
-              option.value = item;
-              option.textContent = item;
-              select.appendChild(option);
-            }
-          });
+          consultoriosGlobales = Array.isArray(data) ? data : (data.consultorios || []);
         })
-        .catch(err => {
-          console.error("Error al obtener consultorios:", err);
-          document.getElementById("consultorio").innerHTML = '<option value="">Error al cargar</option>';
+        .catch(() => {
+          consultoriosGlobales = ["CRED", "VACUNATORIO", "ESNI", "ODONTOLOGÍA", "PSICOLOGÍA", "NUTRICIÓN", "EVA"];
         });
     }
 
-    // 2. Cargar tabla con registros de la hoja "TOPE"
+    // 2. Cargar datos de HOJA TOPE
     function cargarTablaTope() {
       fetch(`${SCRIPT_URL}?action=getDataTope`)
         .then(res => res.json())
         .then(data => {
-          const tbody = document.getElementById("tablaCuerpo");
-          tbody.innerHTML = "";
-
-          if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay registros cargados.</td></tr>';
-            return;
-          }
-
-          data.forEach((row, index) => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${row.fecha}</td>
-              <td>${row.consultorio}</td>
-              <td>${row.turno}</td>
-              <td>${row.cantidad}</td>
-              <td>
-                <button class="action-btn btn-edit" onclick="prepararEdicion(${row.rowIndex}, '${row.fecha}', '${row.consultorio}', '${row.turno}', ${row.cantidad})">Editar</button>
-                <button class="action-btn btn-delete" onclick="eliminarRegistro(${row.rowIndex})">Eliminar</button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
+          registrosLocales = data || [];
+          aplicarFiltrosLocales();
         })
-        .catch(err => console.error("Error al cargar la tabla:", err));
+        .catch(err => {
+          console.error("Error al obtener registros:", err);
+        });
     }
 
-    // 3. Guardar o Editar Registro
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      
-      const rowIndex = document.getElementById("rowIndex").value;
-      const payload = {
-        action: rowIndex ? "update" : "create",
-        rowIndex: rowIndex,
-        fecha: document.getElementById("fecha").value,
-        consultorio: document.getElementById("consultorio").value,
-        turno: document.getElementById("turno").value,
-        cantidad: document.getElementById("cantidad").value
-      };
+    // Aplicar filtros a la tabla del historial
+    function aplicarFiltrosLocales() {
+      const desde = document.getElementById("filtroDesde").value;
+      const hasta = document.getElementById("filtroHasta").value;
+      const consultorio = document.getElementById("valFiltroConsultorio").value;
+      const turno = document.getElementById("valFiltroTurno").value;
 
-      mostrarMensaje("Procesando solicitud...", "loading");
+      let filtrados = registrosLocales.filter(reg => {
+        // Normalizar fecha dd/mm/yyyy a yyyy-mm-dd
+        let fechaRegISO = normalizarFechaISO(reg.fecha);
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        mostrarMensaje("¡Operación completada con éxito!", "success");
-        limpiarFormulario();
-        setTimeout(() => {
-          ocultarMensaje();
-          cargarTablaTope();
-        }, 1500);
-      })
-      .catch(err => {
-        mostrarMensaje("Ocurrió un error al guardar.", "danger");
-        console.error(err);
+        if (desde && fechaRegISO < desde) return false;
+        if (hasta && fechaRegISO > hasta) return false;
+        if (consultorio !== "TODOS" && reg.consultorio.toUpperCase() !== consultorio.toUpperCase()) return false;
+        if (turno !== "TODOS" && reg.turno.toUpperCase() !== turno.toUpperCase()) return false;
+
+        return true;
       });
+
+      renderizarTabla(filtrados);
+    }
+
+    function renderizarTabla(lista) {
+      const tbody = document.getElementById("tablaCuerpo");
+      tbody.innerHTML = "";
+
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No se encontraron registros.</td></tr>';
+        return;
+      }
+
+      lista.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.fecha}</td>
+          <td>${row.consultorio}</td>
+          <td>${row.turno}</td>
+          <td>${row.cantidad}</td>
+          <td>
+            <button class="action-btn btn-edit" onclick="prepararEdicion(${row.rowIndex}, '${row.fecha}', '${row.consultorio}', '${row.turno}', ${row.cantidad})">Editar</button>
+            <button class="action-btn btn-delete" onclick="eliminarRegistro(${row.rowIndex})">Eliminar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 3. Guardar / Editar con Validación de Duplicados
+    document.getElementById("topeForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const rowIndex = document.getElementById("rowIndex").value;
+      const modoFecha = document.querySelector('input[name="modoFecha"]:checked').value;
+      const consultorio = document.getElementById("valConsultorio").value;
+      const turno = document.getElementById("valTurno").value;
+      const cantidad = document.getElementById("cantidad").value;
+
+      if (!consultorio) {
+        alert("Por favor seleccione un consultorio.");
+        return;
+      }
+
+      let fechasAGuardar = [];
+
+      if (rowIndex) {
+        // Modo Edición (Fila específica)
+        fechasAGuardar.push(document.getElementById("fecha").value);
+      } else if (modoFecha === "unica") {
+        const f = document.getElementById("fecha").value;
+        if (!f) { alert("Seleccione una fecha."); return; }
+        fechasAGuardar.push(f);
+      } else {
+        // Modo Rango de Fechas
+        const fDesde = document.getElementById("fechaDesde").value;
+        const fHasta = document.getElementById("fechaHasta").value;
+        if (!fDesde || !fHasta) { alert("Seleccione ambas fechas para el rango."); return; }
+        if (fDesde > fHasta) { alert("La fecha inicial debe ser anterior o igual a la final."); return; }
+
+        let curr = new Date(fDesde + "T00:00:00");
+        let end = new Date(fHasta + "T00:00:00");
+
+        while (curr <= end) {
+          fechasAGuardar.push(curr.toISOString().split('T')[0]);
+          curr.setDate(curr.getDate() + 1);
+        }
+      }
+
+      // Validar duplicados si es un registro nuevo
+      if (!rowIndex) {
+        for (let f of fechasAGuardar) {
+          let fFormateada = normalizarFechaDDMMYYYY(f);
+          let duplicado = registrosLocales.find(r => 
+            r.fecha === fFormateada && 
+            r.consultorio.toUpperCase() === consultorio.toUpperCase() && 
+            r.turno.toUpperCase() === turno.toUpperCase()
+          );
+
+          if (duplicado) {
+            let editar = confirm(`Ya existe una programación para ${fFormateada} - ${consultorio} - Turno ${turno}.\n\n¿Desea editar ese registro existente en lugar de duplicar?`);
+            if (editar) {
+              prepararEdicion(duplicado.rowIndex, duplicado.fecha, duplicado.consultorio, duplicado.turno, duplicado.cantidad);
+            }
+            return;
+          }
+        }
+      }
+
+      // Procesar envíos
+      mostrarMensaje("Guardando registro(s)...", "loading");
+
+      let promesas = fechasAGuardar.map(fechaItem => {
+        const payload = {
+          action: rowIndex ? "update" : "create",
+          rowIndex: rowIndex,
+          fecha: fechaItem,
+          consultorio: consultorio,
+          turno: turno,
+          cantidad: cantidad
+        };
+
+        return fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      });
+
+      Promise.all(promesas)
+        .then(() => {
+          mostrarMensaje("¡Operación completada con éxito!", "success");
+          limpiarFormulario();
+          setTimeout(() => {
+            ocultarMensaje();
+            cargarTablaTope();
+          }, 1200);
+        })
+        .catch(err => {
+          mostrarMensaje("Ocurrió un error al guardar.", "warning");
+          console.error(err);
+        });
     });
 
-    // 4. Cargar datos en el formulario para Editar
+    // 4. Edición de Registro
     function prepararEdicion(rowIndex, fecha, consultorio, turno, cantidad) {
       document.getElementById("rowIndex").value = rowIndex;
-      document.getElementById("fecha").value = formatearFechaParaInput(fecha);
-      document.getElementById("consultorio").value = consultorio;
-      document.getElementById("turno").value = turno;
+
+      // Seleccionar modo de fecha única
+      document.querySelectorAll('input[name="modoFecha"]')[0].checked = true;
+      toggleModoFecha();
+
+      document.getElementById("fecha").value = normalizarFechaISO(fecha);
+
+      // Seleccionar Consultorio
+      document.getElementById("valConsultorio").value = consultorio;
+      document.getElementById("triggerConsultorio").textContent = consultorio;
+
+      // Seleccionar Turno
+      document.getElementById("valTurno").value = turno;
+      document.getElementById("triggerTurno").textContent = turno;
+
       document.getElementById("cantidad").value = cantidad;
 
       document.getElementById("btnGuardar").textContent = "Actualizar Asignación";
-      document.getElementById("btnCancelar").style.display = "inline-block";
+      document.getElementById("btnCancelar").style.display = "block";
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -388,26 +744,123 @@
         setTimeout(() => {
           ocultarMensaje();
           cargarTablaTope();
-        }, 1500);
-      })
-      .catch(err => console.error("Error al eliminar:", err));
+        }, 1200);
+      });
     }
 
-    // Funciones auxiliares
+    // LÓGICA DE MODALES
+    function abrirModalConsultorio(origen) {
+      objetivoModal = origen;
+      document.getElementById("searchConsultorio").value = "";
+      filtrarOpcionesConsultorio();
+      document.getElementById("modalConsultorio").classList.add("active");
+    }
+
+    function abrirModalTurno(origen) {
+      objetivoModal = origen;
+      document.getElementById("searchTurno").value = "";
+      filtrarOpcionesTurno();
+      document.getElementById("modalTurno").classList.add("active");
+    }
+
+    function cerrarModal(id) {
+      document.getElementById(id).classList.remove("active");
+    }
+
+    function filtrarOpcionesConsultorio() {
+      const q = document.getElementById("searchConsultorio").value.toLowerCase();
+      const contenedor = document.getElementById("listaOpcionesConsultorio");
+      contenedor.innerHTML = "";
+
+      let lista = [...consultoriosGlobales];
+      if (objetivoModal === 'filtro') lista.unshift("TODOS");
+
+      lista.filter(c => c.toLowerCase().includes(q)).forEach(item => {
+        const div = document.createElement("div");
+        div.className = "modal-option-item";
+        div.textContent = item;
+        div.onclick = () => {
+          if (objetivoModal === 'form') {
+            document.getElementById("valConsultorio").value = item;
+            document.getElementById("triggerConsultorio").textContent = item;
+          } else {
+            document.getElementById("valFiltroConsultorio").value = item;
+            document.getElementById("triggerFiltroConsultorio").textContent = item;
+            aplicarFiltrosLocales();
+          }
+          cerrarModal("modalConsultorio");
+        };
+        contenedor.appendChild(div);
+      });
+    }
+
+    function filtrarOpcionesTurno() {
+      const q = document.getElementById("searchTurno").value.toLowerCase();
+      const contenedor = document.getElementById("listaOpcionesTurno");
+      contenedor.innerHTML = "";
+
+      let lista = [...turnosGlobales];
+      if (objetivoModal === 'filtro') lista.unshift("TODOS");
+
+      lista.filter(t => t.toLowerCase().includes(q)).forEach(item => {
+        const div = document.createElement("div");
+        div.className = "modal-option-item";
+        div.textContent = item;
+        div.onclick = () => {
+          if (objetivoModal === 'form') {
+            document.getElementById("valTurno").value = item;
+            document.getElementById("triggerTurno").textContent = item;
+          } else {
+            document.getElementById("valFiltroTurno").value = item;
+            document.getElementById("triggerFiltroTurno").textContent = item;
+            aplicarFiltrosLocales();
+          }
+          cerrarModal("modalTurno");
+        };
+        contenedor.appendChild(div);
+      });
+    }
+
+    // Útiles
     function limpiarFormulario() {
-      form.reset();
+      document.getElementById("topeForm").reset();
       document.getElementById("rowIndex").value = "";
+      document.getElementById("valConsultorio").value = "";
+      document.getElementById("triggerConsultorio").textContent = "Seleccione un consultorio...";
+      document.getElementById("valTurno").value = "MAÑANA";
+      document.getElementById("triggerTurno").textContent = "MAÑANA";
       document.getElementById("btnGuardar").textContent = "Guardar Asignación";
       document.getElementById("btnCancelar").style.display = "none";
+      toggleModoFecha();
     }
 
-    function formatearFechaParaInput(fechaTexto) {
-      // Convierte dd/mm/yyyy a yyyy-mm-dd para el input date
-      const partes = fechaTexto.split('/');
-      if (partes.length === 3) {
-        return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+    function mostrarMensaje(txt, tipo) {
+      const el = document.getElementById("statusMsg");
+      el.textContent = txt;
+      el.className = `status-msg status-${tipo}`;
+      el.style.display = "block";
+    }
+
+    function ocultarMensaje() {
+      document.getElementById("statusMsg").style.display = "none";
+    }
+
+    function normalizarFechaISO(fStr) {
+      if (!fStr) return "";
+      if (fStr.includes("/")) {
+        const p = fStr.split("/");
+        return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
       }
-      return fechaTexto;
+      return fStr;
+    }
+
+    function normalizarFechaDDMMYYYY(fStr) {
+      if (!fStr) return "";
+      if (fStr.includes("-")) {
+        const p = fStr.split("-");
+        return `${p[2].padStart(2, '0')}/${p[1].padStart(2, '0')}/${p[0]}`;
+      }
+      return fStr;
     }
   </script>
 </body>
