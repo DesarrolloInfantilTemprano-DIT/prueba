@@ -1,1005 +1,798 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Asignación de Consultorios</title>
-  <style>
-    :root {
-      --primary-color: #0f766e;
-      --primary-hover: #0d9488;
-      --accent-color: #6366f1;
-      --bg-color: #f0fdf4;
-      --card-bg: #ffffff;
-      --text-color: #1e293b;
-      --border-color: #cbd5e1;
-      --danger-color: #ef4444;
-      --warning-color: #f59e0b;
-      --modal-header-bg: #5b51d8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DIT | Desarrollo Infantil Temprano</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f4f8ff;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --primary-blue: #0284c7;
+            --mint-green: #10b981;
+            --pastel-pink: #f472b6;
+            --bright-yellow: #fbbf24;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --shadow-soft: 0 10px 30px rgba(14, 165, 233, 0.12);
+        }
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 20px;
-    }
+        body {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #fef3c7 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--text-main);
+        }
 
-    .container {
-      max-width: 950px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    }
+        /* --- PANTALLA DE AUTENTICACIÓN --- */
+        #auth-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: flex;
+            background: #f8fafc;
+            transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1);
+        }
 
-    h2 {
-      color: var(--primary-color);
-      margin-top: 0;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--primary-color);
-      text-align: center;
-      font-size: 1.5rem;
-    }
+        .auth-visual {
+            flex: 1;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(168, 85, 247, 0.85)), url('https://w.wallhaven.cc/full/kx/wallhaven-kxjjjm.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+            position: relative;
+            overflow-y: auto;
+        }
 
-    .section-card {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 25px;
-    }
+        .auth-form-panel {
+            width: 450px;
+            padding: 40px 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
+            border-top-left-radius: 30px;
+            border-bottom-left-radius: 30px;
+        }
 
-    .section-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 15px;
-      color: var(--primary-color);
-    }
+        .form-box {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-    /* Toggle Modo Fecha */
-    .mode-toggle {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-      align-items: center;
-    }
+        .form-box.active {
+            display: block;
+        }
 
-    .mode-toggle label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            margin-left: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            outline: none;
+            margin-bottom: 18px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
 
-    label {
-      font-weight: 600;
-      margin-bottom: 5px;
-      font-size: 0.88rem;
-    }
+        input:focus {
+            border-color: var(--primary-blue);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+        }
 
-    input[type="date"], input[type="number"] {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      outline: none;
-      background-color: #fff;
-    }
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3);
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
 
-    /* Selectores personalizados estilo Modal */
-    .custom-select-trigger {
-      padding: 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background-color: #fff;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
-      color: var(--text-color);
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+        }
 
-    .custom-select-trigger:hover {
-      border-color: var(--accent-color);
-    }
+        .btn-main:active {
+            transform: translateY(1px);
+        }
 
-    .custom-select-trigger::after {
-      content: '▾';
-      font-size: 0.8rem;
-      color: #64748b;
-    }
+        .toggle-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
 
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
+        .toggle-link span {
+            color: var(--primary-blue);
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: underline;
+        }
 
-    button.btn-submit {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      background-color: var(--primary-color);
-      color: white;
-      transition: background 0.2s, transform 0.1s;
-    }
+        /* --- INTERFAZ PRINCIPAL ALEGRE Y MODERNA --- */
+        #main-app {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
 
-    button.btn-submit:hover {
-      background-color: var(--primary-hover);
-    }
+        .header-clean {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 30px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
 
-    .btn-search {
-      background-color: #0284c7;
-      color: white;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-      margin-bottom: 15px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f9ff;
+            padding: 6px 14px;
+            border-radius: 50px;
+            border: 1px solid #bae6fd;
+        }
 
-    .btn-search:hover {
-      background-color: #0369a1;
-    }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 10px rgba(14, 165, 233, 0.3);
+        }
 
-    .btn-cancel {
-      background-color: #94a3b8;
-      color: white;
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      display: none;
-    }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
 
-    /* Tabla */
-    .table-container {
-      overflow-x: auto;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      background-color: #fff;
-      display: none;
-    }
+        .action-btn {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            padding: 9px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+        .action-btn:hover {
+            background: #f8fafc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
 
-    th, td {
-      text-align: left;
-      padding: 12px 16px;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 0.92rem;
-    }
+        .action-btn-danger {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #ef4444;
+        }
 
-    th {
-      background-color: #f1f5f9;
-      color: var(--primary-color);
-      font-weight: 700;
-    }
+        .action-btn-danger:hover {
+            background: #ef4444;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
 
-    tr:hover {
-      background-color: #f8fafc;
-    }
+        .main-viewport {
+            flex: 1;
+            position: relative;
+            background: transparent;
+            overflow-y: auto;
+        }
 
-    .action-btn {
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      cursor: pointer;
-      border: none;
-      font-weight: 600;
-      margin-right: 4px;
-    }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+        }
 
-    .btn-edit {
-      background-color: var(--warning-color);
-      color: white;
-    }
+        /* --- BOTÓN FLOTANTE REGRESAR AL INICIO --- */
+        #btn-back-home {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: #ffffff;
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            padding: 10px 22px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.2);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-    .btn-delete {
-      background-color: var(--danger-color);
-      color: white;
-    }
+        #btn-back-home:hover {
+            background: var(--primary-blue);
+            color: #ffffff;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(2, 132, 199, 0.35);
+        }
 
-    /* Modales emergentes */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-    }
+        /* --- DASHBOARD DE TARJETAS MODULARES ALEGRES --- */
+        #modules-dashboard {
+            padding: 35px 25px 50px;
+            max-width: 1250px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+        .module-card {
+            background: var(--card-bg);
+            border: 2px solid #ffffff;
+            border-radius: 28px;
+            padding: 28px 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(16px);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
 
-    .modal-card {
-      background: white;
-      width: 90%;
-      max-width: 420px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      transform: translateY(20px);
-      transition: transform 0.2s ease;
-    }
+        .module-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: #ffffff;
+            box-shadow: 0 20px 35px rgba(14, 165, 233, 0.2);
+        }
 
-    .modal-overlay.active .modal-card {
-      transform: translateY(0);
-    }
+        .module-card .icon-box {
+            width: 70px;
+            height: 70px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            font-size: 1.8rem;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+        }
 
-    .modal-header {
-      background: var(--modal-header-bg);
-      color: white;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
+        .module-card:hover .icon-box {
+            transform: scale(1.15) rotate(-4deg);
+            color: #ffffff !important;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
 
-    .modal-header-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+        .module-card h3 {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
 
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1.4rem;
-      cursor: pointer;
-      line-height: 1;
-    }
+        /* TARJETAS CON PALETA ALEGRE PASTEL */
+        .module-card:nth-child(1) .icon-box { background: #e0f2fe; color: #0284c7; }
+        .module-card:nth-child(2) .icon-box { background: #dcfce7; color: #16a34a; }
+        .module-card:nth-child(3) .icon-box { background: #fef3c7; color: #d97706; }
+        .module-card:nth-child(4) .icon-box { background: #f3e8ff; color: #9333ea; }
+        .module-card:nth-child(5) .icon-box { background: #ffe4e6; color: #e11d48; }
+        .module-card:nth-child(6) .icon-box { background: #ccfbf1; color: #0d9488; }
+        .module-card:nth-child(7) .icon-box { background: #ffedd5; color: #ea580c; }
+        .module-card:nth-child(8) .icon-box { background: #fae8ff; color: #c084fc; }
+        .module-card:nth-child(9) .icon-box { background: #e0e7ff; color: #4f46e5; }
+        .module-card:nth-child(10) .icon-box { background: #ecfdf5; color: #059669; }
+        .module-card:nth-child(11) .icon-box { background: #fef2f2; color: #dc2626; }
+        .module-card:nth-child(12) .icon-box { background: #f0fdf4; color: #16a34a; }
 
-    .modal-body {
-      padding: 16px;
-      max-height: 380px;
-      overflow-y: auto;
-    }
+        .module-card:nth-child(1):hover .icon-box { background: linear-gradient(135deg, #38bdf8, #0284c7); }
+        .module-card:nth-child(2):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
+        .module-card:nth-child(3):hover .icon-box { background: linear-gradient(135deg, #fbbf24, #d97706); }
+        .module-card:nth-child(4):hover .icon-box { background: linear-gradient(135deg, #c084fc, #9333ea); }
+        .module-card:nth-child(5):hover .icon-box { background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .module-card:nth-child(6):hover .icon-box { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
+        .module-card:nth-child(7):hover .icon-box { background: linear-gradient(135deg, #fb923c, #ea580c); }
+        .module-card:nth-child(8):hover .icon-box { background: linear-gradient(135deg, #e879f9, #c084fc); }
+        .module-card:nth-child(9):hover .icon-box { background: linear-gradient(135deg, #818cf8, #4f46e5); }
+        .module-card:nth-child(10):hover .icon-box { background: linear-gradient(135deg, #34d399, #059669); }
+        .module-card:nth-child(11):hover .icon-box { background: linear-gradient(135deg, #f87171, #dc2626); }
+        .module-card:nth-child(12):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
 
-    .modal-search-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      background-color: #f8fafc;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-      outline: none;
-    }
+        #modal-pw {
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 41, 59, 0.4);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+            display: none;
+        }
+        .modal-card {
+            background: #fff;
+            padding: 35px;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 400px;
+            color: var(--text-main);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
 
-    .modal-option-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .modal-option-item {
-      padding: 12px 16px;
-      background-color: #f8fafc;
-      border: 1px solid #f1f5f9;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-weight: 600;
-      color: #334155;
-      transition: background 0.15s, border-color 0.15s;
-    }
-
-    .modal-option-item:hover, .modal-option-item.selected {
-      background-color: #eef2ff;
-      border-color: #c7d2fe;
-      color: var(--modal-header-bg);
-    }
-
-    .modal-option-item::after {
-      content: '›';
-      font-size: 1.3rem;
-      color: #94a3b8;
-    }
-
-    /* Modal de Alerta / Confirmación Elegante */
-    .custom-alert-card {
-      background: white;
-      width: 90%;
-      max-width: 440px;
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-
-    .custom-alert-msg {
-      font-size: 0.98rem;
-      color: #334155;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-
-    .custom-alert-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .custom-alert-btn {
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-alert-primary {
-      background-color: var(--primary-color);
-      color: white;
-    }
-
-    .btn-alert-secondary {
-      background-color: #cbd5e1;
-      color: #334155;
-    }
-
-    .status-msg {
-      text-align: center;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      display: none;
-      font-weight: 600;
-    }
-
-    .status-loading { background-color: #e0f2fe; color: #0369a1; }
-    .status-success { background-color: #dcfce7; color: #15803d; }
-    .status-warning { background-color: #fef3c7; color: #b45309; }
-  </style>
+        @media (max-width: 768px) {
+            #auth-screen { flex-direction: column; overflow-y: auto; }
+            .auth-visual { flex: none; padding: 25px 20px; text-align: center; gap: 15px; }
+            .auth-visual h1 { font-size: 1.8rem !important; }
+            .auth-form-panel { width: 100%; padding: 30px 20px; box-shadow: none; border-radius: 0; }
+            .header-clean { padding: 12px 16px; }
+            #modules-dashboard { padding: 20px 12px 40px; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+            .module-card { padding: 20px 10px; border-radius: 20px; }
+            .module-card .icon-box { width: 55px; height: 55px; font-size: 1.3rem; margin-bottom: 12px; }
+            .module-card h3 { font-size: 0.78rem; }
+            #btn-back-home { top: 12px; left: 12px; padding: 8px 16px; font-size: 0.75rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h2>Asignación de Consultorios (Hoja TOPE)</h2>
-
-    <div id="statusMsg" class="status-msg"></div>
-
-    <!-- Formulario Principal -->
-    <form id="topeForm">
-      <input type="hidden" id="rowIndex" value="">
-
-      <!-- Modo de Selección de Fecha -->
-      <div class="mode-toggle">
-        <label>
-          <input type="radio" name="modoFecha" value="unica" checked onchange="toggleModoFecha()"> Fecha Única
-        </label>
-        <label>
-          <input type="radio" name="modoFecha" value="rango" onchange="toggleModoFecha()"> Rango de Fechas (Desde - Hasta)
-        </label>
-      </div>
-
-      <div class="form-grid">
-        <!-- Campo Fecha Única -->
-        <div class="form-group" id="groupFechaUnica">
-          <label for="fecha">Fecha:</label>
-          <input type="date" id="fecha">
-        </div>
-
-        <!-- Campos Rango de Fechas -->
-        <div class="form-group" id="groupFechaDesde" style="display: none;">
-          <label for="fechaDesde">Desde:</label>
-          <input type="date" id="fechaDesde">
-        </div>
-        <div class="form-group" id="groupFechaHasta" style="display: none;">
-          <label for="fechaHasta">Hasta:</label>
-          <input type="date" id="fechaHasta">
-        </div>
-
-        <!-- Consultorio con Modal -->
-        <div class="form-group">
-          <label>Consultorio:</label>
-          <div class="custom-select-trigger" id="triggerConsultorio" onclick="abrirModalConsultorio('form')">
-            Seleccione un consultorio...
-          </div>
-          <input type="hidden" id="valConsultorio">
-        </div>
-
-        <!-- Turno con Modal -->
-        <div class="form-group">
-          <label>Turno:</label>
-          <div class="custom-select-trigger" id="triggerTurno" onclick="abrirModalTurno('form')">
-            MAÑANA
-          </div>
-          <input type="hidden" id="valTurno" value="MAÑANA">
-        </div>
-
-        <!-- Cantidad -->
-        <div class="form-group">
-          <label for="cantidad">Cantidad (Tope):</label>
-          <input type="number" id="cantidad" min="1" required placeholder="Ej. 12">
-        </div>
-      </div>
-
-      <div class="btn-group">
-        <button type="submit" id="btnGuardar" class="btn-submit">Guardar Asignación</button>
-        <button type="button" id="btnCancelar" class="btn-cancel" onclick="limpiarFormulario()">Cancelar Edición</button>
-      </div>
-    </form>
-
-    <!-- Sección de Consulta e Historial de Registros -->
-    <div class="section-card">
-      <div class="section-title">Consulta e Historial de Registros</div>
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="filtroDesde">Desde:</label>
-          <input type="date" id="filtroDesde">
-        </div>
-        <div class="form-group">
-          <label for="filtroHasta">Hasta:</label>
-          <input type="date" id="filtroHasta">
+    <!-- PANTALLA DE AUTENTICACIÓN -->
+    <div id="auth-screen">
+        <div class="auth-visual">
+            <div>
+                <h1 style="font-size: 2.6rem; font-weight:900; text-shadow: 0 4px 10px rgba(0,0,0,0.15);">Desarrollo Infantil Temprano <b style="color:var(--bright-yellow)">DIT</b></h1>
+                <p style="opacity: 0.95; margin-top: 5px; font-weight: 700; letter-spacing: 0.5px;">☀️ Plataforma de Monitoreo Integral Infantil</p>
+            </div>
+            
+            <div style="font-size: 0.8rem; opacity: 0.9; font-weight: 700;"><i class="fas fa-shield-cat"></i> Red Nacional de Salud - MINSA 2026</div>
         </div>
         
-        <!-- Consultorio Filtro -->
-        <div class="form-group">
-          <label>Consultorio:</label>
-          <div class="custom-select-trigger" id="triggerFiltroConsultorio" onclick="abrirModalConsultorio('filtro')">
-            TODOS
-          </div>
-          <input type="hidden" id="valFiltroConsultorio" value="TODOS">
+        <div class="auth-form-panel">
+            <div id="login-box" class="form-box active">
+                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a; font-size: 1.6rem;">¡Hola, Profesional! 👋</h2>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 25px;">Ingresa tus credenciales autorizadas para continuar.</p>
+                
+                <label>DNI del Usuario</label>
+                <input type="text" id="l-dni" placeholder="Ingresa tu número de DNI" autocomplete="username">
+                
+                <label>Contraseña</label>
+                <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+                
+                <button class="btn-main" onclick="handleLogin()">INGRESAR AL SISTEMA</button>
+                <div class="toggle-link">¿No tienes una cuenta activa? <span onclick="showBox('reg-check')">Regístrate aquí</span></div>
+            </div>
+
+            <div id="reg-check" class="form-box">
+                <h2 style="margin-bottom: 8px; font-weight: 900; color: #0f172a;">Validación de Personal</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 25px;">Validaremos si tu DNI figura pre-aprobado por la jefatura del establecimiento.</p>
+                
+                <label>Ingresa tu DNI</label>
+                <input type="text" id="r-dni-search" placeholder="Escribe aquí el DNI a evaluar">
+                
+                <button class="btn-main" onclick="checkAuthorizedDNI()">BUSCAR AUTORIZACIÓN</button>
+                <div class="toggle-link"><span onclick="showBox('login')">Volver al inicio de sesión</span></div>
+            </div>
+
+            <div id="reg-final" class="form-box">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="reg-greeting" style="color: var(--primary-blue); font-size: 1.1rem; font-weight: 800;"></h3>
+                    <button onclick="showBox('reg-check')" style="background: none; border: none; color: var(--primary-blue); font-size: 0.8rem; cursor: pointer; font-weight: 700;"><i class="fas fa-arrow-left"></i> VOLVER</button>
+                </div>
+                
+                <label>Nombres y Apellidos Completos</label>
+                <input type="text" id="r-name" placeholder="Cargando...">
+                
+                <label>Profesión / Especialidad</label>
+                <input type="text" id="r-prof" placeholder="Ej. Lic. en Enfermería">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Número Celular</label>
+                        <input type="number" id="r-cel" placeholder="9 cifras" oninput="if(this.value.length > 9) this.value = this.value.slice(0,9);">
+                    </div>
+                    <div>
+                        <label>Región</label>
+                        <input type="text" id="r-reg" placeholder="Dpto">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>Provincia</label>
+                        <input type="text" id="r-provaws" placeholder="Provincia">
+                    </div>
+                    <div>
+                        <label>Distrito</label>
+                        <input type="text" id="r-dist" placeholder="Distrito">
+                    </div>
+                </div>
+                
+                <label>Establecimiento de Salud (E.E.S.S.)</label>
+                <input type="text" id="r-eess" placeholder="Nombre de su IPRESS">
+                
+                <label>Defina su Nueva Contraseña</label>
+                <input type="password" id="r-new-pass" placeholder="Mínimo 4 caracteres">
+                
+                <button class="btn-main" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="activateAccount()">CONFIRMAR Y ACTIVAR CUENTA</button>
+            </div>
+            
+            <div id="auth-msg" style="margin-top: 20px; text-align: center; font-size: 0.85rem; display: none; padding: 14px; border-radius: 14px; font-weight: 700;"></div>
         </div>
+    </div>
 
-        <!-- Turno Filtro -->
-        <div class="form-group">
-          <label>Turno:</label>
-          <div class="custom-select-trigger" id="triggerFiltroTurno" onclick="abrirModalTurno('filtro')">
-            TODOS
-          </div>
-          <input type="hidden" id="valFiltroTurno" value="TODOS">
+    <!-- APLICACIÓN PRINCIPAL -->
+    <div id="main-app">
+        <!-- BOTÓN FLOTANTE REGRESAR -->
+        <button id="btn-back-home" onclick="showDashboard()">
+            <i class="fas fa-arrow-left"></i> REGRESAR AL INICIO
+        </button>
+
+        <!-- ENCABEZADO MODERNO Y CLARO -->
+        <header class="header-clean" id="app-header">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #0284c7, #38bdf8); border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);">
+                    <i class="fas fa-child-reaching" style="color: #fff; font-size: 1.2rem;"></i>
+                </div>
+                <div>
+                    <h3 style="color: var(--text-main); font-size: 1.05rem; font-weight: 800; letter-spacing: 0.5px;">SISTEMA INTEGRADO DIT</h3>
+                    <p style="font-size: 0.72rem; color: var(--primary-blue); font-weight: 700;">Panel Principal de Monitoreo</p>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="user-pill">
+                    <div class="user-avatar"><i class="fas fa-user-nurse"></i></div>
+                    <span id="user-display" style="font-size: 0.8rem; color: var(--text-main); font-weight: 800;"></span>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="action-btn" onclick="document.getElementById('modal-pw').style.display='flex'">
+                        <i class="fas fa-key" style="color:var(--bright-yellow)"></i> LLAVE
+                    </button>
+                    <button class="action-btn action-btn-danger" onclick="logout()">
+                        <i class="fas fa-power-off"></i> SALIR
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENEDOR PRINCIPAL -->
+        <main class="main-viewport">
+            <!-- DASHBOARD DE TARJETAS MODULARES -->
+            <div id="modules-dashboard">
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/')">
+                    <div class="icon-box"><i class="fas fa-baby"></i></div>
+                    <h3>Censo</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/')">
+                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Citas CRED</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/programarcitas/')">
+                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Topes Citas</h3>                    
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/')">
+                    <div class="icon-box"><i class="fas fa-calendar-plus"></i></div>
+                    <h3>Citas SATD</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/')">
+                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
+                    <h3>Reporte SATD</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/')">
+                    <div class="icon-box"><i class="fas fa-bell"></i></div>
+                    <h3>Recordar Citados</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/')">
+                    <div class="icon-box"><i class="fas fa-book-open"></i></div>
+                    <h3>Libreta CRED</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/anemia/')">
+                    <div class="icon-box"><i class="fas fa-pills"></i></div>
+                    <h3>Anemia</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://confianzaseguridad772-max.github.io/Dosificador_Hierro/')">
+                    <div class="icon-box"><i class="fas fa-pills"></i></div>
+                    <h3>Dosificador</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/mapasector/')">
+                    <div class="icon-box"><i class="fas fa-map-pin"></i></div>
+                    <h3>Mapa Sector</h3>
+                </div>
+                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/sectorizar/')">
+                    <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
+                    <h3>Ficha Familiar</h3>
+                </div>
+            </div>
+
+            <!-- VISOR IFRAME DE MÓDULOS -->
+            <iframe id="content-frame"></iframe>
+        </main>
+    </div>
+
+    <!-- MODAL LLAVE (CAMBIO DE CONTRASEÑA) -->
+    <div id="modal-pw">
+        <div class="modal-card">
+            <h3 style="margin-bottom: 15px; font-weight: 900; color: #0f172a; font-size: 1.2rem;">Cambiar Contraseña</h3>
+            <label>Contraseña Actual</label>
+            <input type="password" id="old-pw" placeholder="Escriba clave vigente">
+            <label>Nueva Contraseña</label>
+            <input type="password" id="new-pw" placeholder="Mínimo 4 caracteres">
+            <button class="btn-main" onclick="changePassword()">ACTUALIZAR CREDENCIAL</button>
+            <button class="btn-main" style="background: #e2e8f0; color: #475569; margin-top: 10px; font-weight: 700; box-shadow: none;" onclick="document.getElementById('modal-pw').style.display='none'">CANCELAR</button>
         </div>
-      </div>
-
-      <!-- Botón de Búsqueda -->
-      <button type="button" class="btn-search" onclick="ejecutarConsulta()">
-        🔍 Buscar Registros
-      </button>
-
-      <!-- Tabla de Registros (Oculta por defecto) -->
-      <div class="table-container" id="contenedorTabla">
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Consultorio</th>
-              <th>Turno</th>
-              <th>Cantidad</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tablaCuerpo">
-            <tr>
-              <td colspan="5" style="text-align: center;">Haga clic en Buscar para obtener datos.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
-  </div>
 
-  <!-- MODAL SELECTOR DE CONSULTORIO -->
-  <div class="modal-overlay" id="modalConsultorio">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-header-title">
-          <span>☰</span> Seleccionar Consultorio
-        </div>
-        <button class="modal-close" onclick="cerrarModal('modalConsultorio')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="text" class="modal-search-input" id="searchConsultorio" placeholder="Escriba para buscar..." oninput="filtrarOpcionesConsultorio()">
-        <div class="modal-option-list" id="listaOpcionesConsultorio"></div>
-      </div>
-    </div>
-  </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2QKNMUiL-H8Z9CAtC1GvHj7OcbS4mG5yjcUwr6S1cL3B8DZ0-ZddSp2trQlAC6uyQ/exec";
+        let currentDNI = '';
+        let userDataCache = {};
 
-  <!-- MODAL SELECTOR DE TURNO -->
-  <div class="modal-overlay" id="modalTurno">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-header-title">
-          <span>☰</span> Seleccionar Turno
-        </div>
-        <button class="modal-close" onclick="cerrarModal('modalTurno')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="text" class="modal-search-input" id="searchTurno" placeholder="Escriba para buscar..." oninput="filtrarOpcionesTurno()">
-        <div class="modal-option-list" id="listaOpcionesTurno"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE ALERTA / CONFIRMACIÓN ELEGANTE -->
-  <div class="modal-overlay" id="modalAlerta">
-    <div class="custom-alert-card">
-      <div class="custom-alert-msg" id="mensajeAlertaTexto">Mensaje aquí</div>
-      <div class="custom-alert-buttons" id="mensajeAlertaBotones">
-        <button class="custom-alert-btn btn-alert-primary" onclick="cerrarAlertaCustom()">Aceptar</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // =========================================================================
-    // URL DEL GOOGLE APPS SCRIPT ADMINISTRACION
-    // =========================================================================
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyWCu9LW3plqqE78CXs0nNd9fbJaVjtPyUz27cXQ7tkomBgVmrtgds3xQN7ih6--AeV/exec";
-
-    let consultoriosGlobales = [];
-    let turnosGlobales = ["MAÑANA", "TARDE", "NOCHE"];
-    let registrosLocales = [];
-    let objetivoModal = 'form'; 
-
-    document.addEventListener("DOMContentLoaded", () => {
-      cargarConsultorios();
-      precargarRegistrosSilencioso();
-    });
-
-    // Carga silenciosa de registros para tener la base de datos lista en memoria
-    function precargarRegistrosSilencioso() {
-      return fetch(`${SCRIPT_URL}?action=getDataTope`)
-        .then(res => res.json())
-        .then(data => {
-          registrosLocales = data || [];
-          return registrosLocales;
-        })
-        .catch(err => {
-          console.error("Precarga de registros fallida", err);
-          return [];
-        });
-    }
-
-    // Alerta personalizada elegante
-    function mostrarAlertaElegante(texto, callbackAceptar = null, textoBoton = "Aceptar") {
-      document.getElementById("mensajeAlertaTexto").innerHTML = texto;
-      const contenedorBotones = document.getElementById("mensajeAlertaBotones");
-      
-      if (callbackAceptar) {
-        contenedorBotones.innerHTML = `
-          <button class="custom-alert-btn btn-alert-secondary" onclick="cerrarAlertaCustom()">Cancelar</button>
-          <button class="custom-alert-btn btn-alert-primary" id="btnAlertaConfirmar">${textoBoton}</button>
-        `;
-        document.getElementById("btnAlertaConfirmar").onclick = () => {
-          cerrarAlertaCustom();
-          callbackAceptar();
-        };
-      } else {
-        contenedorBotones.innerHTML = `
-          <button class="custom-alert-btn btn-alert-primary" onclick="cerrarAlertaCustom()">Aceptar</button>
-        `;
-      }
-      document.getElementById("modalAlerta").classList.add("active");
-    }
-
-    function cerrarAlertaCustom() {
-      document.getElementById("modalAlerta").classList.remove("active");
-    }
-
-    // Alternar visibilidad entre fecha única y rango de fechas
-    function toggleModoFecha() {
-      const modo = document.querySelector('input[name="modoFecha"]:checked').value;
-      const grpUnica = document.getElementById("groupFechaUnica");
-      const grpDesde = document.getElementById("groupFechaDesde");
-      const grpHasta = document.getElementById("groupFechaHasta");
-
-      if (modo === "unica") {
-        grpUnica.style.display = "flex";
-        grpDesde.style.display = "none";
-        grpHasta.style.display = "none";
-      } else {
-        grpUnica.style.display = "none";
-        grpDesde.style.display = "flex";
-        grpHasta.style.display = "flex";
-      }
-    }
-
-    // 1. Cargar Consultorios desde HOJA ADMIN
-    function cargarConsultorios() {
-      fetch(`${SCRIPT_URL}?action=getConsultorios`)
-        .then(res => res.json())
-        .then(data => {
-          consultoriosGlobales = Array.isArray(data) ? data : (data.consultorios || []);
-        })
-        .catch(() => {
-          consultoriosGlobales = ["CRED", "VACUNATORIO", "ESNI", "ODONTOLOGÍA", "PSICOLOGÍA", "NUTRICIÓN", "EVA"];
-        });
-    }
-
-    // 2. Ejecutar Consulta (Mostrar Tabla y obtener datos del Backend)
-    function ejecutarConsulta() {
-      const contenedorTabla = document.getElementById("contenedorTabla");
-      contenedorTabla.style.display = "block";
-      
-      const tbody = document.getElementById("tablaCuerpo");
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Cargando datos...</td></tr>';
-
-      precargarRegistrosSilencioso().then(() => {
-        aplicarFiltrosLocales();
-      });
-    }
-
-    // Aplicar filtros a la tabla del historial
-    function aplicarFiltrosLocales() {
-      const desde = document.getElementById("filtroDesde").value;
-      const hasta = document.getElementById("filtroHasta").value;
-      const consultorio = document.getElementById("valFiltroConsultorio").value;
-      const turno = document.getElementById("valFiltroTurno").value;
-
-      let filtrados = registrosLocales.filter(reg => {
-        let fechaRegISO = normalizarFechaISO(reg.fecha);
-
-        if (desde && fechaRegISO < desde) return false;
-        if (hasta && fechaRegISO > hasta) return false;
-        if (consultorio !== "TODOS" && reg.consultorio.toUpperCase() !== consultorio.toUpperCase()) return false;
-        if (turno !== "TODOS" && reg.turno.toUpperCase() !== turno.toUpperCase()) return false;
-
-        return true;
-      });
-
-      renderizarTabla(filtrados);
-    }
-
-    function renderizarTabla(lista) {
-      const tbody = document.getElementById("tablaCuerpo");
-      tbody.innerHTML = "";
-
-      if (lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No se encontraron registros para los criterios seleccionados.</td></tr>';
-        return;
-      }
-
-      lista.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${row.fecha}</td>
-          <td>${row.consultorio}</td>
-          <td>${row.turno}</td>
-          <td>${row.cantidad}</td>
-          <td>
-            <button class="action-btn btn-edit" onclick="prepararEdicion(${row.rowIndex}, '${row.fecha}', '${row.consultorio}', '${row.turno}', ${row.cantidad})">Editar</button>
-            <button class="action-btn btn-delete" onclick="eliminarRegistro(${row.rowIndex})">Eliminar</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // 3. Guardar / Editar con Escaneo Completo de Duplicados
-    document.getElementById("topeForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const rowIndex = document.getElementById("rowIndex").value;
-      const modoFecha = document.querySelector('input[name="modoFecha"]:checked').value;
-      const consultorio = document.getElementById("valConsultorio").value;
-      const turno = document.getElementById("valTurno").value;
-      const cantidad = document.getElementById("cantidad").value;
-
-      if (!consultorio) {
-        mostrarAlertaElegante("Por favor seleccione un consultorio.");
-        return;
-      }
-
-      let fechasAGuardar = [];
-
-      if (rowIndex) {
-        fechasAGuardar.push(document.getElementById("fecha").value);
-      } else if (modoFecha === "unica") {
-        const f = document.getElementById("fecha").value;
-        if (!f) { mostrarAlertaElegante("Seleccione una fecha."); return; }
-        fechasAGuardar.push(f);
-      } else {
-        const fDesde = document.getElementById("fechaDesde").value;
-        const fHasta = document.getElementById("fechaHasta").value;
-        if (!fDesde || !fHasta) { mostrarAlertaElegante("Seleccione ambas fechas para el rango."); return; }
-        if (fDesde > fHasta) { mostrarAlertaElegante("La fecha inicial debe ser anterior o igual a la final."); return; }
-
-        let curr = new Date(fDesde + "T00:00:00");
-        let end = new Date(fHasta + "T00:00:00");
-
-        while (curr <= end) {
-          fechasAGuardar.push(curr.toISOString().split('T')[0]);
-          curr.setDate(curr.getDate() + 1);
-        }
-      }
-
-      // Sincronizar datos antes de la validación
-      mostrarMensaje("Verificando disponibilidad...", "loading");
-      await precargarRegistrosSilencioso();
-      ocultarMensaje();
-
-      // Buscamos TODAS las fechas del rango que ya están registradas
-      if (!rowIndex && registrosLocales.length > 0) {
-        let coincidencias = [];
-
-        for (let f of fechasAGuardar) {
-          let fFormateada = normalizarFechaDDMMYYYY(f);
-          let duplicado = registrosLocales.find(r => 
-            r.fecha === fFormateada && 
-            r.consultorio.toUpperCase() === consultorio.toUpperCase() && 
-            r.turno.toUpperCase() === turno.toUpperCase()
-          );
-
-          if (duplicado) {
-            coincidencias.push(duplicado);
-          }
+        function showBox(box) {
+            document.querySelectorAll('.form-box').forEach(b => b.classList.remove('active'));
+            document.getElementById(box === 'login' ? 'login-box' : box).classList.add('active');
         }
 
-        // Si se encontraron fechas ya existentes
-        if (coincidencias.length > 0) {
-          let listaFechasTexto = coincidencias.map(c => `<b>${c.fecha}</b>`).join(", ");
-          let textoMensaje = "";
-
-          if (coincidencias.length === 1) {
-            textoMensaje = `Ya existe una programación para la fecha ${listaFechasTexto} en <b>${consultorio}</b> (${turno}).<br><br>¿Desea editar ese registro existente en lugar de duplicar?`;
-          } else {
-            textoMensaje = `Las siguientes fechas ya están registradas para <b>${consultorio}</b> (${turno}):<br><br>${listaFechasTexto}<br><br>¿Desea editar una de ellas en lugar de duplicar?`;
-          }
-
-          mostrarAlertaElegante(
-            textoMensaje,
-            () => {
-              // Cargar la primera de las coincidencias para su edición
-              const primerRegistro = coincidencias[0];
-              prepararEdicion(primerRegistro.rowIndex, primerRegistro.fecha, primerRegistro.consultorio, primerRegistro.turno, primerRegistro.cantidad);
-            },
-            "Sí, Editar"
-          );
-          return;
+        function showMsg(t, c) {
+            const m = document.getElementById('auth-msg');
+            m.innerText = t;
+            m.style.background = c === 'red' ? '#fef2f2' : (c === 'green' ? '#f0fdf4' : '#f0f9ff');
+            m.style.color = c === 'red' ? '#991b1b' : (c === 'green' ? '#166534' : '#075985');
+            m.style.display = t ? 'block' : 'none';
         }
-      }
 
-      // Enviar registro o lote al Backend
-      mostrarMensaje("Guardando registro(s)...", "loading");
+        /* NAVEGACIÓN ENTRE DASHBOARD E IFRAME */
+        function showDashboard() {
+            document.getElementById('modules-dashboard').style.display = 'grid';
+            document.getElementById('app-header').style.display = 'flex';
+            document.getElementById('content-frame').style.display = 'none';
+            document.getElementById('btn-back-home').style.display = 'none';
+        }
 
-      const payload = {
-        action: rowIndex ? "update" : "createBatch",
-        rowIndex: rowIndex,
-        fechas: fechasAGuardar,
-        fecha: fechasAGuardar[0],
-        consultorio: consultorio,
-        turno: turno,
-        cantidad: cantidad
-      };
+        function openModule(url) {
+            document.getElementById('modules-dashboard').style.display = 'none';
+            document.getElementById('app-header').style.display = 'none';
+            const frame = document.getElementById('content-frame');
+            frame.src = url;
+            frame.style.display = 'block';
+            document.getElementById('btn-back-home').style.display = 'flex';
+        }
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(() => {
-        mostrarMensaje("¡Operación completada con éxito!", "success");
-        limpiarFormulario();
-        precargarRegistrosSilencioso();
-        setTimeout(() => {
-          ocultarMensaje();
-          if (document.getElementById("contenedorTabla").style.display === "block") {
-            ejecutarConsulta();
-          }
-        }, 1200);
-      })
-      .catch(err => {
-        mostrarMensaje("Ocurrió un error al guardar.", "warning");
-        console.error(err);
-      });
-    });
+        async function checkAuthorizedDNI() {
+            const dni = document.getElementById('r-dni-search').value;
+            if(!dni) return showMsg("Por favor, ingrese un número de DNI", "red");
+            showMsg("Verificando en servidores del MINSA...", "blue");
+            
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=fetchUserData&dni=${dni}`);
+                const res = await r.json();
+                
+                if(res.status === "found") {
+                    if(res.hasPass) {
+                        showMsg("Este perfil ya se encuentra activo. Redireccionando...", "blue");
+                        setTimeout(() => showBox('login'), 2000);
+                    } else {
+                        currentDNI = dni;
+                        userDataCache = res.userData;
+                        document.getElementById('reg-greeting').innerText = "¡Hola, " + res.userData.nombre.split(" ")[0] + "!";
+                        document.getElementById('r-name').value = res.userData.nombre || "";
+                        document.getElementById('r-prof').value = res.userData.profesion || "";
+                        document.getElementById('r-cel').value = res.userData.celular || "";
+                        document.getElementById('r-reg').value = res.userData.region || "";
+                        document.getElementById('r-provaws').value = res.userData.provincia || "";
+                        document.getElementById('r-dist').value = res.userData.distrito || "";
+                        document.getElementById('r-eess').value = res.userData.eess || "";
+                        showBox('reg-final');
+                        showMsg("", "");
+                    }
+                } else {
+                    showMsg("DNI no registrado como autorizado. Contacte con soporte DIT.", "red");
+                }
+            } catch(e) {
+                showMsg("Ocurrió un error al conectar con la base de datos.", "red");
+            }
+        }
 
-    // 4. Edición de Registro
-    function prepararEdicion(rowIndex, fecha, consultorio, turno, cantidad) {
-      document.getElementById("rowIndex").value = rowIndex;
+        async function activateAccount() {
+            const cel = document.getElementById('r-cel').value;
+            const pass = document.getElementById('r-new-pass').value;
 
-      document.querySelectorAll('input[name="modoFecha"]')[0].checked = true;
-      toggleModoFecha();
+            if(cel.length !== 9) return showMsg("El celular debe tener 9 dígitos", "red");
+            if(pass.length < 4) return showMsg("Contraseña muy corta (mínimo 4 caracteres)", "red");
 
-      document.getElementById("fecha").value = normalizarFechaISO(fecha);
+            const data = {
+                action: "updateUserProfile",
+                dni: currentDNI,
+                nombre: document.getElementById('r-name').value,
+                profesion: document.getElementById('r-prof').value,
+                celular: cel,
+                region: document.getElementById('r-reg').value,
+                provincia: document.getElementById('r-provaws').value,
+                distrito: document.getElementById('r-dist').value,
+                eess: document.getElementById('r-eess').value,
+                newPass: pass
+            };
 
-      document.getElementById("valConsultorio").value = consultorio;
-      document.getElementById("triggerConsultorio").textContent = consultorio;
+            showMsg("Guardando y encriptando tu cuenta...", "blue");
+            const formData = new URLSearchParams();
+            formData.append('jsonData', JSON.stringify(data));
 
-      document.getElementById("valTurno").value = turno;
-      document.getElementById("triggerTurno").textContent = turno;
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const resText = await response.text();
+                
+                if(resText.includes("Success")) {
+                    showMsg("¡Cuenta activada con éxito! Reiniciando...", "green");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showMsg("Error del servidor: " + resText, "red");
+                }
+            } catch(e) {
+                showMsg("Fallo crítico en la red.", "red");
+            }
+        }
 
-      document.getElementById("cantidad").value = cantidad;
+        async function handleLogin() {
+            const u = document.getElementById('l-dni').value;
+            const p = document.getElementById('l-pass').value;
+            if(!u || !p) return showMsg("Por favor completa los dos campos", "red");
+            
+            showMsg("Validando credenciales...", "blue");
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=login&dni=${u}&pass=${p}`);
+                const res = await r.json();
+                if(res.status === "success") {
+                    sessionStorage.setItem('user_dni', u);
+                    sessionStorage.setItem('is_auth', 'true');
+                    sessionStorage.setItem('user_name', res.nombre);
+                    unlockApp(res.nombre);
+                } else {
+                    showMsg("DNI o Contraseña no coinciden", "red");
+                }
+            } catch(e) {
+                showMsg("Error de conexión remota.", "red");
+            }
+        }
 
-      document.getElementById("btnGuardar").textContent = "Actualizar Asignación";
-      document.getElementById("btnCancelar").style.display = "block";
+        async function changePassword() {
+            const oldP = document.getElementById('old-pw').value;
+            const newP = document.getElementById('new-pw').value;
+            if(!oldP || !newP) return alert("Rellene los campos obligatorios.");
 
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+            const data = {
+                action: "updateUserProfile",
+                dni: sessionStorage.getItem('user_dni'),
+                oldPass: oldP,
+                newPass: newP,
+                isChange: true,
+                nombre: "", profesion: "", celular: "", region: "", provincia: "", distrito: "", eess: ""
+            };
 
-    // 5. Eliminar Registro
-    function eliminarRegistro(rowIndex) {
-      mostrarAlertaElegante(
-        "¿Está seguro de que desea eliminar este registro?",
-        () => {
-          mostrarMensaje("Eliminando registro...", "loading");
+            const formData = new URLSearchParams();
+            formData.append('jsonData', JSON.stringify(data));
 
-          fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
-          })
-          .then(() => {
-            mostrarMensaje("Registro eliminado correctamente.", "success");
-            precargarRegistrosSilencioso();
-            setTimeout(() => {
-              ocultarMensaje();
-              ejecutarConsulta();
-            }, 1200);
-          });
-        },
-        "Sí, Eliminar"
-      );
-    }
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+                const resText = await response.text();
+                if(resText.includes("Error")) {
+                    alert(resText);
+                } else {
+                    document.getElementById('modal-pw').style.display='none';
+                    alert("¡Contraseña actualizada!");
+                    document.getElementById('old-pw').value = "";
+                    document.getElementById('new-pw').value = "";
+                }
+            } catch(e) {
+                alert("Error al procesar el cambio.");
+            }
+        }
 
-    // LÓGICA DE MODALES
-    function abrirModalConsultorio(origen) {
-      objetivoModal = origen;
-      document.getElementById("searchConsultorio").value = "";
-      filtrarOpcionesConsultorio();
-      document.getElementById("modalConsultorio").classList.add("active");
-    }
+        function unlockApp(n) {
+            document.getElementById('auth-screen').style.transform = "translateY(-100%)";
+            document.getElementById('main-app').style.display = "flex";
+            document.getElementById('user-display').innerText = n;
+            
+            showDashboard();
 
-    function abrirModalTurno(origen) {
-      objetivoModal = origen;
-      document.getElementById("searchTurno").value = "";
-      filtrarOpcionesTurno();
-      document.getElementById("modalTurno").classList.add("active");
-    }
+            if(!window.hasGreeted) {
+                const msg = new SpeechSynthesisUtterance("Bienvenido al sistema DIT, " + n.split(" ")[0]);
+                msg.lang = 'es-PE';
+                window.speechSynthesis.speak(msg);
+                window.hasGreeted = true;
+            }
+        }
 
-    function cerrarModal(id) {
-      document.getElementById(id).classList.remove("active");
-    }
+        function logout() {
+            sessionStorage.clear();
+            location.reload();
+        }
 
-    function filtrarOpcionesConsultorio() {
-      const q = document.getElementById("searchConsultorio").value.toLowerCase();
-      const contenedor = document.getElementById("listaOpcionesConsultorio");
-      contenedor.innerHTML = "";
+        if(sessionStorage.getItem('is_auth') === 'true') {
+            unlockApp(sessionStorage.getItem('user_name'));
+        }
 
-      let lista = [...consultoriosGlobales];
-      if (objetivoModal === 'filtro') lista.unshift("TODOS");
-
-      lista.filter(c => c.toLowerCase().includes(q)).forEach(item => {
-        const div = document.createElement("div");
-        div.className = "modal-option-item";
-        div.textContent = item;
-        div.onclick = () => {
-          if (objetivoModal === 'form') {
-            document.getElementById("valConsultorio").value = item;
-            document.getElementById("triggerConsultorio").textContent = item;
-          } else {
-            document.getElementById("valFiltroConsultorio").value = item;
-            document.getElementById("triggerFiltroConsultorio").textContent = item;
-          }
-          cerrarModal("modalConsultorio");
-        };
-        contenedor.appendChild(div);
-      });
-    }
-
-    function filtrarOpcionesTurno() {
-      const q = document.getElementById("searchTurno").value.toLowerCase();
-      const contenedor = document.getElementById("listaOpcionesTurno");
-      contenedor.innerHTML = "";
-
-      let lista = [...turnosGlobales];
-      if (objetivoModal === 'filtro') lista.unshift("TODOS");
-
-      lista.filter(t => t.toLowerCase().includes(q)).forEach(item => {
-        const div = document.createElement("div");
-        div.className = "modal-option-item";
-        div.textContent = item;
-        div.onclick = () => {
-          if (objetivoModal === 'form') {
-            document.getElementById("valTurno").value = item;
-            document.getElementById("triggerTurno").textContent = item;
-          } else {
-            document.getElementById("valFiltroTurno").value = item;
-            document.getElementById("triggerFiltroTurno").textContent = item;
-          }
-          cerrarModal("modalTurno");
-        };
-        contenedor.appendChild(div);
-      });
-    }
-
-    // Auxiliares
-    function limpiarFormulario() {
-      document.getElementById("topeForm").reset();
-      document.getElementById("rowIndex").value = "";
-      document.getElementById("valConsultorio").value = "";
-      document.getElementById("triggerConsultorio").textContent = "Seleccione un consultorio...";
-      document.getElementById("valTurno").value = "MAÑANA";
-      document.getElementById("triggerTurno").textContent = "MAÑANA";
-      document.getElementById("btnGuardar").textContent = "Guardar Asignación";
-      document.getElementById("btnCancelar").style.display = "none";
-      toggleModoFecha();
-    }
-
-    function mostrarMensaje(txt, tipo) {
-      const el = document.getElementById("statusMsg");
-      el.textContent = txt;
-      el.className = `status-msg status-${tipo}`;
-      el.style.display = "block";
-    }
-
-    function ocultarMensaje() {
-      document.getElementById("statusMsg").style.display = "none";
-    }
-
-    function normalizarFechaISO(fStr) {
-      if (!fStr) return "";
-      if (fStr.includes("/")) {
-        const p = fStr.split("/");
-        return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
-      }
-      return fStr;
-    }
-
-    function normalizarFechaDDMMYYYY(fStr) {
-      if (!fStr) return "";
-      if (fStr.includes("-")) {
-        const p = fStr.split("-");
-        return `${p[2].padStart(2, '0')}/${p[1].padStart(2, '0')}/${p[0]}`;
-      }
-      return fStr;
-    }
-  </script>
+        document.getElementById('l-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
+    </script>
 </body>
 </html>
