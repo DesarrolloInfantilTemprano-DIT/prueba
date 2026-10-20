@@ -282,7 +282,7 @@
             box-shadow: 0 12px 30px rgba(2, 132, 199, 0.35);
         }
 
-        /* --- DASHBOARD DE TARJETAS MODULARES ALEGRES --- */
+        /* --- DASHBOARD DE TARJETAS MODULARES DINÁMICAS --- */
         #modules-dashboard {
             padding: 35px 25px 50px;
             max-width: 1250px;
@@ -326,12 +326,15 @@
             justify-content: center;
             margin-bottom: 18px;
             font-size: 1.8rem;
+            background: #e0f2fe;
+            color: #0284c7;
             transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 8px 18px rgba(0,0,0,0.06);
         }
 
         .module-card:hover .icon-box {
             transform: scale(1.15) rotate(-4deg);
+            background: linear-gradient(135deg, #38bdf8, #0284c7);
             color: #ffffff !important;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
@@ -343,33 +346,6 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
-
-        /* TARJETAS CON PALETA ALEGRE PASTEL */
-        .module-card:nth-child(1) .icon-box { background: #e0f2fe; color: #0284c7; }
-        .module-card:nth-child(2) .icon-box { background: #dcfce7; color: #16a34a; }
-        .module-card:nth-child(3) .icon-box { background: #fef3c7; color: #d97706; }
-        .module-card:nth-child(4) .icon-box { background: #f3e8ff; color: #9333ea; }
-        .module-card:nth-child(5) .icon-box { background: #ffe4e6; color: #e11d48; }
-        .module-card:nth-child(6) .icon-box { background: #ccfbf1; color: #0d9488; }
-        .module-card:nth-child(7) .icon-box { background: #ffedd5; color: #ea580c; }
-        .module-card:nth-child(8) .icon-box { background: #fae8ff; color: #c084fc; }
-        .module-card:nth-child(9) .icon-box { background: #e0e7ff; color: #4f46e5; }
-        .module-card:nth-child(10) .icon-box { background: #ecfdf5; color: #059669; }
-        .module-card:nth-child(11) .icon-box { background: #fef2f2; color: #dc2626; }
-        .module-card:nth-child(12) .icon-box { background: #f0fdf4; color: #16a34a; }
-
-        .module-card:nth-child(1):hover .icon-box { background: linear-gradient(135deg, #38bdf8, #0284c7); }
-        .module-card:nth-child(2):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
-        .module-card:nth-child(3):hover .icon-box { background: linear-gradient(135deg, #fbbf24, #d97706); }
-        .module-card:nth-child(4):hover .icon-box { background: linear-gradient(135deg, #c084fc, #9333ea); }
-        .module-card:nth-child(5):hover .icon-box { background: linear-gradient(135deg, #fb7185, #e11d48); }
-        .module-card:nth-child(6):hover .icon-box { background: linear-gradient(135deg, #2dd4bf, #0d9488); }
-        .module-card:nth-child(7):hover .icon-box { background: linear-gradient(135deg, #fb923c, #ea580c); }
-        .module-card:nth-child(8):hover .icon-box { background: linear-gradient(135deg, #e879f9, #c084fc); }
-        .module-card:nth-child(9):hover .icon-box { background: linear-gradient(135deg, #818cf8, #4f46e5); }
-        .module-card:nth-child(10):hover .icon-box { background: linear-gradient(135deg, #34d399, #059669); }
-        .module-card:nth-child(11):hover .icon-box { background: linear-gradient(135deg, #f87171, #dc2626); }
-        .module-card:nth-child(12):hover .icon-box { background: linear-gradient(135deg, #4ade80, #16a34a); }
 
         #modal-pw {
             position: fixed;
@@ -530,53 +506,8 @@
 
         <!-- CONTENEDOR PRINCIPAL -->
         <main class="main-viewport">
-            <!-- DASHBOARD DE TARJETAS MODULARES -->
-            <div id="modules-dashboard">
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CensoDIT/')">
-                    <div class="icon-box"><i class="fas fa-baby"></i></div>
-                    <h3>Censo</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/Reservar.CITAS.DIT/')">
-                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-                    <h3>Citas CRED</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/programarcitas/')">
-                    <div class="icon-box"><i class="fas fa-calendar-check"></i></div>
-                    <h3>Topes Citas</h3>                    
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/CampanaInfantil/')">
-                    <div class="icon-box"><i class="fas fa-calendar-plus"></i></div>
-                    <h3>Citas SATD</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/citadosdesarrollo/')">
-                    <div class="icon-box"><i class="fas fa-chart-line"></i></div>
-                    <h3>Reporte SATD</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/RecordarCITAS/')">
-                    <div class="icon-box"><i class="fas fa-bell"></i></div>
-                    <h3>Recordar Citados</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/LibretaBoys/')">
-                    <div class="icon-box"><i class="fas fa-book-open"></i></div>
-                    <h3>Libreta CRED</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/anemia/')">
-                    <div class="icon-box"><i class="fas fa-pills"></i></div>
-                    <h3>Anemia</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://confianzaseguridad772-max.github.io/Dosificador_Hierro/')">
-                    <div class="icon-box"><i class="fas fa-pills"></i></div>
-                    <h3>Dosificador</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/mapasector/')">
-                    <div class="icon-box"><i class="fas fa-map-pin"></i></div>
-                    <h3>Mapa Sector</h3>
-                </div>
-                <div class="module-card" onclick="openModule('https://desarrolloinfantiltemprano-dit.github.io/sectorizar/')">
-                    <div class="icon-box"><i class="fas fa-file-invoice"></i></div>
-                    <h3>Ficha Familiar</h3>
-                </div>
-            </div>
+            <!-- DASHBOARD DE TARJETAS MODULARES DINÁMICAS -->
+            <div id="modules-dashboard"></div>
 
             <!-- VISOR IFRAME DE MÓDULOS -->
             <iframe id="content-frame"></iframe>
@@ -597,7 +528,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby2QKNMUiL-H8Z9CAtC1GvHj7OcbS4mG5yjcUwr6S1cL3B8DZ0-ZddSp2trQlAC6uyQ/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxwrc0DxVF8WiXc_gYzCR3iS0rO5K7IcKKmdgASn5apmIiCAd-dpscLIQOpBRdfdg/exec";
+
         let currentDNI = '';
         let userDataCache = {};
 
@@ -722,7 +654,8 @@
                     sessionStorage.setItem('user_dni', u);
                     sessionStorage.setItem('is_auth', 'true');
                     sessionStorage.setItem('user_name', res.nombre);
-                    unlockApp(res.nombre);
+                    sessionStorage.setItem('user_paginas', JSON.stringify(res.paginas || []));
+                    unlockApp(res.nombre, res.paginas);
                 } else {
                     showMsg("DNI o Contraseña no coinciden", "red");
                 }
@@ -768,11 +701,30 @@
             }
         }
 
-        function unlockApp(n) {
+        function unlockApp(n, paginas) {
             document.getElementById('auth-screen').style.transform = "translateY(-100%)";
             document.getElementById('main-app').style.display = "flex";
             document.getElementById('user-display').innerText = n;
             
+            // Renderizado dinámico de tarjetas según hoja Pag
+            const dashboard = document.getElementById('modules-dashboard');
+            dashboard.innerHTML = '';
+
+            if (paginas && paginas.length > 0) {
+                paginas.forEach(pag => {
+                    const card = document.createElement('div');
+                    card.className = 'module-card';
+                    card.onclick = () => openModule(pag.url);
+                    card.innerHTML = `
+                        <div class="icon-box"><i class="${pag.icono || 'fas fa-star'}"></i></div>
+                        <h3>${pag.nombre}</h3>
+                    `;
+                    dashboard.appendChild(card);
+                });
+            } else {
+                dashboard.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">No hay módulos asignados para tu tipo de usuario.</div>';
+            }
+
             showDashboard();
 
             if(!window.hasGreeted) {
@@ -789,7 +741,8 @@
         }
 
         if(sessionStorage.getItem('is_auth') === 'true') {
-            unlockApp(sessionStorage.getItem('user_name'));
+            const savedPaginas = JSON.parse(sessionStorage.getItem('user_paginas') || '[]');
+            unlockApp(sessionStorage.getItem('user_name'), savedPaginas);
         }
 
         document.getElementById('l-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleLogin(); });
