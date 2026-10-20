@@ -352,7 +352,7 @@
     .custom-alert-card {
       background: white;
       width: 90%;
-      max-width: 400px;
+      max-width: 440px;
       border-radius: 16px;
       padding: 24px;
       text-align: center;
@@ -360,7 +360,7 @@
     }
 
     .custom-alert-msg {
-      font-size: 1rem;
+      font-size: 0.98rem;
       color: #334155;
       margin-bottom: 20px;
       line-height: 1.5;
@@ -590,14 +590,18 @@
       precargarRegistrosSilencioso();
     });
 
-    // Carga silenciosa de registros para validación inmediata de duplicados
+    // Carga silenciosa de registros para tener la base de datos lista en memoria
     function precargarRegistrosSilencioso() {
-      fetch(`${SCRIPT_URL}?action=getDataTope`)
+      return fetch(`${SCRIPT_URL}?action=getDataTope`)
         .then(res => res.json())
         .then(data => {
           registrosLocales = data || [];
+          return registrosLocales;
         })
-        .catch(err => console.error("Precarga silenciosa fallida", err));
+        .catch(err => {
+          console.error("Precarga de registros fallida", err);
+          return [];
+        });
     }
 
     // Alerta personalizada elegante
@@ -664,16 +668,9 @@
       const tbody = document.getElementById("tablaCuerpo");
       tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Cargando datos...</td></tr>';
 
-      fetch(`${SCRIPT_URL}?action=getDataTope`)
-        .then(res => res.json())
-        .then(data => {
-          registrosLocales = data || [];
-          aplicarFiltrosLocales();
-        })
-        .catch(err => {
-          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error al consultar datos.</td></tr>';
-          console.error("Error al obtener registros:", err);
-        });
+      precargarRegistrosSilencioso().then(() => {
+        aplicarFiltrosLocales();
+      });
     }
 
     // Aplicar filtros a la tabla del historial
@@ -722,8 +719,8 @@
       });
     }
 
-    // 3. Guardar / Editar con Validación Antiduplicados y Diálogo Elegante
-    document.getElementById("topeForm").addEventListener("submit", (e) => {
+    // 3. Guardar / Editar con Escaneo Completo de Duplicados
+    document.getElementById("topeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const rowIndex = document.getElementById("rowIndex").value;
@@ -760,8 +757,15 @@
         }
       }
 
-      // Validar duplicados si es un registro nuevo
+      // Sincronizar datos antes de la validación
+      mostrarMensaje("Verificando disponibilidad...", "loading");
+      await precargarRegistrosSilencioso();
+      ocultarMensaje();
+
+      // Buscamos TODAS las fechas del rango que ya están registradas
       if (!rowIndex && registrosLocales.length > 0) {
+        let coincidencias = [];
+
         for (let f of fechasAGuardar) {
           let fFormateada = normalizarFechaDDMMYYYY(f);
           let duplicado = registrosLocales.find(r => 
@@ -771,19 +775,35 @@
           );
 
           if (duplicado) {
-            mostrarAlertaElegante(
-              `Ya existe una programación registrada para el <b>${fFormateada}</b> en <b>${consultorio}</b> (${turno}).<br><br>¿Desea editar ese registro en lugar de duplicar?`,
-              () => {
-                prepararEdicion(duplicado.rowIndex, duplicado.fecha, duplicado.consultorio, duplicado.turno, duplicado.cantidad);
-              },
-              "Sí, Editar"
-            );
-            return;
+            coincidencias.push(duplicado);
           }
+        }
+
+        // Si se encontraron fechas ya existentes
+        if (coincidencias.length > 0) {
+          let listaFechasTexto = coincidencias.map(c => `<b>${c.fecha}</b>`).join(", ");
+          let textoMensaje = "";
+
+          if (coincidencias.length === 1) {
+            textoMensaje = `Ya existe una programación para la fecha ${listaFechasTexto} en <b>${consultorio}</b> (${turno}).<br><br>¿Desea editar ese registro existente en lugar de duplicar?`;
+          } else {
+            textoMensaje = `Las siguientes fechas ya están registradas para <b>${consultorio}</b> (${turno}):<br><br>${listaFechasTexto}<br><br>¿Desea editar una de ellas en lugar de duplicar?`;
+          }
+
+          mostrarAlertaElegante(
+            textoMensaje,
+            () => {
+              // Cargar la primera de las coincidencias para su edición
+              const primerRegistro = coincidencias[0];
+              prepararEdicion(primerRegistro.rowIndex, primerRegistro.fecha, primerRegistro.consultorio, primerRegistro.turno, primerRegistro.cantidad);
+            },
+            "Sí, Editar"
+          );
+          return;
         }
       }
 
-      // Enviar lote o registro único al Backend
+      // Enviar registro o lote al Backend
       mostrarMensaje("Guardando registro(s)...", "loading");
 
       const payload = {
