@@ -191,7 +191,7 @@
       border-radius: 8px;
       border: 1px solid var(--border-color);
       background-color: #fff;
-      display: none; /* Oculta por defecto hasta presionar Buscar */
+      display: none;
     }
 
     table {
@@ -346,6 +346,48 @@
       content: '›';
       font-size: 1.3rem;
       color: #94a3b8;
+    }
+
+    /* Modal de Alerta / Confirmación Elegante */
+    .custom-alert-card {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-alert-msg {
+      font-size: 1rem;
+      color: #334155;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .custom-alert-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .custom-alert-btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-alert-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-alert-secondary {
+      background-color: #cbd5e1;
+      color: #334155;
     }
 
     .status-msg {
@@ -522,6 +564,16 @@
     </div>
   </div>
 
+  <!-- MODAL DE ALERTA / CONFIRMACIÓN ELEGANTE -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="custom-alert-card">
+      <div class="custom-alert-msg" id="mensajeAlertaTexto">Mensaje aquí</div>
+      <div class="custom-alert-buttons" id="mensajeAlertaBotones">
+        <button class="custom-alert-btn btn-alert-primary" onclick="cerrarAlertaCustom()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =========================================================================
     // URL DEL GOOGLE APPS SCRIPT ADMINISTRACION
@@ -535,7 +587,44 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarConsultorios();
+      precargarRegistrosSilencioso();
     });
+
+    // Carga silenciosa de registros para validación inmediata de duplicados
+    function precargarRegistrosSilencioso() {
+      fetch(`${SCRIPT_URL}?action=getDataTope`)
+        .then(res => res.json())
+        .then(data => {
+          registrosLocales = data || [];
+        })
+        .catch(err => console.error("Precarga silenciosa fallida", err));
+    }
+
+    // Alerta personalizada elegante
+    function mostrarAlertaElegante(texto, callbackAceptar = null, textoBoton = "Aceptar") {
+      document.getElementById("mensajeAlertaTexto").innerHTML = texto;
+      const contenedorBotones = document.getElementById("mensajeAlertaBotones");
+      
+      if (callbackAceptar) {
+        contenedorBotones.innerHTML = `
+          <button class="custom-alert-btn btn-alert-secondary" onclick="cerrarAlertaCustom()">Cancelar</button>
+          <button class="custom-alert-btn btn-alert-primary" id="btnAlertaConfirmar">${textoBoton}</button>
+        `;
+        document.getElementById("btnAlertaConfirmar").onclick = () => {
+          cerrarAlertaCustom();
+          callbackAceptar();
+        };
+      } else {
+        contenedorBotones.innerHTML = `
+          <button class="custom-alert-btn btn-alert-primary" onclick="cerrarAlertaCustom()">Aceptar</button>
+        `;
+      }
+      document.getElementById("modalAlerta").classList.add("active");
+    }
+
+    function cerrarAlertaCustom() {
+      document.getElementById("modalAlerta").classList.remove("active");
+    }
 
     // Alternar visibilidad entre fecha única y rango de fechas
     function toggleModoFecha() {
@@ -633,7 +722,7 @@
       });
     }
 
-    // 3. Guardar / Editar con Validación de Duplicados
+    // 3. Guardar / Editar con Validación Antiduplicados y Diálogo Elegante
     document.getElementById("topeForm").addEventListener("submit", (e) => {
       e.preventDefault();
 
@@ -644,25 +733,23 @@
       const cantidad = document.getElementById("cantidad").value;
 
       if (!consultorio) {
-        alert("Por favor seleccione un consultorio.");
+        mostrarAlertaElegante("Por favor seleccione un consultorio.");
         return;
       }
 
       let fechasAGuardar = [];
 
       if (rowIndex) {
-        // Modo Edición (Fila específica)
         fechasAGuardar.push(document.getElementById("fecha").value);
       } else if (modoFecha === "unica") {
         const f = document.getElementById("fecha").value;
-        if (!f) { alert("Seleccione una fecha."); return; }
+        if (!f) { mostrarAlertaElegante("Seleccione una fecha."); return; }
         fechasAGuardar.push(f);
       } else {
-        // Modo Rango de Fechas
         const fDesde = document.getElementById("fechaDesde").value;
         const fHasta = document.getElementById("fechaHasta").value;
-        if (!fDesde || !fHasta) { alert("Seleccione ambas fechas para el rango."); return; }
-        if (fDesde > fHasta) { alert("La fecha inicial debe ser anterior o igual a la final."); return; }
+        if (!fDesde || !fHasta) { mostrarAlertaElegante("Seleccione ambas fechas para el rango."); return; }
+        if (fDesde > fHasta) { mostrarAlertaElegante("La fecha inicial debe ser anterior o igual a la final."); return; }
 
         let curr = new Date(fDesde + "T00:00:00");
         let end = new Date(fHasta + "T00:00:00");
@@ -684,23 +771,26 @@
           );
 
           if (duplicado) {
-            let editar = confirm(`Ya existe una programación para ${fFormateada} - ${consultorio} - Turno ${turno}.\n\n¿Desea editar ese registro existente en lugar de duplicar?`);
-            if (editar) {
-              prepararEdicion(duplicado.rowIndex, duplicado.fecha, duplicado.consultorio, duplicado.turno, duplicado.cantidad);
-            }
+            mostrarAlertaElegante(
+              `Ya existe una programación registrada para el <b>${fFormateada}</b> en <b>${consultorio}</b> (${turno}).<br><br>¿Desea editar ese registro en lugar de duplicar?`,
+              () => {
+                prepararEdicion(duplicado.rowIndex, duplicado.fecha, duplicado.consultorio, duplicado.turno, duplicado.cantidad);
+              },
+              "Sí, Editar"
+            );
             return;
           }
         }
       }
 
-      // Enviar lote o único registro al Backend
+      // Enviar lote o registro único al Backend
       mostrarMensaje("Guardando registro(s)...", "loading");
 
       const payload = {
         action: rowIndex ? "update" : "createBatch",
         rowIndex: rowIndex,
         fechas: fechasAGuardar,
-        fecha: fechasAGuardar[0], // Compatibilidad si envía única
+        fecha: fechasAGuardar[0],
         consultorio: consultorio,
         turno: turno,
         cantidad: cantidad
@@ -715,6 +805,7 @@
       .then(() => {
         mostrarMensaje("¡Operación completada con éxito!", "success");
         limpiarFormulario();
+        precargarRegistrosSilencioso();
         setTimeout(() => {
           ocultarMensaje();
           if (document.getElementById("contenedorTabla").style.display === "block") {
@@ -753,23 +844,28 @@
 
     // 5. Eliminar Registro
     function eliminarRegistro(rowIndex) {
-      if (!confirm("¿Está seguro de que desea eliminar este registro?")) return;
+      mostrarAlertaElegante(
+        "¿Está seguro de que desea eliminar este registro?",
+        () => {
+          mostrarMensaje("Eliminando registro...", "loading");
 
-      mostrarMensaje("Eliminando registro...", "loading");
-
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
-      })
-      .then(() => {
-        mostrarMensaje("Registro eliminado correctamente.", "success");
-        setTimeout(() => {
-          ocultarMensaje();
-          ejecutarConsulta();
-        }, 1200);
-      });
+          fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "delete", rowIndex: rowIndex })
+          })
+          .then(() => {
+            mostrarMensaje("Registro eliminado correctamente.", "success");
+            precargarRegistrosSilencioso();
+            setTimeout(() => {
+              ocultarMensaje();
+              ejecutarConsulta();
+            }, 1200);
+          });
+        },
+        "Sí, Eliminar"
+      );
     }
 
     // LÓGICA DE MODALES
