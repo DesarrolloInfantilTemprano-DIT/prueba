@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Censo 2027</title>
+  <title>Censo CSCastillo</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
@@ -17,7 +16,11 @@
     .container { margin-top: 2%; max-width: 900px; }
     .card { border-radius: 12px; overflow: hidden; }
     .btn-save { background-color: var(--primary-color) !important; width: 100%; height: 50px; font-weight: bold; font-size: 1.1rem; }
-    #loader { display: none; }
+    
+    /* ESTILOS DEL LOADER SUPERIOR */
+    #loader { display: none; background: #e0f2f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b2dfdb; }
+    #loader p { margin: 5px 0 0 0; font-weight: bold; color: var(--secondary-color); font-size: 0.95rem; }
+
     .section-title { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
     input.validate.invalid { border-bottom: 1px solid #ff5252 !important; box-shadow: 0 1px 0 0 #ff5252 !important; }
 
@@ -101,6 +104,18 @@
     </div>
     
     <div class="card-content">
+      <!-- LOADER UBICADO EN LA PARTE SUPERIOR DEL FORMULARIO -->
+      <div id="loader" class="center-align">
+        <div class="preloader-wrapper small active">
+          <div class="spinner-layer spinner-teal-only">
+            <div class="circle-clipper left"><div class="circle"></div></div>
+            <div class="gap-patch"><div class="circle"></div></div>
+            <div class="circle-clipper right"><div class="circle"></div></div>
+          </div>
+        </div>
+        <p>Procesando información...</p>
+      </div>
+
       <form id="pacienteForm">
         <div class="row">
           <div class="input-field col s12 m8">
@@ -208,17 +223,6 @@
           <button id="btnSubmit" class="btn waves-effect btn-save" type="submit">
             <i class="material-icons right">cloud_upload</i> Guardar
           </button>
-        </div>
-
-        <div id="loader" class="center-align" style="margin-top:20px;">
-          <div class="preloader-wrapper small active">
-            <div class="spinner-layer spinner-green-only">
-              <div class="circle-clipper left"><div class="circle"></div></div>
-              <div class="gap-patch"><div class="circle"></div></div>
-              <div class="circle-clipper right"><div class="circle"></div></div>
-            </div>
-          </div>
-          <p>Procesando información...</p>
         </div>
       </form>
     </div>
@@ -381,7 +385,6 @@
         document.getElementById('hclinica').value = data.hclinica || "";
         document.getElementById('ffamiliar').value = data.ffamiliar || "";
         document.getElementById('telefono').value = data.telefono || "";
-        // Lee correctamente TELEFONO-2 o telefono2 de la respuesta del servidor
         document.getElementById('telefono2').value = data["TELEFONO-2"] || data["TELFONO-2"] || data.telefono2 || "";
         document.getElementById('estado_civil').value = data.estado_civil || "";
         document.getElementById('sector').value = data.sector || "";
@@ -466,18 +469,15 @@
     };
 
     try {
-      // 1. Envío principal de los datos del formulario (crear o actualizar fila completa)
       await fetch(WEB_APP_URL, {
         method: 'POST',
         mode: 'no-cors',
         body: JSON.stringify(data)
       });
 
-      // 2. Actualización específica del Teléfono 1 mediante la función de acción del script (igual que en el módulo de citas)
       const urlUpdateTel = `${WEB_APP_URL}?action=actualizarTel&dni=${data.dni}&telefono=${telVal}`;
       fetch(urlUpdateTel, { mode: 'no-cors' });
 
-      // 3. Actualización específica de TELEFONO-2 usando el método nativo action=actualizarColumna del script
       if (tel2Val) {
         const urlUpdateTel2 = `${WEB_APP_URL}?action=actualizarColumna&dni=${data.dni}&columna=TELEFONO-2&valor=${encodeURIComponent(tel2Val)}`;
         fetch(urlUpdateTel2, { mode: 'no-cors' });
