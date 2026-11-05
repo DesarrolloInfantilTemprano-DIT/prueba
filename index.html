@@ -1,8 +1,9 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Censo Salud</title>
+  <title>Censo DIT</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
@@ -95,7 +96,7 @@
 <div class="container">
   <div class="card z-depth-3">
     <div class="header-panel center-align">
-      <h4 style="margin:0;"><i class="material-icons medium">assignment_ind</i> CENSO SALUD</h4>
+      <h4 style="margin:0;"><i class="material-icons medium">assignment_ind</i> CENSO DIT</h4>
       <p style="margin: 5px 0 0;">Bienvenido</p>
     </div>
     
@@ -201,6 +202,7 @@
         </div>
 
         <input type="hidden" id="rowNum" value="">
+        <input type="hidden" id="georeferencia" value="">
 
         <div class="center-align">
           <button id="btnSubmit" class="btn waves-effect btn-save" type="submit">
@@ -230,7 +232,7 @@
     <i class="material-icons modal-close">close</i>
   </div>
   <div class="search-box-container">
-    <input type="text" id="inputBuscarSector" class="search-input-field" placeholder="ESCRIBA PARA BUSCAR SECTOR..." onkeyup="filtrarSectores()">
+    <input type="text" id="inputBuscarSector" class="search-input-field" placeholder="ESCRIBA PARA SECTOR..." onkeyup="filtrarSectores()">
   </div>
   <div class="sector-list" id="listaSectoresContenedor">
     <!-- Lista generada dinámicamente mediante JS -->
@@ -281,10 +283,9 @@
     });
   });
 
-  // FUNCIÓN COMPATIBLE CON EL BACKEND DE ADMIN PARA OBTENER SECTORES (COLUMNA D / SECTORES)
+  // FUNCIÓN PARA CARGAR SECTORES DESDE SCRIPT_ADMIN
   async function cargarSectoresDesdeAdmin() {
     try {
-      // 1. Intentar endpoint getSectores=true
       let response = await fetch(`${SCRIPT_ADMIN}?getSectores=true`);
       let data = await response.json();
 
@@ -295,7 +296,6 @@
       } else if (Array.isArray(data) && data.length > 0) {
         listaObtenida = data;
       } else {
-        // 2. Fallback a la columna D (índice 3 en Apps Script para Columna D) o por nombre "SECTORES"
         response = await fetch(`${SCRIPT_ADMIN}?getColumnaAdmin=SECTORES`);
         data = await response.json();
         
@@ -310,7 +310,6 @@
         }
       }
 
-      // Filtrar y limpiar la lista
       sectoresDisponibles = listaObtenida
         .map(item => typeof item === 'object' ? (item.sector || item.SECTOR || Object.values(item)[0]) : item)
         .filter(sec => sec && sec.toString().trim() !== "");
@@ -382,11 +381,13 @@
         document.getElementById('hclinica').value = data.hclinica || "";
         document.getElementById('ffamiliar').value = data.ffamiliar || "";
         document.getElementById('telefono').value = data.telefono || "";
-        document.getElementById('telefono2').value = data.telefono2 || data["TELEFONO-2"] || "";
+        // Mapea TELEFONO-2 o telefono2 de la respuesta del servidor
+        document.getElementById('telefono2').value = data["TELEFONO-2"] || data.telefono2 || "";
         document.getElementById('estado_civil').value = data.estado_civil || "";
         document.getElementById('sector').value = data.sector || "";
         document.getElementById('ref_direccion').value = data.ref_direccion || "";
         document.getElementById('mz').value = data.mz || "";
+        document.getElementById('georeferencia').value = data.georeferencia || data.gps || "";
         
         M.updateTextFields();
         
@@ -401,6 +402,7 @@
         const dniActual = document.getElementById('dni').value;
         document.getElementById('pacienteForm').reset();
         document.getElementById('dni').value = dniActual;
+        document.getElementById('georeferencia').value = "";
         
         M.updateTextFields();
         var elems = document.querySelectorAll('select');
@@ -445,6 +447,7 @@
     document.getElementById('loader').style.display = 'block';
     document.getElementById('btnSubmit').disabled = true;
 
+    // Se envían las propiedades exactas que espera tu Google Script
     const data = {
       row: document.getElementById('rowNum').value,
       dni: document.getElementById('dni').value,
@@ -455,10 +458,12 @@
       ffamiliar: document.getElementById('ffamiliar').value,
       telefono: telVal,
       telefono2: tel2Val,
+      "TELEFONO-2": tel2Val, // Asegura compatibilidad con el título de la columna M del Excel
       estado_civil: document.getElementById('estado_civil').value,
       sector: sectorInput,
       ref_direccion: document.getElementById('ref_direccion').value,
-      mz: document.getElementById('mz').value
+      mz: document.getElementById('mz').value,
+      georeferencia: document.getElementById('georeferencia').value
     };
 
     try {
@@ -474,6 +479,7 @@
       
       this.reset();
       document.getElementById('rowNum').value = "";
+      document.getElementById('georeferencia').value = "";
       M.updateTextFields();
       var elems = document.querySelectorAll('select');
       M.FormSelect.init(elems);
