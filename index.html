@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Censo DIT</title>
+  <title>Censo Salud</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <style>
@@ -96,7 +95,7 @@
 <div class="container">
   <div class="card z-depth-3">
     <div class="header-panel center-align">
-      <h4 style="margin:0;"><i class="material-icons medium">assignment_ind</i> CENSO DIT</h4>
+      <h4 style="margin:0;"><i class="material-icons medium">assignment_ind</i> CENSO SALUD</h4>
       <p style="margin: 5px 0 0;">Bienvenido</p>
     </div>
     
@@ -282,20 +281,44 @@
     });
   });
 
-  // FUNCIÓN PARA CARGAR SECTORES DESDE SCRIPT_ADMIN
+  // FUNCIÓN COMPATIBLE CON EL BACKEND DE ADMIN PARA OBTENER SECTORES (COLUMNA D / SECTORES)
   async function cargarSectoresDesdeAdmin() {
     try {
-      const response = await fetch(SCRIPT_ADMIN);
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        sectoresDisponibles = data.map(item => typeof item === 'object' ? (item.sector || item.SECTOR || Object.values(item)[0]) : item);
-      } else if (data && data.sectores) {
-        sectoresDisponibles = data.sectores;
+      // 1. Intentar endpoint getSectores=true
+      let response = await fetch(`${SCRIPT_ADMIN}?getSectores=true`);
+      let data = await response.json();
+
+      let listaObtenida = [];
+
+      if (data && Array.isArray(data.sectores) && data.sectores.length > 0) {
+        listaObtenida = data.sectores;
+      } else if (Array.isArray(data) && data.length > 0) {
+        listaObtenida = data;
+      } else {
+        // 2. Fallback a la columna D (índice 3 en Apps Script para Columna D) o por nombre "SECTORES"
+        response = await fetch(`${SCRIPT_ADMIN}?getColumnaAdmin=SECTORES`);
+        data = await response.json();
+        
+        if (data && (data.data || data.profesionales)) {
+          listaObtenida = data.data || data.profesionales;
+        } else {
+          response = await fetch(`${SCRIPT_ADMIN}?getColumnaAdmin=3`);
+          data = await response.json();
+          if (data && (data.data || data.profesionales)) {
+            listaObtenida = data.data || data.profesionales;
+          }
+        }
       }
+
+      // Filtrar y limpiar la lista
+      sectoresDisponibles = listaObtenida
+        .map(item => typeof item === 'object' ? (item.sector || item.SECTOR || Object.values(item)[0]) : item)
+        .filter(sec => sec && sec.toString().trim() !== "");
+
       cargarSectores(sectoresDisponibles);
     } catch (error) {
-      console.error("Error al cargar sectores:", error);
-      M.toast({html: '⚠️ Error al cargar la lista de sectores desde ADMIN'});
+      console.error("Error al cargar sectores desde SCRIPT_ADMIN:", error);
+      M.toast({html: '⚠️ No se pudo obtener la lista de sectores'});
     }
   }
 
@@ -394,7 +417,7 @@
     e.preventDefault();
     
     const sectorInput = document.getElementById('sector').value.trim();
-    if (!sectoresDisponibles.includes(sectorInput)) {
+    if (sectoresDisponibles.length > 0 && !sectoresDisponibles.includes(sectorInput)) {
       M.toast({html: '❌ Por favor, seleccione un Sector válido de la lista.'});
       abrirModalSector();
       return;
