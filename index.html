@@ -357,8 +357,8 @@
                 let fechaStringOriginal = "";
 
                 registros.forEach(reg => {
-                    let fStr = reg.fechaCitaCred || reg.fechaCita || reg.fecha || reg.J;
-                    let tStr = reg.turno || reg.TURNO || reg.K || "";
+                    let fStr = reg.J || reg.fechaCitaCred || reg.fechaCita || reg.fecha;
+                    let tStr = reg.K || reg.turno || reg.TURNO || "";
                     if (fStr && fStr !== "-" && fStr !== "undefined") {
                         let d = parseFechaFlexible(fStr);
                         if (d && !isNaN(d.getTime())) {
@@ -413,11 +413,16 @@
             document.getElementById('casitaNotice').classList.add('hidden');
             document.getElementById('badgeCitaCred').classList.add('hidden');
             
-            mostrarStatus(true, "Espere mientras se valida sus datos");
+            mostrarStatus(true, "Consultando bases de datos...");
 
             try {
-                const resScript = await fetch(`${SCRIPT_CENSO}?dni=${dniBuscado}`, { redirect: "follow" });
-                const scriptData = await resScript.json();
+                // Ejecución en PARALELO de Censo y Atenciones para máxima velocidad
+                const [resCenso, resAtenciones] = await Promise.all([
+                    fetch(`${SCRIPT_CENSO}?dni=${dniBuscado}`, { redirect: "follow" }),
+                    fetch(`${SCRIPT_ATENCIONES_URL}?dni=${dniBuscado}`, { redirect: "follow" })
+                ]);
+
+                const scriptData = await resCenso.json();
 
                 if (scriptData.error && scriptData.status === "NOT_FOUND") {
                     mostrarStatus(false);
@@ -427,13 +432,10 @@
                     return; 
                 }
 
-                mostrarStatus(true, "...ya casi");
-                
+                // Consultar citas de forma simultánea
                 consultarFechaCitaCred(dniBuscado);
 
-                const resAtenciones = await fetch(`${SCRIPT_ATENCIONES_URL}?dni=${dniBuscado}`, { redirect: "follow" });
-                if (!resAtenciones.ok) throw new Error("Servidor no disponible");
-
+                if (!resAtenciones.ok) throw new Error("Servidor de atenciones no disponible");
                 const dataAtenciones = await resAtenciones.json();
 
                 mostrarStatus(false);
