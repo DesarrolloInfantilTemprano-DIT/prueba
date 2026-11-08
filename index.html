@@ -57,22 +57,34 @@
             <h1 class="text-3xl font-black text-blue-600 tracking-tight flex items-center justify-center gap-3">
                 <span class="text-4xl">👶🏽👧🏻</span> Tarjeta CRED <span class="text-emerald-500 text-xl font-medium">2026</span>
             </h1>
-            <p class="text-xs text-slate-400 mt-1">BIENVENIDO</p>
+            <p class="text-xs text-slate-400 mt-1">PANEL DE CONSULTAS INDEPENDIENTES</p>
         </div>
 
-        <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+        <div class="max-w-2xl mx-auto flex flex-col gap-3">
             <input type="text" id="dniInput" placeholder="Escribe el número de DNI aquí..." 
-                   class="flex-1 px-5 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 text-lg shadow-inner transition-colors font-medium placeholder-slate-300"
+                   class="w-full px-5 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 text-lg shadow-inner transition-colors font-medium placeholder-slate-300 text-center"
                    maxlength="15">
-            <button id="btnBuscar" onclick="buscarPorDNI()" 
-                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer transform active:scale-95 flex items-center justify-center gap-2">
-                <span>Buscar Niño/a</span>
-            </button>
+            
+            <!-- Botones Separados por URL -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
+                <button onclick="consultarCenso()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer transform active:scale-95 flex items-center justify-center gap-2 text-xs">
+                    <span>🔍 1. Buscar en Censo</span>
+                </button>
+                <button onclick="consultarCitas()" 
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer transform active:scale-95 flex items-center justify-center gap-2 text-xs">
+                    <span>📅 2. Consultar Citas</span>
+                </button>
+                <button onclick="consultarAtenciones()" 
+                        class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer transform active:scale-95 flex items-center justify-center gap-2 text-xs">
+                    <span>📋 3. Cargar Atenciones</span>
+                </button>
+            </div>
         </div>
 
         <div id="statusMessage" class="hidden text-center mt-5 text-slate-500 flex items-center justify-center gap-2">
             <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-100 h-5 w-5"></div>
-            <span id="statusText" class="text-sm font-semibold text-rose-500">Analizando base de datos...</span>
+            <span id="statusText" class="text-sm font-semibold text-rose-500">Consultando base de datos...</span>
         </div>
     </div>
 
@@ -331,16 +343,53 @@
             return isNaN(d.getTime()) ? null : d;
         }
 
-        async function consultarFechaCitaCred(dni) {
+        // BOTÓN 1: Consultar Censo
+        async function consultarCenso() {
+            const dniBuscado = document.getElementById('dniInput').value.trim();
+            if (!dniBuscado) { alert("Por favor, escribe un DNI válido."); return; }
+
+            document.getElementById('areaImpresion').classList.add('hidden');
+            document.getElementById('noResult').classList.add('hidden');
+            document.getElementById('casitaNotice').classList.add('hidden');
+            document.getElementById('badgeCitaCred').classList.add('hidden');
+
+            mostrarStatus(true, "Consultando Censo...");
+
+            try {
+                const resScript = await fetch(`${SCRIPT_CENSO}?dni=${dniBuscado}`, { redirect: "follow" });
+                const scriptData = await resScript.json();
+                mostrarStatus(false);
+
+                if (scriptData.error && scriptData.status === "NOT_FOUND") {
+                    document.getElementById('casitaMessage').innerText = scriptData.mensaje;
+                    document.getElementById('casitaLink').href = scriptData.enlace;
+                    document.getElementById('casitaNotice').classList.remove('hidden');
+                    return; 
+                }
+
+                alert("¡DNI encontrado en el Censo correctamente!");
+            } catch (error) {
+                mostrarStatus(false);
+                alert("Error al conectar con Censo: " + error.message);
+            }
+        }
+
+        // BOTÓN 2: Consultar Citas
+        async function consultarCitas() {
+            const dniBuscado = document.getElementById('dniInput').value.trim();
+            if (!dniBuscado) { alert("Por favor, escribe un DNI válido."); return; }
+
             const badge = document.getElementById('badgeCitaCred');
             const lblTexto = document.getElementById('lblTextoCita');
             const lblFecha = document.getElementById('lblFechaCitaCred');
             
             badge.className = "hidden px-4 py-2 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center gap-1.5 shadow-sm";
             lblFecha.innerText = "";
+            mostrarStatus(true, "Buscando última cita...");
 
             try {
-                const response = await fetch(`${SCRIPT_CITAS}?dni=${dni}`, { redirect: "follow" });
+                const response = await fetch(`${SCRIPT_CITAS}?dni=${dniBuscado}`, { redirect: "follow" });
+                mostrarStatus(false);
                 badge.classList.remove('hidden');
 
                 if (!response.ok) {
@@ -392,52 +441,31 @@
                     badge.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-700');
                 }
             } catch (err) {
+                mostrarStatus(false);
                 console.error("Error al obtener la cita CRED:", err);
                 lblTexto.innerText = "📅 INASISTENTE";
                 badge.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-800');
                 badge.classList.remove('hidden');
             }
         }
-        function paddingCero(val) { return parseInt(val, 10); }
 
-        async function buscarPorDNI() {
+        // BOTÓN 3: Cargar Atenciones
+        async function consultarAtenciones() {
             const dniBuscado = document.getElementById('dniInput').value.trim();
             if (!dniBuscado) { alert("Por favor, escribe un DNI válido."); return; }
 
             document.getElementById('areaImpresion').classList.add('hidden');
-            
             const contenedorNoResult = document.getElementById('noResult');
             contenedorNoResult.classList.add('hidden');
             contenedorNoResult.classList.remove('flex');
 
-            document.getElementById('casitaNotice').classList.add('hidden');
-            document.getElementById('badgeCitaCred').classList.add('hidden');
-            
-            mostrarStatus(true, "Consultando bases de datos...");
+            mostrarStatus(true, "Cargando atenciones y CRED...");
 
             try {
-                // Ejecución en PARALELO de Censo y Atenciones para máxima velocidad
-                const [resCenso, resAtenciones] = await Promise.all([
-                    fetch(`${SCRIPT_CENSO}?dni=${dniBuscado}`, { redirect: "follow" }),
-                    fetch(`${SCRIPT_ATENCIONES_URL}?dni=${dniBuscado}`, { redirect: "follow" })
-                ]);
+                const resAtenciones = await fetch(`${SCRIPT_ATENCIONES_URL}?dni=${dniBuscado}`, { redirect: "follow" });
+                if (!resAtenciones.ok) throw new Error("Servidor no disponible");
 
-                const scriptData = await resCenso.json();
-
-                if (scriptData.error && scriptData.status === "NOT_FOUND") {
-                    mostrarStatus(false);
-                    document.getElementById('casitaMessage').innerText = scriptData.mensaje;
-                    document.getElementById('casitaLink').href = scriptData.enlace;
-                    document.getElementById('casitaNotice').classList.remove('hidden');
-                    return; 
-                }
-
-                // Consultar citas de forma simultánea
-                consultarFechaCitaCred(dniBuscado);
-
-                if (!resAtenciones.ok) throw new Error("Servidor de atenciones no disponible");
                 const dataAtenciones = await resAtenciones.json();
-
                 mostrarStatus(false);
 
                 if (dataAtenciones && !dataAtenciones.error) {
@@ -449,10 +477,9 @@
                     contenedorNoResult.classList.remove('hidden');
                     contenedorNoResult.classList.add('flex');
                 }
-
             } catch (error) {
                 mostrarStatus(false);
-                alert("Fallo de red al conectar con BD: " + error.message);
+                alert("Fallo de red al conectar con Atenciones: " + error.message);
             }
         }
 
