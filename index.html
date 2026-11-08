@@ -1,504 +1,557 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Censo CSCastillo</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-  <style>
-    :root { 
-      --primary-color: #00796b; 
-      --secondary-color: #004d40; 
-      --modal-header-color: #3f51b5; /* Azul similar a la imagen */
-    }
-    body { background-color: #f0f4f4; color: #333; }
-    .header-panel { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 25px; border-radius: 8px 8px 0 0; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .container { margin-top: 2%; max-width: 900px; }
-    .card { border-radius: 12px; overflow: hidden; }
-    .btn-save { background-color: var(--primary-color) !important; width: 100%; height: 50px; font-weight: bold; font-size: 1.1rem; }
-    
-    /* ESTILOS DEL LOADER SUPERIOR */
-    #loader { display: none; background: #e0f2f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b2dfdb; }
-    #loader p { margin: 5px 0 0 0; font-weight: bold; color: var(--secondary-color); font-size: 0.95rem; }
-
-    .section-title { font-size: 0.9rem; font-weight: bold; color: var(--primary-color); text-transform: uppercase; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 5px; }
-    input.validate.invalid { border-bottom: 1px solid #ff5252 !important; box-shadow: 0 1px 0 0 #ff5252 !important; }
-
-    /* ESTILOS DEL MODAL DE SECTOR */
-    #modalSector {
-      border-radius: 12px;
-      max-height: 85%;
-      width: 90%;
-      max-width: 550px;
-    }
-    .modal-header-custom {
-      background-color: var(--modal-header-color);
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-    .modal-header-custom .modal-close {
-      color: white;
-      cursor: pointer;
-      background: none;
-      border: none;
-    }
-    .search-box-container {
-      padding: 15px 20px 5px 20px;
-    }
-    .search-input-field {
-      border: 2px solid #3f51b5 !important;
-      border-radius: 20px !important;
-      padding: 0 15px !important;
-      box-sizing: border-box !important;
-      height: 42px !important;
-      font-size: 0.95rem !important;
-      text-transform: uppercase;
-    }
-    .search-input-field:focus {
-      box-shadow: 0 0 5px rgba(63, 81, 181, 0.5) !important;
-    }
-    .sector-list {
-      max-height: 350px;
-      overflow-y: auto;
-      margin: 0;
-      padding: 0 10px;
-    }
-    .sector-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 15px;
-      border-bottom: 1px solid #e0e0e0;
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #333;
-      transition: background 0.2s;
-    }
-    .sector-item:hover {
-      background-color: #f1f3f9;
-    }
-    .sector-item i {
-      color: #3f51b5;
-      font-size: 1.1rem;
-    }
-    .modal-footer-custom {
-      padding: 10px 20px;
-      background-color: #f5f5f5;
-      text-align: right;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <div class="card z-depth-3">
-    <div class="header-panel center-align">
-      <h4 style="margin:0;"><i class="material-icons medium">assignment_ind</i> CENSO DIT</h4>
-      <p style="margin: 5px 0 0;">Bienvenido</p>
-    </div>
-    
-    <div class="card-content">
-      <!-- LOADER UBICADO EN LA PARTE SUPERIOR DEL FORMULARIO -->
-      <div id="loader" class="center-align">
-        <div class="preloader-wrapper small active">
-          <div class="spinner-layer spinner-teal-only">
-            <div class="circle-clipper left"><div class="circle"></div></div>
-            <div class="gap-patch"><div class="circle"></div></div>
-            <div class="circle-clipper right"><div class="circle"></div></div>
-          </div>
-        </div>
-        <p>Procesando información...</p>
-      </div>
-
-      <form id="pacienteForm">
-        <div class="row">
-          <div class="input-field col s12 m8">
-            <i class="material-icons prefix">fingerprint</i>
-            <input id="dni" type="text" class="validate" required pattern="[0-9]{8}" maxlength="8">
-            <label for="dni">DNI (Obligatorio - 8 dígitos)</label>
-          </div>
-          <div class="col s12 m4">
-            <button type="button" class="btn waves-effect blue darken-3" onclick="buscarDNI()" style="width:100%; margin-top:15px;">
-              <i class="material-icons left">search</i> Verificar
-            </button>
-          </div>
-        </div>
-
-        <div class="section-title">Datos Personales</div>
-        <div class="row">
-          <div class="input-field col s12">
-            <i class="material-icons prefix">person</i>
-            <input id="nombreB" type="text" class="validate" required style="text-transform: uppercase;">
-            <label for="nombreB">Apellidos y Nombres Completos (Obligatorio)</label>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-field col s12 m4">
-            <i class="material-icons prefix">event</i>
-            <input id="fn" type="text" placeholder="DD/MM/YYYY" maxlength="10" required class="validate">
-            <label for="fn" class="active">Fecha de Nacimiento (Obligatorio)</label>
-          </div>
-          <div class="input-field col s12 m4">
-            <select id="sexo" required>
-              <option value="" disabled selected>Sexo</option>
-              <option value="M">Masculino</option>
-              <option value="F">Femenino</option>
-            </select>
-            <label>Sexo (Obligatorio)</label>
-          </div>
-          <div class="input-field col s12 m4">
-            <select id="estado_civil">
-              <option value="" disabled selected>Estado Civil</option>
-              <option value="SOLTERO">Soltero/a</option>
-              <option value="CONVIVIENTE">Conviviente</option>
-              <option value="CASADO">Casado/a</option>
-              <option value="VIUDO">Viudo/a</option>
-              <option value="DIVORCIADO">Divorciado/a</option>
-              <option value="FALLECIDO">Fallecido/a</option>
-            </select>
-            <label>Estado Civil (Opcional)</label>
-          </div>
-        </div>
-
-        <div class="section-title">Ubicación y Contacto</div>
-        <div class="row">
-          <div class="input-field col s12 m8">
-            <i class="material-icons prefix">map</i>
-            <!-- CAMPO DE SECTOR MEJORADO CON INTERFAZ TIPO MODAL -->
-            <input id="sector" type="text" placeholder="Haga clic para seleccionar..." required class="validate" readonly onclick="abrirModalSector()">
-            <label for="sector" class="active">Sector (Obligatorio)</label>
-          </div>
-          <div class="input-field col s12 m4">
-            <input id="mz" type="text">
-            <label for="mz">Manzana (Opcional)</label>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-field col s12 m6">
-            <i class="material-icons prefix">phone</i>
-            <input id="telefono" type="text" maxlength="9" pattern="[0-9]{9}" required class="validate">
-            <label for="telefono">Celular 1 (9 dígitos)</label>
-          </div>
-          <div class="input-field col s12 m6">
-            <i class="material-icons prefix">phone_android</i>
-            <input id="telefono2" type="text" maxlength="9" pattern="[0-9]{9}" class="validate">
-            <label for="telefono2">Celular 2 (Opcional - 9 dígitos)</label>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="input-field col s12">
-            <i class="material-icons prefix">place</i>
-            <input id="ref_direccion" type="text" required class="validate">
-            <label for="ref_direccion">Referencia de Dirección (Obligatorio)</label>
-          </div>
-        </div>
-
-        <div class="section-title">Historial</div>
-        <div class="row">
-          <div class="input-field col s12 m6">
-            <i class="material-icons prefix">folder</i>
-            <input id="hclinica" type="text" required class="validate">
-            <label for="hclinica">Historia Clínica (Obligatorio)</label>
-          </div>
-          <div class="input-field col s12 m6">
-            <i class="material-icons prefix">description</i>
-            <input id="ffamiliar" type="text" maxlength="7" class="validate">
-            <label for="ffamiliar">Ficha Familiar (Máx 7 números - Opcional)</label>
-          </div>
-        </div>
-
-        <input type="hidden" id="rowNum" value="">
-        <input type="hidden" id="georeferencia" value="">
-
-        <div class="center-align">
-          <button id="btnSubmit" class="btn waves-effect btn-save" type="submit">
-            <i class="material-icons right">cloud_upload</i> Guardar
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL PARA SELECCIÓN DE SECTOR -->
-<div id="modalSector" class="modal">
-  <div class="modal-header-custom">
-    <span><i class="material-icons left" style="font-size:1.2rem; vertical-align:middle;">location_on</i> Seleccionar Sector Registrado</span>
-    <i class="material-icons modal-close">close</i>
-  </div>
-  <div class="search-box-container">
-    <input type="text" id="inputBuscarSector" class="search-input-field" placeholder="ESCRIBA PARA BUSCAR SECTOR..." onkeyup="filtrarSectores()">
-  </div>
-  <div class="sector-list" id="listaSectoresContenedor">
-    <!-- Lista generada dinámicamente mediante JS -->
-  </div>
-  <div class="modal-footer-custom">
-    <a href="#!" class="modal-close btn-flat grey lighten-2 waves-effect" style="border-radius: 8px;">Cancelar</a>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-<script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec";
-  const SCRIPT_ADMIN = "https://script.google.com/macros/s/AKfycbxmqviwzICjqWFCu9S5cx0Jb4Kp3Si9CcDLmEEALkgKH6VCAmzRJ66SLtPZaBjmbbqu/exec";
-
-  let sectoresDisponibles = [];
-  let modalSectorInstance = null;
-
-  document.addEventListener('DOMContentLoaded', function() {
-    M.AutoInit();
-
-    // Inicializar Modal de Sector
-    const modalElem = document.getElementById('modalSector');
-    modalSectorInstance = M.Modal.init(modalElem, { dismissible: true });
-
-    // Cargar sectores de forma dinámica desde ADMIN
-    cargarSectoresDesdeAdmin();
-
-    const fnInput = document.getElementById('fn');
-    fnInput.addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g, '').slice(0, 8);
-      if (v.length >= 5) v = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
-      else if (v.length >= 3) v = `${v.slice(0,2)}/${v.slice(2)}`;
-      e.target.value = v;
-    });
-
-    // Validación solo números para Manzana y Ficha Familiar
-    ['mz', 'ffamiliar'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function(e) {
-        this.value = this.value.replace(/[^0-9]/g, '');
-      });
-    });
-
-    // Validación solo números (máximo 9 dígitos) para Celular 1 y Celular 2
-    ['telefono', 'telefono2'].forEach(id => {
-      document.getElementById(id).addEventListener('input', function(e) {
-        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 9);
-      });
-    });
-  });
-
-  // FUNCIÓN PARA CARGAR SECTORES DESDE SCRIPT_ADMIN
-  async function cargarSectoresDesdeAdmin() {
-    try {
-      let response = await fetch(`${SCRIPT_ADMIN}?getSectores=true`);
-      let data = await response.json();
-
-      let listaObtenida = [];
-
-      if (data && Array.isArray(data.sectores) && data.sectores.length > 0) {
-        listaObtenida = data.sectores;
-      } else if (Array.isArray(data) && data.length > 0) {
-        listaObtenida = data;
-      } else {
-        response = await fetch(`${SCRIPT_ADMIN}?getColumnaAdmin=SECTORES`);
-        data = await response.json();
-        
-        if (data && (data.data || data.profesionales)) {
-          listaObtenida = data.data || data.profesionales;
-        } else {
-          response = await fetch(`${SCRIPT_ADMIN}?getColumnaAdmin=3`);
-          data = await response.json();
-          if (data && (data.data || data.profesionales)) {
-            listaObtenida = data.data || data.profesionales;
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libreta de Control Digital CRED</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .loader {
+            border-top-color: #f43f5e;
+            animation: spinner 1s linear infinite;
         }
-      }
-
-      sectoresDisponibles = listaObtenida
-        .map(item => typeof item === 'object' ? (item.sector || item.SECTOR || Object.values(item)[0]) : item)
-        .filter(sec => sec && sec.toString().trim() !== "");
-
-      cargarSectores(sectoresDisponibles);
-    } catch (error) {
-      console.error("Error al cargar sectores desde SCRIPT_ADMIN:", error);
-      M.toast({html: '⚠️ No se pudo obtener la lista de sectores'});
-    }
-  }
-
-  // FUNCIONES PARA EL MODAL DE SECTOR
-  function cargarSectores(lista) {
-    const contenedor = document.getElementById('listaSectoresContenedor');
-    contenedor.innerHTML = '';
-    
-    if (!lista || lista.length === 0) {
-      contenedor.innerHTML = '<div style="padding: 20px; text-align: center; color: #888;">No se encontraron resultados o cargando...</div>';
-      return;
-    }
-
-    lista.forEach(sec => {
-      const item = document.createElement('div');
-      item.className = 'sector-item';
-      item.innerHTML = `<span>${sec}</span><i class="material-icons">chevron_right</i>`;
-      item.onclick = function() {
-        seleccionarSector(sec);
-      };
-      contenedor.appendChild(item);
-    });
-  }
-
-  function abrirModalSector() {
-    document.getElementById('inputBuscarSector').value = '';
-    cargarSectores(sectoresDisponibles);
-    modalSectorInstance.open();
-    setTimeout(() => {
-      document.getElementById('inputBuscarSector').focus();
-    }, 300);
-  }
-
-  function filtrarSectores() {
-    const texto = document.getElementById('inputBuscarSector').value.toUpperCase();
-    const filtrados = sectoresDisponibles.filter(sec => String(sec).toUpperCase().includes(texto));
-    cargarSectores(filtrados);
-  }
-
-  function seleccionarSector(valor) {
-    document.getElementById('sector').value = valor;
-    M.updateTextFields();
-    modalSectorInstance.close();
-  }
-
-  async function buscarDNI() {
-    const dni = document.getElementById('dni').value;
-    if(dni.length < 8) return M.toast({html: '⚠️ DNI incompleto'});
-    
-    document.getElementById('loader').style.display = 'block';
-    try {
-      const response = await fetch(`${WEB_APP_URL}?action=buscar&dni=${dni}`);
-      const data = await response.json();
-      document.getElementById('loader').style.display = 'none';
-      
-      if(data && data.status === "ok") {
-        document.getElementById('rowNum').value = data.row || "";
-        document.getElementById('nombreB').value = data.nombreB || "";
-        document.getElementById('fn').value = data.fn || "";
-        document.getElementById('sexo').value = data.sexo || "";
-        document.getElementById('hclinica').value = data.hclinica || "";
-        document.getElementById('ffamiliar').value = data.ffamiliar || "";
-        document.getElementById('telefono').value = data.telefono || "";
-        document.getElementById('telefono2').value = data["TELEFONO-2"] || data["TELFONO-2"] || data.telefono2 || "";
-        document.getElementById('estado_civil').value = data.estado_civil || "";
-        document.getElementById('sector').value = data.sector || "";
-        document.getElementById('ref_direccion').value = data.ref_direccion || "";
-        document.getElementById('mz').value = data.mz || "";
-        document.getElementById('georeferencia').value = data.georeferencia || data.gps || data.GPS || "";
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
-        M.updateTextFields();
+        @keyframes pulsoAlerta {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .alerta-vencida {
+            animation: pulsoAlerta 2s infinite;
+        }
         
-        var elems = document.querySelectorAll('select');
-        M.FormSelect.init(elems);
+        @media print {
+            .no-print { 
+                display: none !important; 
+            }
+            body { 
+                background-color: #ffffff !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-container { 
+                box-shadow: none !important; 
+                border: none !important; 
+                margin: 0 !important; 
+                padding: 4mm !important;
+                max-width: 100% !important; 
+                width: 100% !important;
+                display: block !important;
+            }
+            tr { 
+                page-break-inside: avoid; 
+            }
+        }
+    </style>
+</head>
+<body class="bg-amber-50/40 font-sans min-h-screen flex flex-col items-center justify-start p-3 sm:p-6 text-slate-700">
 
-        M.toast({html: '✅ Datos encontrados. Verifique y actualice.'});
-      } else {
-        M.toast({html: 'ℹ️ Usuario Nuevo. Registre todos los datos.'});
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-xl shadow-amber-100/50 p-6 mb-5 no-print border border-amber-100">
+        <div class="text-center mb-5">
+            <h1 class="text-3xl font-black text-blue-600 tracking-tight flex items-center justify-center gap-3">
+                <span class="text-4xl">👶🏽👧🏻</span> Tarjeta CRED <span class="text-emerald-500 text-xl font-medium">2026</span>
+            </h1>
+            <p class="text-xs text-slate-400 mt-1">BIENVENIDO</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
+            <input type="text" id="dniInput" placeholder="Escribe el número de DNI aquí..." 
+                   class="flex-1 px-5 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 text-lg shadow-inner transition-colors font-medium placeholder-slate-300"
+                   maxlength="15">
+            <button id="btnBuscar" onclick="buscarPorDNI()" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold px-8 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer transform active:scale-95 flex items-center justify-center gap-2">
+                <span>Buscar Niño/a</span>
+            </button>
+        </div>
+
+        <div id="statusMessage" class="hidden text-center mt-5 text-slate-500 flex items-center justify-center gap-2">
+            <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-100 h-5 w-5"></div>
+            <span id="statusText" class="text-sm font-semibold text-rose-500">Analizando base de datos...</span>
+        </div>
+    </div>
+
+    <div id="casitaNotice" class="w-full max-w-5xl bg-rose-50 border border-rose-200 rounded-2xl p-6 mb-5 hidden no-print text-center shadow-lg shadow-rose-100/40">
+        <div class="text-4xl mb-3">🏡📍</div>
+        <h3 class="text-xl font-bold text-rose-800 mb-2">¡Atención Papito / Mamita!</h3>
+        <p id="casitaMessage" class="text-sm text-rose-700 max-w-2xl mx-auto mb-4 leading-relaxed"></p>
+        <a id="casitaLink" href="#" target="_blank" class="inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-black px-6 py-3 rounded-xl shadow transition-all transform active:scale-95 text-sm">
+            🚀 Registrar desde mi Casita aquí
+        </a>
+    </div>
+
+    <div id="areaImpresion" class="w-full max-w-5xl bg-white rounded-3xl shadow-xl shadow-slate-100 p-6 sm:p-8 hidden border border-slate-100 print-container">
         
-        document.getElementById('rowNum').value = "";
-        const dniActual = document.getElementById('dni').value;
-        document.getElementById('pacienteForm').reset();
-        document.getElementById('dni').value = dniActual;
-        document.getElementById('georeferencia').value = "";
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b-4 border-dotted border-slate-100 pb-5 mb-6 gap-3">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                    <span class="text-3xl">🧸🎒</span> LIBRETA DE CONTROL DEL NIÑ@
+                </h2>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Desarrollo Infantil Temprano-(DIT)</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 no-print">
+                <div id="badgeCitaCred" class="hidden px-4 py-2 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center gap-1.5 shadow-sm">
+                    <span id="lblTextoCita">📅 CITA CRED:</span>
+                    <span id="lblFechaCitaCred">--/--/----</span>
+                </div>
+                
+                <button onclick="exportarAPDF()" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition-all duration-150 cursor-pointer transform active:scale-95 flex items-center gap-1">
+                     🖨️ Descargar en PDF
+                </button>
+            </div>
+        </div>
         
-        M.updateTextFields();
-        var elems = document.querySelectorAll('select');
-        M.FormSelect.init(elems);
-      }
-    } catch (error) {
-      document.getElementById('loader').style.display = 'none';
-      M.toast({html: '❌ Error al conectar con el servidor'});
-      console.error(error);
-    }
-  }
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6 bg-gradient-to-br from-blue-50/60 to-emerald-50/40 p-5 rounded-2xl border border-blue-100/50">
+            <div>
+                <span class="text-[10px] font-black text-blue-400 block uppercase tracking-wider">Nombre Completo</span> 
+                <p id="resNombre" class="text-base font-black text-slate-800 truncate">-</p>
+            </div>
+            <div>
+                <span class="text-[10px] font-black text-emerald-400 block uppercase tracking-wider">DNI</span> 
+                <p id="resDNI" class="text-base font-mono font-black text-slate-800">-</p>
+            </div>
+            <div>
+                <span class="text-[10px] font-black text-amber-500 block uppercase tracking-wider">Fecha de Nacimiento</span> 
+                <p id="resFechaNac" class="text-base font-medium text-slate-800">-</p>
+            </div>
+            <div>
+                <span class="text-[10px] font-black text-rose-400 block uppercase tracking-wider">Edad Actual</span> 
+                <p id="resEdad" class="text-base font-black text-blue-600">-</p>
+            </div>
+        </div>
 
-  document.getElementById('pacienteForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const sectorInput = document.getElementById('sector').value.trim();
-    if (sectoresDisponibles.length > 0 && !sectoresDisponibles.includes(sectorInput)) {
-      M.toast({html: '❌ Por favor, seleccione un Sector válido de la lista.'});
-      abrirModalSector();
-      return;
-    }
+        <div class="mb-6">
+            <h3 class="text-xs font-black text-blue-600 bg-blue-50/50 border border-blue-100/60 px-3 py-2 rounded-xl mb-3 flex items-center gap-2">
+                <span>📈</span> HISTORIAL DE CONTROLES DE CRECIMIENTO Y DESARROLLO (CRED)
+            </h3>
+            <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+                <table class="min-w-full bg-white text-[11px]">
+                    <thead class="bg-slate-50 text-slate-500 uppercase font-black text-center border-b border-slate-100">
+                        <tr>
+                            <th class="px-4 py-2.5 border-r border-slate-100 text-left w-1/4">Control CRED</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-1</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-2</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-3</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-4</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-5</th>
+                            <th class="px-1 py-2.5 border-r border-slate-100">CRED-6</th>
+                            <th class="px-1 py-2.5 text-slate-500">CRED-7</th>
+                        </tr>
+                    </thead>
+                    <tbody id="credTableBody" class="divide-y divide-slate-100 text-center text-slate-600 font-medium"></tbody>
+                </table>
+            </div>
+        </div>
 
-    const telVal = document.getElementById('telefono').value.trim();
-    const telRegex = /^\d{9}$/;
-    if (!telRegex.test(telVal)) {
-      M.toast({html: '❌ El Celular 1 debe tener exactamente 9 dígitos'});
-      document.getElementById('telefono').focus();
-      return;
-    }
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <div>
+                <h3 class="text-xs font-black text-amber-600 bg-amber-50/50 border border-amber-100/60 px-3 py-2 rounded-xl mb-3 flex items-center gap-2">
+                    <span>🧴</span> SUPLEMENTACIÓN CON HIERRO
+                </h3>
+                <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+                    <table class="min-w-full bg-white text-[11px]">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-black text-center border-b border-slate-100">
+                            <tr>
+                                <th class="px-3 py-2.5 border-r border-slate-100 text-left">Edad de Control</th>
+                                <th class="px-3 py-2.5">Fecha Registrada</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hierroTableBody" class="divide-y divide-slate-100 text-slate-600 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
 
-    const tel2Val = document.getElementById('telefono2').value.trim();
-    if (tel2Val && !telRegex.test(tel2Val)) {
-      M.toast({html: '❌ El Celular 2 debe tener exactamente 9 dígitos si se completa'});
-      document.getElementById('telefono2').focus();
-      return;
-    }
+            <div>
+                <h3 class="text-xs font-black text-rose-600 bg-rose-50/50 border border-rose-100/60 px-3 py-2 rounded-xl mb-3 flex items-center gap-2">
+                    <span>🩸</span> DOSAJE DE HEMOGLOBINA
+                </h3>
+                <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+                    <table class="min-w-full bg-white text-[11px]">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-black text-center border-b border-slate-100">
+                            <tr>
+                                <th class="px-3 py-2.5 border-r border-slate-100 text-left">Edad Evaluada</th>
+                                <th class="px-3 py-2.5">Resultado / Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hbTableBody" class="divide-y divide-slate-100 text-slate-600 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    if(!document.getElementById('sexo').value) {
-        return M.toast({html: '⚠️ Seleccione el Sexo (Obligatorio)'});
-    }
+        <div>
+            <h3 class="text-xs font-black text-emerald-600 bg-emerald-50/50 border border-emerald-100/60 px-3 py-2 rounded-xl mb-3 flex items-center gap-2">
+                <span>💉</span> ESQUEMA DE VACUNACIÓN POR GRUPOS DE EDAD
+            </h3>
+            <div class="overflow-x-auto border border-slate-100 rounded-2xl">
+                <table class="min-w-full bg-white text-[11px]">
+                    <thead class="bg-slate-50 text-slate-600 uppercase font-black text-center border-b border-slate-100">
+                        <tr>
+                            <th class="px-3 py-2.5 border-r border-slate-100 text-left w-24">Grupo Edad</th>
+                            <th class="px-3 py-2.5 border-r border-slate-100 text-left">Vacuna / Biológico</th>
+                            <th class="px-2 py-2.5 border-r border-slate-100 w-28">Dosis Única</th>
+                            <th class="px-2 py-2.5 border-r border-slate-100 w-28">Dosis-1</th>
+                            <th class="px-2 py-2.5 border-r border-slate-100 w-28">Dosis-2</th>
+                            <th class="px-2 py-2.5 w-28 border-r border-slate-100">Dosis-3</th>
+                            <th class="px-2 py-2.5 w-12 bg-slate-100/50"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="vacunasTableBody" class="divide-y divide-slate-100 text-slate-600 font-medium"></tbody>
+                </table>
+            </div>
+        </div>
 
-    document.getElementById('loader').style.display = 'block';
-    document.getElementById('btnSubmit').disabled = true;
+    </div>
 
-    const data = {
-      row: document.getElementById('rowNum').value,
-      dni: document.getElementById('dni').value,
-      nombreB: document.getElementById('nombreB').value.toUpperCase(),
-      fn: document.getElementById('fn').value,
-      sexo: document.getElementById('sexo').value,
-      hclinica: document.getElementById('hclinica').value,
-      ffamiliar: document.getElementById('ffamiliar').value,
-      telefono: telVal,
-      telefono2: tel2Val,
-      "TELEFONO-2": tel2Val,
-      estado_civil: document.getElementById('estado_civil').value,
-      sector: sectorInput,
-      ref_direccion: document.getElementById('ref_direccion').value,
-      mz: document.getElementById('mz').value,
-      georeferencia: document.getElementById('georeferencia').value
-    };
+    <div id="noResult" class="hidden flex-col items-center justify-center gap-4 text-center py-8 px-6 text-rose-500 font-bold bg-white max-w-5xl w-full rounded-2xl shadow border border-rose-100 mt-4">
+        <div>
+            Alerta: Sus datos aún no estan en el Padrón - Castillo Grande - <br class="hidden sm:inline"> 
+            Escribir al WhatsApp
+        </div>
+        <a id="btnWhatsApp" href="#" target="_blank" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-3 rounded-xl shadow transition-all transform active:scale-95 text-sm cursor-pointer no-print">
+            💬 Enviar Mensaje
+        </a>
+    </div>
 
-    try {
-      await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(data)
-      });
+    <script>
+        const SCRIPT_CENSO = 'https://script.google.com/macros/s/AKfycbzV4-amqK-0j0KkL5D1ukGwVOMdwdzVdlUd7hnaQT3RlBDM-61tTo6oAaiXn7kYtD4xZA/exec';
+        const SCRIPT_CITAS = 'https://script.google.com/macros/s/AKfycbwLOYe1VYgfQNRR9O0xeHXSAyUYnaXYbbcKBsDBGkoOYwfrD9X_lJfZzA7dvK_1LeSk/exec';
+        const SCRIPT_ATENCIONES_URL = "https://script.google.com/macros/s/AKfycbwWzBpaGTOQjReos9-82gb3PFreis79tRic3k5tB1LWbFc8bFt0PvErAObwF1M3rhtE/exec";
 
-      const urlUpdateTel = `${WEB_APP_URL}?action=actualizarTel&dni=${data.dni}&telefono=${telVal}`;
-      fetch(urlUpdateTel, { mode: 'no-cors' });
+        const MAPEO_CRED = [
+            { etapa: "RECIEN NACIDO", n1: "G", n2: "H", n3: "I", n4: "GRIS", n5: "GRIS", n6: "GRIS", n7: "GRIS" },
+            { etapa: "MENOR DE UN AÑO", n1: "K", n2: "L", n3: "Q", n4: "R", n5: "Z", n6: "AE", n7: "AI" },
+            { etapa: "UN AÑO", n1: "AP", n2: "AU", n3: "AX", n4: "AY", n5: "GRIS", n6: "GRIS", n7: "GRIS" },
+            { etapa: "DOS AÑOS", n1: "BF", n2: "BH", n3: "GRIS", n4: "GRIS", n5: "GRIS", n6: "GRIS", n7: "GRIS" },
+            { etapa: "TRES AÑOS", n1: "BK", n2: "BM", n3: "GRIS", n4: "GRIS", n5: "GRIS", n6: "GRIS", n7: "GRIS" },
+            { etapa: "CUATRO AÑOS", n1: "BP", n2: "BT", n3: "GRIS", n4: "GRIS", n5: "GRIS", n6: "GRIS", n7: "GRIS" }
+        ];
 
-      if (tel2Val) {
-        const urlUpdateTel2 = `${WEB_APP_URL}?action=actualizarColumna&dni=${data.dni}&columna=TELEFONO-2&valor=${encodeURIComponent(tel2Val)}`;
-        fetch(urlUpdateTel2, { mode: 'no-cors' });
-      }
+        const MAPEO_HIERRO = [
+            { edad: "4 MESES", col: "S" },
+            { edad: "6 MESES", col: "AA" },
+            { edad: "7 MESES", col: "AF" },
+            { edad: "8 MESES", col: "AH" },
+            { edad: "9 MESES", col: "AJ" },
+            { edad: "10 MESES", col: "AM" },
+            { edad: "11 MESES", col: "AO" }
+        ];
 
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('btnSubmit').disabled = false;
-      M.toast({html: '🚀 Guardado con éxito en el Censo'});
-      
-      this.reset();
-      document.getElementById('rowNum').value = "";
-      document.getElementById('georeferencia').value = "";
-      M.updateTextFields();
-      var elems = document.querySelectorAll('select');
-      M.FormSelect.init(elems);
-    } catch (error) {
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('btnSubmit').disabled = false;
-      M.toast({html: '❌ Fallo al guardar los datos'});
-    }
-  });
-</script>
+        const MAPEO_HB = [
+            { edad: "6 MESES", col: "AB" },
+            { edad: "7 MESES", col: "GRIS" },
+            { edad: "8 MESES", col: "GRIS" },
+            { edad: "9 MESES", col: "AK" },
+            { edad: "10 MESES", col: "GRIS" },
+            { edad: "11 MESES", col: "GRIS" },
+            { edad: "1 AÑO", col: "AQ" },
+            { edad: "1 AÑO Y 3 MESES", col: "GRIS" }, 
+            { edad: "1 AÑO Y 6 MESES", col: "AZ" },
+            { edad: "2 AÑOS", col: "BG" },
+            { edad: "3 AÑOS", col: "BL" },
+            { edad: "4 AÑOS", col: "BQ" }
+        ];
+
+        const ESQUEMA_VACUNAS_GRUPOS = [
+            { grupo: "MENOR DE 1 AÑO", nombre: "PENTAVALENTE", unica: "GRIS", d1: "M", d2: "T", d3: "AC" },
+            { grupo: "MENOR DE 1 AÑO", nombre: "IPV", unica: "GRIS", d1: "N", d2: "U", d3: "AD" },
+            { grupo: "MENOR DE 1 AÑO", nombre: "ROTAVIRUS", unica: "GRIS", d1: "O", d2: "V", d3: "GRIS" },
+            { grupo: "MENOR DE 1 AÑO", nombre: "NEUMOCOCO", unica: "GRIS", d1: "P", d2: "W", d3: "GRIS" },
+            
+            { grupo: "1 AÑO", nombre: "NEUMOCOCO: 1 año", unica: "AR", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "1 AÑO", nombre: "SARAMPIÓN (SPR)", unica: "GRIS", d1: "AS", d2: "BC", d3: "GRIS" },
+            { grupo: "1 AÑO", nombre: "VARICELA", unica: "AT", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "1 AÑO", nombre: "ANTI-FIEBRE AMARILLA (AMA)", unica: "AV", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "1 AÑO", nombre: "HEPATITIS A", unica: "AW", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "1 AÑO", font: "", nombre: "DPT", unica: "BA", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "1 AÑO", nombre: "REFUERZO POLIO", unica: "BB", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            
+            { grupo: "4 AÑOS", nombre: "DPT", unica: "BR", d1: "GRIS", d2: "GRIS", d3: "GRIS" },
+            { grupo: "4 AÑOS", nombre: "REFUERZO POLIO", unica: "BS", d1: "GRIS", d2: "GRIS", d3: "GRIS" }
+        ];
+
+        function calcularEdadExacta(fechaString) {
+            if (!fechaString || fechaString === '-') return "-";
+            let fechaNac = !isNaN(fechaString) ? new Date((fechaString - 25569) * 86400 * 1000) : new Date(fechaString);
+            if (isNaN(fechaNac.getTime())) return "Fecha inválida";
+            
+            const hoy = new Date();
+            let deY = hoy.getFullYear() - fechaNac.getUTCFullYear();
+            let deM = hoy.getMonth() - fechaNac.getUTCMonth();
+            let deD = hoy.getDate() - fechaNac.getUTCDate();
+
+            if (deD < 0) { deM--; deD += new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate(); }
+            if (deM < 0) { deY--; deM += 12; }
+
+            return deY === 0 ? `${deM} meses y ${deD} días` : `${deY} años, ${deM} meses y ${deD} días`;
+        }
+
+        function formatearValorCelda(valor) {
+            if (!valor || valor === '-' || String(valor).trim() === '') return "-";
+            
+            if (!isNaN(valor) && Number(valor) > 30000 && Number(valor) < 60000) {
+                let d = new Date((valor - 25569) * 86400 * 1000);
+                return d.toLocaleDateString('es-PE', { timeZone: 'UTC' });
+            }
+            if (typeof valor === "string" && (valor.includes("T") || valor.includes("-"))) {
+                let d = new Date(valor);
+                if (!isNaN(d.getTime()) && valor.length > 8) return d.toLocaleDateString('es-PE', { timeZone: 'UTC' });
+            }
+            return valor;
+        }
+
+        function obtenerHTMLCelda(llaveMapeo, filaObjeto) {
+            if (llaveMapeo === "GRIS" || !llaveMapeo) {
+                return `<td class="bg-slate-800 border-r border-slate-100/70 opacity-95"></td>`;
+            }
+            let val = formatearValorCelda(filaObjeto[llaveMapeo]);
+            return `<td class="px-1 py-2 border-r border-slate-100 bg-white font-medium text-slate-800 text-center">${val}</td>`;
+        }
+
+        function parseFechaFlexible(fechaString) {
+            if (!fechaString) return null;
+            if (!isNaN(fechaString) && Number(fechaString) > 30000) {
+                return new Date((fechaString - 25569) * 86400 * 1000);
+            }
+            let s = String(fechaString).trim();
+            let partes = s.includes('/') ? s.split('/') : s.split('-');
+            if (partes.length === 3) {
+                if (s.includes('/')) {
+                    return new Date(partes[2], partes[1] - 1, partes[0]);
+                } else {
+                    return new Date(partes[0], partes[1] - 1, partes[2]);
+                }
+            }
+            let d = new Date(s);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        async function consultarFechaCitaCred(dni) {
+            const badge = document.getElementById('badgeCitaCred');
+            const lblTexto = document.getElementById('lblTextoCita');
+            const lblFecha = document.getElementById('lblFechaCitaCred');
+            
+            badge.className = "hidden px-4 py-2 rounded-xl text-xs font-black tracking-wide border transition-all flex items-center gap-1.5 shadow-sm";
+            lblFecha.innerText = "";
+
+            try {
+                const response = await fetch(`${SCRIPT_CITAS}?dni=${dni}`, { redirect: "follow" });
+                badge.classList.remove('hidden');
+
+                if (!response.ok) {
+                    lblTexto.innerText = "📅 INASISTENTE";
+                    badge.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-800');
+                    return;
+                }
+                
+                const resJson = await response.json();
+                let registros = Array.isArray(resJson) ? resJson : (resJson.citas || resJson.data || [resJson]);
+                
+                let fechaUltima = null;
+                let turnoUltimo = "";
+                let fechaStringOriginal = "";
+
+                registros.forEach(reg => {
+                    let fStr = reg.fechaCitaCred || reg.fechaCita || reg.fecha || reg.J;
+                    let tStr = reg.turno || reg.TURNO || reg.K || "";
+                    if (fStr && fStr !== "-" && fStr !== "undefined") {
+                        let d = parseFechaFlexible(fStr);
+                        if (d && !isNaN(d.getTime())) {
+                            if (!fechaUltima || d > fechaUltima) {
+                                fechaUltima = d;
+                                turnoUltimo = tStr;
+                                fechaStringOriginal = fStr;
+                            }
+                        }
+                    }
+                });
+
+                if (!fechaUltima) {
+                    lblTexto.innerText = "📅 NO RESERVÓ CITA CRED";
+                    badge.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-800');
+                    return;
+                }
+
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                fechaUltima.setHours(0, 0, 0, 0);
+
+                let turnoTexto = turnoUltimo ? ` [TURNO: ${turnoUltimo}]` : "";
+
+                if (fechaUltima < hoy) {
+                    lblTexto.innerText = `📅 INASISTENTE desde el ${fechaStringOriginal}${turnoTexto}`;
+                    badge.classList.add('bg-rose-100', 'border-rose-400', 'text-rose-700', 'alerta-vencida');
+                } else {
+                    lblTexto.innerText = `📅 CITA CRED${turnoTexto}:`;
+                    lblFecha.innerText = fechaStringOriginal;
+                    badge.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-700');
+                }
+            } catch (err) {
+                console.error("Error al obtener la cita CRED:", err);
+                lblTexto.innerText = "📅 INASISTENTE";
+                badge.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-800');
+                badge.classList.remove('hidden');
+            }
+        }
+        function paddingCero(val) { return parseInt(val, 10); }
+
+        async function buscarPorDNI() {
+            const dniBuscado = document.getElementById('dniInput').value.trim();
+            if (!dniBuscado) { alert("Por favor, escribe un DNI válido."); return; }
+
+            document.getElementById('areaImpresion').classList.add('hidden');
+            
+            const contenedorNoResult = document.getElementById('noResult');
+            contenedorNoResult.classList.add('hidden');
+            contenedorNoResult.classList.remove('flex');
+
+            document.getElementById('casitaNotice').classList.add('hidden');
+            document.getElementById('badgeCitaCred').classList.add('hidden');
+            
+            mostrarStatus(true, "Espere mientras se valida sus datos");
+
+            try {
+                const resScript = await fetch(`${SCRIPT_CENSO}?dni=${dniBuscado}`, { redirect: "follow" });
+                const scriptData = await resScript.json();
+
+                if (scriptData.error && scriptData.status === "NOT_FOUND") {
+                    mostrarStatus(false);
+                    document.getElementById('casitaMessage').innerText = scriptData.mensaje;
+                    document.getElementById('casitaLink').href = scriptData.enlace;
+                    document.getElementById('casitaNotice').classList.remove('hidden');
+                    return; 
+                }
+
+                mostrarStatus(true, "...ya casi");
+                
+                consultarFechaCitaCred(dniBuscado);
+
+                const resAtenciones = await fetch(`${SCRIPT_ATENCIONES_URL}?dni=${dniBuscado}`, { redirect: "follow" });
+                if (!resAtenciones.ok) throw new Error("Servidor no disponible");
+
+                const dataAtenciones = await resAtenciones.json();
+
+                mostrarStatus(false);
+
+                if (dataAtenciones && !dataAtenciones.error) {
+                    renderizarResultado(dataAtenciones);
+                } else {
+                    const mensajeWA = encodeURIComponent(`Hola Lic. Carmen, buenas tardes. Consulté el DNI ${dniBuscado} en la Libreta Digital CRED y me sale que aún no está en el Padrón de Castillo Grande. Por favor, me podría apoyar con el registro?`);
+                    document.getElementById('btnWhatsApp').href = `https://wa.me/51940278529?text=${mensajeWA}`;
+                    
+                    contenedorNoResult.classList.remove('hidden');
+                    contenedorNoResult.classList.add('flex');
+                }
+
+            } catch (error) {
+                mostrarStatus(false);
+                alert("Fallo de red al conectar con BD: " + error.message);
+            }
+        }
+
+        function mostrarStatus(show, text = "") {
+            const statusDiv = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            statusDiv.classList.toggle('hidden', !show);
+            if (show) statusText.innerText = text;
+        }
+
+        function renderizarResultado(fila) {
+            document.getElementById('areaImpresion').classList.remove('hidden');
+
+            document.getElementById('resNombre').innerText = fila['C'] || fila['B'] || '-';
+            document.getElementById('resDNI').innerText = fila['D'] || fila['A'] || '-';
+            document.getElementById('resFechaNac').innerText = formatearValorCelda(fila['E'] || fila['C']);
+            document.getElementById('resEdad').innerText = calcularEdadExacta(fila['E'] || fila['C']);
+
+            // 1. CRED
+            const credBody = document.getElementById('credTableBody');
+            credBody.innerHTML = '';
+            MAPEO_CRED.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-100";
+                
+                let htmlCeldas = `<td class="px-3 py-2 text-left bg-slate-50 font-bold border-r border-slate-100 text-slate-700">${m.etapa}</td>`;
+                htmlCeldas += obtenerHTMLCelda(m.n1, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n2, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n3, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n4, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n5, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n6, fila);
+                htmlCeldas += obtenerHTMLCelda(m.n7, fila);
+
+                tr.innerHTML = htmlCeldas;
+                credBody.appendChild(tr);
+            });
+
+            // 2. Hierro
+            const hierroBody = document.getElementById('hierroTableBody');
+            hierroBody.innerHTML = '';
+            MAPEO_HIERRO.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 font-bold bg-slate-50 border-r border-slate-100 text-slate-700">${m.edad}</td>
+                    <td class="px-3 py-2 text-center bg-white font-medium text-slate-800">${formatearValorCelda(fila[m.col])}</td>
+                `;
+                hierroBody.appendChild(tr);
+            });
+
+            // 3. Hemoglobina
+            const hbBody = document.getElementById('hbTableBody');
+            hbBody.innerHTML = '';
+            MAPEO_HB.forEach(m => {
+                const tr = document.createElement('tr');
+                if (m.col === "GRIS") {
+                    tr.innerHTML = `
+                        <td class="px-3 py-2 font-bold bg-slate-50 border-r border-slate-100 text-slate-700">${m.edad}</td>
+                        <td class="bg-slate-800 border-r border-slate-100/70 opacity-95"></td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="px-3 py-2 font-bold bg-slate-50 border-r border-slate-100 text-slate-700">${m.edad}</td>
+                        <td class="px-3 py-2 text-center bg-white font-black text-slate-800">${formatearValorCelda(fila[m.col])}</td>
+                    `;
+                }
+                hbBody.appendChild(tr);
+            });
+
+            // 4. Vacunas
+            const vacunasBody = document.getElementById('vacunasTableBody');
+            vacunasBody.innerHTML = '';
+            
+            let ultimoGrupo = "";
+            ESQUEMA_VACUNAS_GRUPOS.forEach(v => {
+                const tr = document.createElement('tr');
+                
+                let celdaGrupo = "";
+                if (v.grupo !== ultimoGrupo) {
+                    const totalFilasGrupo = ESQUEMA_VACUNAS_GRUPOS.filter(item => item.grupo === v.grupo).length;
+                    let colorGrupo = v.grupo === "MENOR DE 1 AÑO" ? "bg-blue-50 text-blue-700" : (v.grupo === "1 AÑO" ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700");
+                    celdaGrupo = `<td rowspan="${totalFilasGrupo}" class="px-3 py-2 text-left ${colorGrupo} font-black border-r border-slate-100 text-[10px] uppercase tracking-wider align-middle w-24">${v.grupo}</td>`;
+                    ultimoGrupo = v.grupo;
+                }
+
+                tr.innerHTML = `
+                    ${celdaGrupo}
+                    <td class="px-3 py-2 text-left bg-slate-50 font-bold border-r border-slate-100 text-slate-700">${v.nombre}</td>
+                    ${obtenerHTMLCelda(v.unica, fila)}
+                    ${obtenerHTMLCelda(v.d1, fila)}
+                    ${obtenerHTMLCelda(v.d2, fila)}
+                    ${obtenerHTMLCelda(v.d3, fila)}
+                    <td class="px-1 py-2 bg-slate-50/40 w-12 border-b border-slate-100"></td>
+                `;
+                vacunasBody.appendChild(tr);
+            });
+        }
+
+        function exportarAPDF() {
+            window.print();
+        }
+    </script>
 </body>
 </html>
